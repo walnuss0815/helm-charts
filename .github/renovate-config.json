@@ -1,6 +1,8 @@
 {
-  "extends": ["config:recommended"],
-  "dryRun": "full",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits"
+  ],
   "username": "renovate-release",
   "repositories": ["walnuss0815/helm-charts"],
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",

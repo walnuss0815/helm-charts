@@ -9,6 +9,7 @@
   "onboarding": false,
   "requireConfig": "optional",
   "platform": "github",
+  "baseBranches": ["main"],
   "packageRules": [
     {
       "matchManagers": ["github-actions"],

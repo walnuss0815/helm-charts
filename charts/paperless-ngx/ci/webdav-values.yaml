@@ -1,0 +1,13 @@
+persistence:
+  consumption:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce
+
+webdav:
+  enabled: true
+  user:
+    username:
+      value: "my-user"
+    password:
+      value: "my-password"

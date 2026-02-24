@@ -1,0 +1,6 @@
+# Patterns to ignore when packaging charts
+.DS_Store
+*.tgz
+.git
+charts/
+*.swp

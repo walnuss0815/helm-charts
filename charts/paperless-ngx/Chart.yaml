@@ -1,0 +1,28 @@
+apiVersion: v2
+name: paperless-ngx
+description: A Helm chart for Kubernetes
+type: application
+version: 0.1.0
+# renovate: datasource=github-releases depName=paperless-ngx/paperless-ngx versioning=semver
+appVersion: "2.20.8"
+maintainers:
+  - name: walnuss0815
+    email: walnuss0815@gmail.com
+
+dependencies:
+  - name: redis
+    version: "21.2.13"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: webdav
+    version: "0.1.0"
+    condition: webdav.enabled
+  - name: tika
+    version: "0.1.0"
+    condition: tika.enabled
+  - name: gotenberg
+    version: "0.1.0"
+    condition: gotenberg.enabled
+  - name: paperless-ai
+    version: "0.1.0"
+    condition: paperless-ai.enabled

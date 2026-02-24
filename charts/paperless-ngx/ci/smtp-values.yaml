@@ -1,0 +1,16 @@
+persistence:
+  consumption:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce
+
+smtp:
+  enabled: true
+  host: mail.example.com
+  port: 587
+  useTLS: true
+  emailFrom: Paperless <noreply@paperless.example.com>
+  username:
+    value: "my-smtp-user"
+  password:
+    value: "my-smtp-password"

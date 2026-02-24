@@ -1,0 +1,190 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "paperless-ngx.fullname" . }}
+  labels:
+    {{- include "paperless-ngx.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "paperless-ngx.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "paperless-ngx.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "paperless-ngx.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: PAPERLESS_URL
+              value: {{ tpl .Values.url . }}
+            - name: PAPERLESS_SECRET_KEY
+              {{- include "paperless-ngx.secretEnvVar" .Values.secretKey | indent 14 }}
+            - name: PAPERLESS_DATA_DIR
+              value: /volumes/data
+            - name: PAPERLESS_MEDIA_ROOT
+              value: /volumes/media
+            - name: PAPERLESS_CONSUMPTION_DIR
+              value: /volumes/consumption
+            - name: PAPERLESS_SCRATCH_DIR
+              value: /volumes/data/scratch
+            {{- if .Values.database.enabled }}
+            - name: PAPERLESS_DBHOST
+              value: {{ .Values.database.host }}
+            - name: PAPERLESS_DBENGINE
+              value: {{ .Values.database.engine }}
+            - name: PAPERLESS_DBPORT
+              value: {{ .Values.database.port | quote }}
+            - name: PAPERLESS_DBNAME
+              value: {{ .Values.database.name }}
+            - name: PAPERLESS_DBUSER
+              {{- include "paperless-ngx.secretEnvVar" .Values.database.username | indent 14 }}
+            - name: PAPERLESS_DBPASS
+              {{- include "paperless-ngx.secretEnvVar" .Values.database.password | indent 14 }}
+            {{- end }}
+            - name: PAPERLESS_REDIS
+              {{- include "paperless-ngx.secretEnvVar" (merge .Values.redisKV.url $) | indent 14 }}
+            {{- if .Values.smtp.enabled }}
+            - name: PAPERLESS_EMAIL_HOST
+              value: {{ .Values.smtp.host }}
+            - name: PAPERLESS_EMAIL_PORT
+              value: {{ .Values.smtp.port | quote }}
+            - name: PAPERLESS_EMAIL_USE_TLS
+              value: {{ .Values.smtp.useTLS | quote }}
+            - name: PAPERLESS_EMAIL_USE_SSL
+              value: {{ .Values.smtp.useSSL | quote }}
+            - name: PAPERLESS_EMAIL_FROM
+              value: {{ .Values.smtp.emailFrom }}
+            - name: PAPERLESS_EMAIL_HOST_USER
+              {{- include "paperless-ngx.secretEnvVar" .Values.smtp.username | indent 14 }}
+            - name: PAPERLESS_EMAIL_HOST_PASSWORD
+              {{- include "paperless-ngx.secretEnvVar" .Values.smtp.password | indent 14 }}
+            {{- end }}
+            - name: PAPERLESS_OCR_LANGUAGE
+              value: {{ join "+" .Values.ocr.languages | quote }}
+            - name: PAPERLESS_DATE_PARSER_LANGUAGES
+              value: {{ join "+" .Values.parser.datetime | quote }}
+            - name: PAPERLESS_PRE_CONSUME_SCRIPT
+              value: /scripts/pre-consume-script.sh
+            - name: PDF_DECRYPTION_PASSWORD_PATH
+              value: /pdfdecryption
+            - name: PAPERLESS_TIKA_ENABLED
+              value: {{ .Values.tika.enabled | quote }}
+            {{- if .Values.tika.enabled }}
+            - name: PAPERLESS_TIKA_ENDPOINT
+              value: "http://{{ .Release.Name }}-tika:9998"
+            {{- end }}
+            {{- if .Values.gotenberg.enabled }}
+            - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
+              value: "http://{{ .Release.Name }}-gotenberg:3000"
+            {{- end }}
+            - name: PAPERLESS_CONVERT_TMPDIR
+              value: /tmp/convert
+            - name: PYTHONPYCACHEPREFIX
+              value: /tmp/pycache
+            - name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
+              value: "1"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key | quote }}
+              value: {{ (tpl $value $) | quote }}
+            {{- end }}
+            {{- range $key, $value := .Values.envFrom }}
+            - name: {{ $key | quote }}
+              valueFrom: {{ toYaml $value | nindent 16 }}
+            {{- end }}
+            {{- if .Values.sso.enabled }}
+            - name: PAPERLESS_SOCIAL_AUTO_SIGNUP
+              value: {{ .Values.sso.autoSignup | quote }}
+            - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
+              value: {{ mustToJson .Values.sso.config | quote }}
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: run
+              mountPath: /run
+            - name: tmp
+              mountPath: /tmp
+          {{- range $key, $value := .Values.persistence }}
+            - name: {{ $key }}
+              mountPath: /volumes/{{ $key }}
+          {{- end }}
+            - name: scripts
+              mountPath: "/scripts"
+          {{- range $value := .Values.pdfDecryption.secrets }}
+            - name: {{ $value }}-decrypt
+              readOnly: true
+              mountPath: /pdfdecryption/{{ $value }}
+          {{- end }}
+      volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        {{- range $key, $value := .Values.persistence }}
+        - name: {{ $key }}
+          persistentVolumeClaim:
+            claimName: '{{ include "paperless-ngx.fullname" $ }}-{{ $key }}'
+        {{- end }}
+        - name: scripts
+          configMap:
+            name: {{ include "paperless-ngx.fullname" $ }}-scripts
+            defaultMode: 0777
+        {{- range $value := .Values.pdfDecryption.secrets }}
+        - name: {{ $value }}-decrypt
+          secret:
+            secretName: {{ $value }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

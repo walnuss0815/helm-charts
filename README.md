@@ -2,11 +2,6 @@
 
 Repository for Helm Charts. Charts live in the `charts/` directory.
 
-Structure:
-- `charts/` — Helm charts (each chart in its own subdirectory)
-- `.github/workflows/ci.yaml` — CI that lints and tests charts
-- `.github/workflows/release.yaml` — Releases packaged charts on tag (v*)
-
 Quickstart (locally):
 
 1. Install Helm 3 (if not installed):

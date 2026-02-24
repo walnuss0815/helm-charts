@@ -14,6 +14,7 @@
           kubectl
           yq-go
           kubernetes-helm
+          chart-testing
         ];
       };
     };

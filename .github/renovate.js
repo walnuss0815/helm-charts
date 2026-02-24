@@ -1,15 +1,17 @@
 module.exports = {
-  dryRun: "full",
-  username: "renovate-release",
-  gitAuthor: "Renovate Bot <bot@walnuss0815.de>",
+  extends: ['config:recommended'],
+  dryRun: 'full',
+  username: 'renovate-release',
+  repositories: ['walnuss0815/helm-charts'],
+  gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
   onboarding: false,
-  platform: "github",
+  platform: 'github',
   packageRules: [
     {
-      matchManagers: ["github-actions"],
-      groupName: "github actions",
+      matchManagers: ['github-actions'],
+      groupName: 'github actions',
       dependencyDashboardApproval: false,
-      minimumReleaseAge: "1 day"
-    }
+      minimumReleaseAge: '1 day',
+    },
   ],
 };

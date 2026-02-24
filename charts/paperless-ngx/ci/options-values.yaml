@@ -1,0 +1,44 @@
+persistence:
+  consumption:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce
+
+secretKey:
+  secretKeyRef:
+    name: "secret-key"
+    key: "secretKey"
+
+ocr:
+  languages:
+    - deu
+    - eng
+
+parser:
+  datetime:
+    - de
+    - en
+
+pdfDecryption:
+  secrets:
+    - pdf-passwords
+
+extraManifests:
+  - |
+    kind: Secret
+    apiVersion: v1
+    metadata:
+      name: secret-key
+      labels:
+        {{- include "paperless-ngx.labels" . | nindent 4 }}
+    stringData:
+      secretKey: KuUXqzP7kP5MTgfwyBbLkmucBDf8pbdK
+  - |
+    kind: Secret
+    apiVersion: v1
+    metadata:
+      name: pdf-passwords
+      labels:
+        {{- include "paperless-ngx.labels" . | nindent 4 }}
+    stringData:
+      foo: D66DwcjG97D9gwPgwKEkp3cdVDgMTt7z

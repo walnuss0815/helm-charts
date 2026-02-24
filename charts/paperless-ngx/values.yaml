@@ -1,0 +1,389 @@
+# Default values for paperless-ngx.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replicas for the paperless-ngx deployment
+# @default -- `1`
+replicaCount: 1
+
+# -- Container image configuration
+image:
+  # -- Container image repository
+  repository: ghcr.io/paperless-ngx/paperless-ngx
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: ""
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the fullname of the chart
+fullnameOverride: ""
+
+# -- Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
+  name: ""
+
+# -- Annotations to add to the pod
+podAnnotations: {}
+
+# -- Labels to add to the pod
+podLabels: {}
+
+# -- Pod security context configuration
+podSecurityContext:
+  # -- Set filesystem group ownership for mounted volumes
+  fsGroup: 1000
+  # -- Define behavior when fsGroup changes
+  fsGroupChangePolicy: OnRootMismatch
+
+# -- Container security context configuration
+securityContext:
+  # -- Linux capabilities to drop
+  capabilities:
+    drop:
+      - ALL
+  # -- Mount root filesystem as read-only
+  readOnlyRootFilesystem: true
+  # -- Run container as non-root user
+  runAsNonRoot: true
+  # -- User ID to run the container as
+  runAsUser: 1000
+  # -- Group ID to run the container as
+  runAsGroup: 1000
+  # -- Seccomp profile configuration
+  seccompProfile:
+    type: RuntimeDefault
+  # -- Prevent privilege escalation
+  allowPrivilegeEscalation: false
+
+# -- Service configuration
+service:
+  # -- Service type (ClusterIP, NodePort, LoadBalancer)
+  type: ClusterIP
+  # -- Service port
+  port: 8000
+
+# -- Ingress configuration
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  # -- Ingress hostname
+  host: "{{ .Values.host }}"
+  # -- TLS configuration
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# -- Gateway API HTTPRoute configuration (requires Gateway API CRDs installed)
+httpRoute:
+  # -- Enable HTTPRoute
+  enabled: false
+  # -- HTTPRoute annotations
+  annotations: {}
+  # -- Parent gateway references to attach this route to
+  parentRefs:
+    - name: gateway
+      sectionName: http
+      # namespace: default
+  # -- Hostnames for HTTP header matching
+  hostnames:
+    - chart-example.local
+  # -- Routing rules and filters
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /headers
+  #   filters:
+  #   - type: RequestHeaderModifier
+  #     requestHeaderModifier:
+  #       set:
+  #       - name: My-Overwrite-Header
+  #         value: this-is-the-only-value
+  #       remove:
+  #       - User-Agent
+  # - matches:
+  #   - path:
+  #       type: PathPrefix
+  #       value: /echo
+  #     headers:
+  #     - name: version
+  #       value: v2
+
+# -- Resource limits and requests for the paperless-ngx container
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 1000m
+  #   memory: 1024Mi
+  # requests:
+  #   cpu: 500m
+  #   memory: 768Mi
+
+# -- Liveness probe configuration
+livenessProbe:
+  # -- HTTP GET configuration for liveness probe
+  httpGet:
+    path: /
+    port: http
+  # -- Timeout in seconds for the probe
+  timeoutSeconds: 5
+  # -- Initial delay before starting probes
+  initialDelaySeconds: 30
+
+# -- Readiness probe configuration
+readinessProbe:
+  # -- HTTP GET configuration for readiness probe
+  httpGet:
+    path: /
+    port: http
+  # -- Timeout in seconds for the probe
+  timeoutSeconds: 5
+  # -- Initial delay before starting probes
+  initialDelaySeconds: 30
+
+# -- Node selector for pod assignment
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []
+
+# -- Affinity rules for pod assignment
+affinity: {}
+
+# -- Extra Kubernetes manifests to deploy
+extraManifests: []
+
+# -- Hostname for the paperless-ngx instance
+host: chart-example.local
+
+# -- URL for the paperless-ngx instance
+url: "https://{{ .Values.host }}"
+
+# -- Secret key configuration for Django
+secretKey:
+  # -- Secret key value (use secretKeyRef in production)
+  value: "FQdWQr5xKy8ZYTD4YB5rJAE9e2CbWb3E"
+  # -- Reference to existing secret containing the secret key
+  secretKeyRef:
+    # -- Name of the secret
+    name: ""
+    # -- Key within the secret
+    key: ""
+
+# -- Additional environment variables to set
+env: {}
+
+# -- Additional environment variables from ConfigMaps or Secrets
+envFrom: {}
+
+# -- Persistence configuration for paperless-ngx volumes
+persistence:
+  # -- Data directory persistence configuration
+  data:
+    # -- Annotations for the data PVC
+    annotations: {}
+    # -- Storage class for data PVC
+    storageClass: "-"
+    # -- Size of the data PVC
+    size: "1Gi"
+    # -- Access modes for data PVC
+    accessModes:
+      - ReadWriteOnce
+  # -- Media directory persistence configuration
+  media:
+    # -- Annotations for the media PVC
+    annotations: {}
+    # -- Storage class for media PVC
+    storageClass: "-"
+    # -- Size of the media PVC
+    size: "8Gi"
+    # -- Access modes for media PVC
+    accessModes:
+      - ReadWriteOnce
+  # -- Consumption directory persistence configuration
+  consumption:
+    # -- Annotations for the consumption PVC
+    annotations: {}
+    # -- Storage class for consumption PVC
+    storageClass: "-"
+    # -- Size of the consumption PVC
+    size: "512Mi"
+    # -- Access modes for consumption PVC
+    accessModes:
+      - ReadWriteMany
+
+# -- OCR (Optical Character Recognition) configuration
+ocr:
+  # -- OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
+  languages:
+    - eng
+
+# -- Document parser configuration
+parser:
+  # -- Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html)
+  datetime:
+    - en
+
+# -- Single Sign-On (SSO) configuration
+sso:
+  # -- Enable SSO authentication
+  enabled: false
+  # -- Automatically create user accounts on first SSO login
+  autoSignup: false
+  # -- SSO provider configuration (OpenID Connect). See [django-allauth documentation](https://docs.allauth.org/en/latest/socialaccount/providers/openid_connect.html)
+  config: {}
+
+# -- Redis key-value store configuration
+redisKV:
+  # -- Redis connection URL configuration
+  url:
+    # -- Redis URL value
+    value: 'redis://{{ include "paperless-ngx.fullname" $ }}-redis-headless:6379'
+    # -- Reference to existing secret containing Redis URL
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+
+# -- External database configuration
+database:
+  # -- Enable external database (if false, uses SQLite)
+  enabled: false
+  # -- Database host
+  host: ""
+  # -- Database engine (postgresql, mysql, mariadb)
+  engine: "postgresql"
+  # -- Database port
+  port: 5432
+  # -- Database name
+  name: paperless
+  # -- Database username configuration
+  username:
+    # -- Database username value
+    value: "paperless"
+    # -- Reference to existing secret containing database username
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+  # -- Database password configuration
+  password:
+    # -- Database password value (use secretKeyRef in production)
+    value: "paperless"
+    # -- Reference to existing secret containing database password
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+
+# -- PDF decryption configuration
+pdfDecryption:
+  # -- List of secrets containing PDF passwords for decryption
+  secrets: []
+
+# -- SMTP email configuration
+smtp:
+  # -- Enable SMTP email functionality
+  enabled: false
+  # -- SMTP server hostname
+  host: ""
+  # -- SMTP server port
+  port: 25
+  # -- Use TLS for SMTP connection
+  useTLS: false
+  # -- Use SSL for SMTP connection
+  useSSL: false
+  # -- Email address to use in 'From' field
+  emailFrom: ""
+  # -- SMTP username configuration
+  username:
+    # -- SMTP username value
+    value: ""
+    # -- Reference to existing secret containing SMTP username
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+  # -- SMTP password configuration
+  password:
+    # -- SMTP password value (use secretKeyRef in production)
+    value: ""
+    # -- Reference to existing secret containing SMTP password
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+
+# -- Redis subchart configuration (Bitnami Redis)
+redis:
+  # -- Enable Redis as a subchart
+  enabled: true
+  # -- Global Redis configuration
+  global:
+    security:
+      # -- Allow insecure container images
+      allowInsecureImages: true
+  # -- Redis image configuration
+  image:
+    # -- Redis image repository (using legacy Bitnami images)
+    repository: bitnamilegacy/redis
+  # -- Redis deployment architecture
+  architecture: standalone
+  # -- Redis authentication configuration
+  auth:
+    # -- Enable Redis password authentication (TODO: Enable in production)
+    enabled: false
+
+# -- WebDAV configuration for document consumption
+webdav:
+  # -- Enable WebDAV integration
+  enabled: false
+  # -- WebDAV persistence configuration
+  persistence:
+    # -- Consumption directory configuration
+    consumption:
+      # -- PVC claim name for WebDAV consumption
+      claimName: "{{ .Release.Name }}-consumption"
+
+# -- Apache Tika subchart configuration (for document parsing)
+tika:
+  # -- Enable Apache Tika service
+  enabled: true
+
+# -- Gotenberg subchart configuration (for document conversion)
+gotenberg:
+  # -- Enable Gotenberg service
+  enabled: true
+
+# -- Paperless-AI subchart configuration (for AI-powered features)
+paperless-ai:
+  # -- Enable Paperless-AI service
+  enabled: false

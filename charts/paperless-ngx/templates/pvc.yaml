@@ -1,0 +1,28 @@
+{{- range $key, $value := .Values.persistence }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "paperless-ngx.fullname" $ }}-{{ $key }}
+  labels:
+    {{- include "paperless-ngx.labels" $ | nindent 4 }}
+  {{- with $value.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- if not (empty $value.accessModes) }}
+  {{- range $value.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  {{- else }}
+    - {{ $value.accessMode | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $value.size | quote }}
+  {{- if not (eq $value.storageClass "-") }}
+  storageClassName: {{ $value.storageClass }}
+  {{- end }}
+---
+{{- end }}

@@ -5,10 +5,37 @@ on: pull_request
 permissions: {}
 
 jobs:
-  lint-test:
+  list-changed:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      changed-charts: ${{ steps.list-changed.outputs.changed-charts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.8.0
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --config ct.yaml --target-branch ${{ github.event.repository.default_branch }})
+          charts_json=$(echo "$changed" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "changed-charts=$charts_json" >> "$GITHUB_OUTPUT"
+
+  lint-test:
+    needs: list-changed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        chart: ${{ fromJson(needs.list-changed.outputs.changed-charts) }}
+      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
@@ -26,22 +53,11 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.8.0
 
-      - name: Run chart-testing (list-changed)
-        id: list-changed
-        run: |
-          changed=$(ct list-changed --config ct.yaml --target-branch ${{ github.event.repository.default_branch }})
-          if [[ -n "$changed" ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Run chart-testing (lint)
-        if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --config ct.yaml --target-branch ${{ github.event.repository.default_branch }}
+        run: ct lint --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts ${{ matrix.chart }}
 
       - name: Create kind cluster
-        if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@v1.14.0
 
       - name: Run chart-testing (install)
-        if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --config ct.yaml --target-branch ${{ github.event.repository.default_branch }}
+        run: ct install --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts ${{ matrix.chart }}

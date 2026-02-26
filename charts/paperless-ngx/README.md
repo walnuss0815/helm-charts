@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -14,11 +14,11 @@ A Helm chart for Kubernetes
 
 | Repository | Name | Version |
 |------------|------|---------|
-|  | gotenberg | 0.1.0 |
-|  | paperless-ai | 0.1.0 |
-|  | tika | 0.1.0 |
-|  | webdav | 0.1.0 |
 | https://charts.bitnami.com/bitnami | redis | 21.2.14 |
+| https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.0 |
+| https://walnuss0815.github.io/helm-charts | paperless-ai | 0.1.0 |
+| https://walnuss0815.github.io/helm-charts | tika | 0.1.0 |
+| https://walnuss0815.github.io/helm-charts | webdav | 0.1.0 |
 
 ## Values
 

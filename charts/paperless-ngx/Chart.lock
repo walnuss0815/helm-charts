@@ -3,16 +3,16 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 21.2.14
 - name: webdav
-  repository: ""
+  repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
 - name: tika
-  repository: ""
+  repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
 - name: gotenberg
-  repository: ""
+  repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
 - name: paperless-ai
-  repository: ""
+  repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
-digest: sha256:07d70a42780754508650a565911b0750f952596298f3f8934f9889ec925df6cc
-generated: "2026-02-26T09:48:38.128304322Z"
+digest: sha256:4749bf6d053886752b64db9610a01797a34aa06378013b77ec4e3ca4638819aa
+generated: "2026-02-26T23:10:26.24078204+01:00"

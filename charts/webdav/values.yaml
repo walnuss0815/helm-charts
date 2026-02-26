@@ -173,6 +173,9 @@ tolerations: []
 # -- Affinity rules for pod assignment
 affinity: {}
 
+# -- Extra Kubernetes manifests to deploy
+extraManifests: []
+
 # -- Persistence configuration for WebDAV
 persistence:
   # -- Data directory persistence configuration

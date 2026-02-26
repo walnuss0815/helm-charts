@@ -8,14 +8,15 @@ A Helm chart for Kubernetes
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| walnuss0815 | <walnuss0815@gmail.com> |  |
+| walnuss0815 | <walnuss0815@gmail.com> | <https://github.com/walnuss0815> |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment |
-| config | object | `{"behindProxy":true,"cors":{"enabled":false},"debug":false,"directory":"/consumption","log":{"format":"json"},"noSniff":false,"permissions":"CRUD","port":6060,"users":[{"password":"{env}USER_PASSWORD","username":"{env}USER_USERNAME"}]}` | WebDAV server configuration |
+| config | object | `{"behindProxy":true,"cors":{"enabled":false},"debug":false,"directory":"/data","log":{"format":"json"},"noSniff":false,"permissions":"CRUD","port":6060,"users":[{"password":"{env}USER_PASSWORD","username":"{env}USER_USERNAME"}]}` | WebDAV server configuration |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
 | httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Gateway API HTTPRoute configuration (requires Gateway API CRDs installed) |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations |
@@ -41,9 +42,13 @@ A Helm chart for Kubernetes
 | livenessProbe | object | `{}` | Liveness probe configuration (disabled by default) livenessProbe:   httpGet:     path: /     port: http |
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
-| persistence | object | `{"consumption":{"claimName":""}}` | Persistence configuration for WebDAV |
-| persistence.consumption | object | `{"claimName":""}` | Consumption directory persistence configuration |
-| persistence.consumption.claimName | string | `""` | Existing PVC claim name to use (if empty, creates new PVC) |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":"-"}}` | Persistence configuration for WebDAV |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":"-"}` | Data directory persistence configuration |
+| persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for data PVC |
+| persistence.data.annotations | object | `{}` | Annotations for the data PVC |
+| persistence.data.claimName | string | `""` | Existing PVC claim name to use (if empty, creates new PVC) |
+| persistence.data.size | string | `"1Gi"` | Size of the data PVC |
+| persistence.data.storageClass | string | `"-"` | Storage class for data PVC |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
 | podLabels | object | `{}` | Labels to add to the pod |
 | podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod security context configuration |

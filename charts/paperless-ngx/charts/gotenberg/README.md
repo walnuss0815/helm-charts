@@ -15,10 +15,10 @@ A Helm chart for Kubernetes
 | autoscaling.minReplicas | int | `1` | Minimum number of replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage for autoscaling |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"gotenberg/gotenberg","tag":""}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"gotenberg/gotenberg","tag":"8.23"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"gotenberg/gotenberg"` | Container image repository |
-| image.tag | string | `""` | Overrides the image tag whose default is the chart appVersion |
+| image.tag | string | `"8.23"` | Overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | livenessProbe | object | `{"httpGet":{"path":"/health","port":"http"}}` | Liveness probe configuration |
 | livenessProbe.httpGet | object | `{"path":"/health","port":"http"}` | HTTP GET configuration for liveness probe |

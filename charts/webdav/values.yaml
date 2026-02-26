@@ -175,10 +175,19 @@ affinity: {}
 
 # -- Persistence configuration for WebDAV
 persistence:
-  # -- Consumption directory persistence configuration
-  consumption:
+  # -- Data directory persistence configuration
+  data:
     # -- Existing PVC claim name to use (if empty, creates new PVC)
     claimName: ""
+    # -- Annotations for the data PVC
+    annotations: {}
+    # -- Storage class for data PVC
+    storageClass: "-"
+    # -- Size of the data PVC
+    size: "1Gi"
+    # -- Access modes for data PVC
+    accessModes:
+      - ReadWriteOnce
 
 # -- WebDAV user authentication configuration
 user:
@@ -212,7 +221,7 @@ config:
   noSniff: false
   behindProxy: true
   permissions: CRUD
-  directory: /consumption
+  directory: /data
   cors:
     enabled: false
   users:

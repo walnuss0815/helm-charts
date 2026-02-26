@@ -74,3 +74,14 @@ valueFrom:
 value: {{ tpl .value . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create pvc name
+*/}}
+{{- define "webdav.dataPvcName" -}}
+{{- if .Values.persistence.data.claimName }}
+{{- tpl .Values.persistence.data.claimName . }}
+{{- else }}
+{{- include "webdav.fullname" . }}-data
+{{- end }}
+{{- end }}

@@ -60,7 +60,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: '{{ include "paperless-ngx.fullname" . }}-data'
+            claimName: '{{ include "paperless-ai.fullname" . }}-data'
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

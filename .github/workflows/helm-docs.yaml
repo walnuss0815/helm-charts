@@ -1,9 +1,12 @@
-name: Check Helm documentation
+name: Generate Helm documentation
 
 on: pull_request
 
+permissions:
+  contents: write
+
 jobs:
-  check:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -13,4 +16,5 @@ jobs:
       - name: Run helm-docs
         uses: losisin/helm-docs-github-action@v1
         with:
-          fail-on-diff: true
+          git-push: true
+          git-commit-message: "chore: update Helm documentation"

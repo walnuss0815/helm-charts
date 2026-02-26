@@ -1,7 +1,7 @@
 dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 21.2.13
+  version: 21.2.14
 - name: webdav
   repository: ""
   version: 0.1.0
@@ -14,5 +14,5 @@ dependencies:
 - name: paperless-ai
   repository: ""
   version: 0.1.0
-digest: sha256:118d31b4252ea3533182e9f008b0fde0e1d6c4a25c720e2c6af3ea421a9ab83f
-generated: "2025-10-09T09:28:27.770587161+02:00"
+digest: sha256:07d70a42780754508650a565911b0750f952596298f3f8934f9889ec925df6cc
+generated: "2026-02-26T09:48:38.128304322Z"

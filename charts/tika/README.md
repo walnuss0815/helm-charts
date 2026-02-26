@@ -8,7 +8,7 @@ A Helm chart for Kubernetes
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| walnuss0815 | <walnuss0815@gmail.com> |  |
+| walnuss0815 | <walnuss0815@gmail.com> | <https://github.com/walnuss0815> |
 
 ## Values
 

@@ -1,0 +1,25 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "paperless-ai.fullname" $ }}-data
+  labels:
+    {{- include "paperless-ai.labels" $ | nindent 4 }}
+  {{- with .Values.persistence.data.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- if not (empty .Values.persistence.data.accessModes) }}
+  {{- range .Values.persistence.data.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  {{- else }}
+    - {{ .Values.persistence.data.accessMode | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.data.size | quote }}
+  {{- if not (eq .Values.persistence.data.storageClass "-") }}
+  storageClassName: {{ .Values.persistence.data.storageClass }}
+  {{- end }}

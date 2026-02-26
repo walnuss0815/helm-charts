@@ -1,0 +1,220 @@
+# Default values for webdav.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replicas for the WebDAV deployment
+# @default -- `1`
+replicaCount: 1
+
+# -- Container image configuration
+image:
+  # -- Container image repository
+  repository: hacdias/webdav
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: "v5.11.1"
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the fullname of the chart
+fullnameOverride: ""
+
+# -- Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
+  name: ""
+
+# -- Annotations to add to the pod
+podAnnotations: {}
+
+# -- Labels to add to the pod
+podLabels: {}
+
+# -- Pod security context configuration
+podSecurityContext:
+  # -- Set filesystem group ownership for mounted volumes
+  fsGroup: 1000
+  # -- Define behavior when fsGroup changes
+  fsGroupChangePolicy: OnRootMismatch
+
+# -- Container security context configuration
+securityContext:
+  # -- Linux capabilities to drop
+  capabilities:
+    drop:
+      - ALL
+  # -- Mount root filesystem as read-only
+  readOnlyRootFilesystem: true
+  # -- Run container as non-root user
+  runAsNonRoot: true
+  # -- User ID to run the container as
+  runAsUser: 1000
+  # -- Group ID to run the container as
+  runAsGroup: 1000
+  # -- Seccomp profile configuration
+  seccompProfile:
+    type: RuntimeDefault
+  # -- Prevent privilege escalation
+  allowPrivilegeEscalation: false
+
+# -- Service configuration
+service:
+  # -- Service type (ClusterIP, NodePort, LoadBalancer)
+  type: ClusterIP
+  # -- Service port (WebDAV default port)
+  port: 6060
+
+# -- Ingress configuration
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  # -- Ingress hosts configuration
+  hosts:
+    # -- Hostname for ingress
+    - host: chart-example.local
+      # -- Paths configuration for the host
+      paths:
+        # -- Path to route
+        - path: /
+          # -- Path type (ImplementationSpecific, Exact, Prefix)
+          pathType: ImplementationSpecific
+  # -- TLS configuration
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# -- Gateway API HTTPRoute configuration (requires Gateway API CRDs installed)
+httpRoute:
+  # -- Enable HTTPRoute
+  enabled: false
+  # -- HTTPRoute annotations
+  annotations: {}
+  # -- Parent gateway references to attach this route to
+  parentRefs:
+    - name: gateway
+      sectionName: http
+      # namespace: default
+  # -- Hostnames for HTTP header matching
+  hostnames:
+    - chart-example.local
+  # -- Routing rules and filters
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /headers
+  #   filters:
+  #   - type: RequestHeaderModifier
+  #     requestHeaderModifier:
+  #       set:
+  #       - name: My-Overwrite-Header
+  #         value: this-is-the-only-value
+  #       remove:
+  #       - User-Agent
+  # - matches:
+  #   - path:
+  #       type: PathPrefix
+  #       value: /echo
+  #     headers:
+  #     - name: version
+  #       value: v2
+
+# -- Resource limits and requests for the WebDAV container
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- Liveness probe configuration (disabled by default)
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+livenessProbe: {}
+
+# -- Readiness probe configuration (disabled by default)
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+readinessProbe: {}
+
+# -- Node selector for pod assignment
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []
+
+# -- Affinity rules for pod assignment
+affinity: {}
+
+# -- Persistence configuration for WebDAV
+persistence:
+  # -- Consumption directory persistence configuration
+  consumption:
+    # -- Existing PVC claim name to use (if empty, creates new PVC)
+    claimName: ""
+
+# -- WebDAV user authentication configuration
+user:
+  # -- Username configuration
+  username:
+    # -- Username value
+    value: ""
+    # -- Reference to existing secret containing username
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+  # -- Password configuration
+  password:
+    # -- Password value (use secretKeyRef in production)
+    value: ""
+    # -- Reference to existing secret containing password
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+
+# -- WebDAV server configuration
+config:
+  port: 6060
+  debug: false
+  log:
+    format: json
+  noSniff: false
+  behindProxy: true
+  permissions: CRUD
+  directory: /consumption
+  cors:
+    enabled: false
+  users:
+    - username: "{env}USER_USERNAME"
+      password: "{env}USER_PASSWORD"

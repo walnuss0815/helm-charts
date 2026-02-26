@@ -7,6 +7,7 @@ appVersion: "2.20.8"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com
+    url: https://github.com/walnuss0815
 
 dependencies:
   - name: redis

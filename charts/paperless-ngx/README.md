@@ -18,7 +18,7 @@ A Helm chart for Kubernetes
 |  | paperless-ai | 0.1.0 |
 |  | tika | 0.1.0 |
 |  | webdav | 0.1.0 |
-| https://charts.bitnami.com/bitnami | redis | 21.2.13 |
+| https://charts.bitnami.com/bitnami | redis | 21.2.14 |
 
 ## Values
 

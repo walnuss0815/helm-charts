@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helm Charts Repository</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+    }
+
+    .container {
+      max-width: 760px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .helm-logo {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 1rem;
+    }
+
+    .card {
+      background-color: #1e2130;
+      border: 1px solid #2d3348;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #7dd3fc;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h2::before {
+      content: attr(data-icon);
+      font-size: 1.2rem;
+    }
+
+    .code-block {
+      background-color: #0d1117;
+      border: 1px solid #2d3348;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.875rem;
+      color: #86efac;
+      margin-bottom: 12px;
+      word-break: break-all;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: #2d3348;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #3d4563;
+      color: #e2e8f0;
+    }
+
+    .step-label {
+      color: #94a3b8;
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+    }
+
+    .repo-url {
+      color: #7dd3fc;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .repo-url:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 48px;
+      text-align: center;
+      color: #475569;
+      font-size: 0.8rem;
+    }
+
+    footer a {
+      color: #64748b;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="helm-logo">⎈</div>
+      <h1>Helm Charts Repository</h1>
+      <p class="subtitle">
+        Public Helm Chart Repository · hosted via GitHub Pages
+      </p>
+    </div>
+
+    <!-- Repo URL Info -->
+    <div class="card">
+      <h2 data-icon="🔗">Repository URL</h2>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyText('https://walnuss0815.github.io/helm-charts', this)">Copy</button>
+        https://walnuss0815.github.io/helm-charts
+      </div>
+      <p style="color:#94a3b8; font-size:0.85rem;">
+        The <code style="color:#86efac;">index.yaml</code> is available at:
+        <a class="repo-url" href="https://walnuss0815.github.io/helm-charts/index.yaml" target="_blank">
+          https://walnuss0815.github.io/helm-charts/index.yaml
+        </a>
+      </p>
+    </div>
+
+    <!-- Usage -->
+    <div class="card">
+      <h2 data-icon="🚀">Usage</h2>
+
+      <p class="step-label">1. Add the repository</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyText('helm repo add walnuss0815 https://walnuss0815.github.io/helm-charts', this)">Copy</button>
+        helm repo add walnuss0815 https://walnuss0815.github.io/helm-charts
+      </div>
+
+      <p class="step-label">2. Update repositories</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyText('helm repo update', this)">Copy</button>
+        helm repo update
+      </div>
+
+      <p class="step-label">3. Search available charts</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyText('helm search repo walnuss0815', this)">Copy</button>
+        helm search repo walnuss0815
+      </div>
+
+      <p class="step-label">4. Install a chart</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyText('helm install my-release walnuss0815/<chart-name>', this)">Copy</button>
+        helm install my-release walnuss0815/&lt;chart-name&gt;
+      </div>
+    </div>
+
+    <!-- Source -->
+    <div class="card">
+      <h2 data-icon="📦">Source Code</h2>
+      <p style="color:#94a3b8; font-size:0.9rem;">
+        The source code and all charts are available on GitHub:
+        <br /><br />
+        <a class="repo-url" href="https://github.com/walnuss0815/helm-charts" target="_blank">
+          https://github.com/walnuss0815/helm-charts
+        </a>
+      </p>
+    </div>
+
+    <footer>
+      Powered by <a href="https://helm.sh" target="_blank">Helm</a> &amp;
+      <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
+    </footer>
+
+  </div>
+
+  <script>
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "✓ Copied";
+        btn.style.color = "#86efac";
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.style.color = "";
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

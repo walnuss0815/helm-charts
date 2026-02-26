@@ -1,0 +1,113 @@
+# Default values for gotenberg.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replicas for the gotenberg deployment
+# @default -- `1`
+replicaCount: 1
+
+# -- Container image configuration
+image:
+  # -- Container image repository
+  repository: gotenberg/gotenberg
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: "8.27"
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the fullname of the chart
+fullnameOverride: ""
+
+# -- Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
+  name: ""
+
+# -- Annotations to add to the pod
+podAnnotations: {}
+
+# -- Labels to add to the pod
+podLabels: {}
+
+# -- Pod security context configuration
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Container security context configuration
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# -- Service configuration
+service:
+  # -- Service type (ClusterIP, NodePort, LoadBalancer)
+  type: ClusterIP
+  # -- Service port
+  port: 3000
+
+# -- Resource limits and requests for the gotenberg container
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- Liveness probe configuration
+livenessProbe:
+  # -- HTTP GET configuration for liveness probe
+  httpGet:
+    # -- Health check endpoint path
+    path: /health
+    port: http
+
+# -- Readiness probe configuration
+readinessProbe:
+  # -- HTTP GET configuration for readiness probe
+  httpGet:
+    # -- Health check endpoint path
+    path: /health
+    port: http
+
+# -- Horizontal Pod Autoscaler configuration
+autoscaling:
+  # -- Enable autoscaling
+  enabled: false
+  # -- Minimum number of replicas
+  minReplicas: 1
+  # -- Maximum number of replicas
+  maxReplicas: 100
+  # -- Target CPU utilization percentage for autoscaling
+  targetCPUUtilizationPercentage: 80
+  # -- Target memory utilization percentage for autoscaling (optional)
+  # targetMemoryUtilizationPercentage: 80
+
+# -- Node selector for pod assignment
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []
+
+# -- Affinity rules for pod assignment
+affinity: {}

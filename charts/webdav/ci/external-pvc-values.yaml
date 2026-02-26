@@ -1,0 +1,23 @@
+user:
+  username:
+    value: "my-user"
+  password:
+    value: "my-password"
+
+persistence:
+  enabled: true
+  data:
+    claimName: "my-data"
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: "my-data"
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi

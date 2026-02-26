@@ -17,10 +17,10 @@ A Helm chart for Kubernetes
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames for HTTP header matching |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Parent gateway references to attach this route to |
 | httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules and filters |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"hacdias/webdav","tag":"v5.8.0"}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"hacdias/webdav","tag":"v5.11.1"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"hacdias/webdav"` | Container image repository |
-| image.tag | string | `"v5.8.0"` | Overrides the image tag whose default is the chart appVersion |
+| image.tag | string | `"v5.11.1"` | Overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |

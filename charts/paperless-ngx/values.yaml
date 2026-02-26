@@ -368,8 +368,8 @@ webdav:
   enabled: false
   # -- WebDAV persistence configuration
   persistence:
-    # -- Consumption directory configuration
-    consumption:
+    # -- Data directory configuration
+    data:
       # -- PVC claim name for WebDAV consumption
       claimName: "{{ .Release.Name }}-consumption"
 

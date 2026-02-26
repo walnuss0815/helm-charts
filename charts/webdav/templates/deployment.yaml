@@ -66,15 +66,15 @@ spec:
             - name: config
               mountPath: /config
               readOnly: true
-            - name: consumption
-              mountPath: /consumption
+            - name: data
+              mountPath: /data
       volumes:
         - name: config
           configMap:
             name: {{ include "webdav.fullname" . }}-config
-        - name: consumption
+        - name: data
           persistentVolumeClaim:
-            claimName: {{ tpl .Values.persistence.consumption.claimName . }}
+            claimName: {{ include "webdav.dataPvcName" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

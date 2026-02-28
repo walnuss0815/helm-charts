@@ -1,0 +1,118 @@
+# Default values for postgres.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  repository: postgres
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "18.3"
+
+# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  type: ClusterIP
+  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+  port: 5432
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe:
+  exec:
+    command:
+    - pg_isready
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+readinessProbe:
+  exec:
+    command:
+    - pg_isready
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# -- Extra Kubernetes manifests to deploy
+extraManifests: []
+
+# -- Name of a secret which contains `username` and `password`.
+secretName: ""
+
+# -- Create secret containing database credentials and connection details
+createSecret: true
+username: app
+database: app
+port: 5432
+
+# -- Persistence configuration for PostgreSQL volumes
+persistence:
+  # -- PostgreSQL data directory persistence configuration
+  pgdata:
+    # -- Annotations for the PostgreSQL data PVC
+    annotations: {}
+    # -- Storage class for PostgreSQL data PVC
+    storageClass: "-"
+    # -- Size of the PostgreSQL data PVC
+    size: "1Gi"
+    # -- Access modes for PostgreSQL data PVC
+    accessModes:
+      - ReadWriteOnce
+
+# -- InitDB scripts (see [docs](https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts))
+initdb: {}
+  # init.sh: |
+  #   echo "Initializing database..."

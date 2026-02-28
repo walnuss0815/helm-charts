@@ -1,0 +1,37 @@
+{{- $credentialsSecretName := ternary (include "postgres.fullname" .) .Values.secretName .Values.createSecret }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "postgres.fullname" . }}-test-connection"
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: psql
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+      args:
+        - /bin/bash
+        - -c
+        - |
+          PGPASSWORD=$POSTGRES_PASSWORD psql \
+            -h {{ include "postgres.fullname" . }} \
+            -U $POSTGRES_USER \
+            -p {{ .Values.service.port }} \
+            -d $POSTGRES_DB  \
+            -c "\dt;"
+      env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ $credentialsSecretName }}
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $credentialsSecretName }}
+              key: password
+        - name: POSTGRES_DB
+          value: {{ .Values.database }}
+  restartPolicy: Never

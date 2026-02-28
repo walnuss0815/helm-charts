@@ -1,0 +1,234 @@
+# Default values for odoo.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replicas for the Odoo deployment
+replicaCount: 1
+
+# -- Odoo container image configuration
+image:
+  # -- Image repository
+  repository: odoo
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag
+  tag: "19.0"
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+# -- Override the chart name
+nameOverride: ""
+# -- Override the full chart name
+fullnameOverride: ""
+
+# -- Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount the ServiceAccount's API credentials
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- Name of the service account to use. If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# -- Annotations to add to the Odoo pod
+podAnnotations: {}
+# -- Labels to add to the Odoo pod
+podLabels: {}
+
+# -- Pod-level security context (e.g. fsGroup)
+podSecurityContext: {}
+  # fsGroup: 101
+  # fsGroupChangePolicy: OnRootMismatch
+
+# -- Container-level security context
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #     - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 100
+  # runAsGroup: 101
+  # seccompProfile:
+  #   type: RuntimeDefault
+  # allowPrivilegeEscalation: false
+
+# -- Kubernetes Service configuration
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port for Odoo web interface
+  port: 8069
+
+# -- Ingress configuration for external HTTP access
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  # -- Ingress hosts configuration
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- TLS configuration for ingress
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# -- Expose the service via Gateway API HTTPRoute.
+# Requires Gateway API resources and a suitable controller installed within the cluster
+# (see: https://gateway-api.sigs.k8s.io/guides/)
+httpRoute:
+  # -- Enable HTTPRoute
+  enabled: false
+  # -- HTTPRoute annotations
+  annotations: {}
+  # -- Gateways this Route is attached to
+  parentRefs:
+    - name: gateway
+      sectionName: http
+      # namespace: default
+  # -- Hostnames matching HTTP header
+  hostnames:
+    - chart-example.local
+  # -- List of routing rules and filters
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /headers
+
+# -- Additional environment variables to set
+env: {}
+
+# -- Additional environment variables from ConfigMaps or Secrets
+envFrom: {}
+
+# -- Resource requests and limits for the Odoo container
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- Liveness probe configuration
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+
+# -- Readiness probe configuration
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+
+# -- Node selector for pod scheduling
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling
+tolerations: []
+
+# -- Affinity rules for pod scheduling
+affinity: {}
+
+# -- Persistence configuration for Odoo volumes
+persistence:
+  # -- Odoo data directory persistence configuration
+  data:
+    # -- Annotations for the Odoo data PVC
+    annotations: {}
+    # -- Storage class for the Odoo data PVC. Use `"-"` to disable dynamic provisioning
+    storageClass: "-"
+    # -- Size of the Odoo data PVC
+    size: "1Gi"
+    # -- Access modes for the Odoo data PVC
+    accessModes:
+      - ReadWriteOnce
+  # -- Odoo addons directory persistence configuration
+  addons:
+    # -- Annotations for the Odoo addons PVC
+    annotations: {}
+    # -- Storage class for the Odoo addons PVC. Use `"-"` to disable dynamic provisioning
+    storageClass: "-"
+    # -- Size of the Odoo addons PVC
+    size: "1Gi"
+    # -- Access modes for the Odoo addons PVC
+    accessModes:
+      - ReadWriteOnce
+
+# -- External database connection config. Only used if `postgres.enabled` is `false`
+database:
+  # -- Database hostname
+  host: ""
+  # -- Database port
+  port: 5432
+  # -- Database username configuration
+  username:
+    # -- Plain-text username value. Ignored if `secretKeyRef.name` is set
+    value: "odoo"
+    # -- Reference to an existing secret containing the database username
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+  # -- Database password configuration
+  password:
+    # -- Plain-text password value. Ignored if `secretKeyRef.name` is set
+    value: ""
+    # -- Reference to an existing secret containing the database password
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+
+# -- Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/de/developer/reference/cli.html#cmdoption-odoo-bin-log-level)
+logLevel: info
+
+# -- Odoo configuration file content (supports Helm templating)
+config: |-
+  [options]
+  addons_path = /mnt/extra-addons
+  data_dir = /var/lib/odoo
+
+  db_host = $DB_HOST
+  db_port = $DB_PORT
+  db_user = $DB_USER
+  db_password = $DB_PASSWORD
+
+  log_level = $LOG_LEVEL
+
+  {{ tpl .Values.extraConfig . }}
+
+# -- Extra content appended to the Odoo config file. Supports multiline INI-style options
+extraConfig: ""
+
+# -- PostgreSQL subchart configuration. See [postgresql chart](../postgres) for all available options
+postgres:
+  # -- Enable the PostgreSQL subchart. Set to `false` to use an external database via `database.*`
+  enabled: true
+
+  # -- Name of the PostgreSQL database to create
+  database: postgres
+
+  # -- Secret configuration for database credentials
+  secret:
+    # -- Create a new secret for database credentials
+    create: true
+    # -- Name of the secret (supports Helm templating)
+    name: '{{ .Release.Name }}-db'

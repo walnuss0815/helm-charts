@@ -1,0 +1,16 @@
+apiVersion: v2
+name: odoo
+description: A Helm chart for Odoo
+type: application
+version: 0.1.0
+appVersion: "19.0"
+maintainers:
+  - name: walnuss0815
+    email: walnuss0815@gmail.com
+    url: https://github.com/walnuss0815
+
+dependencies:
+  - name: postgres
+    version: "0.3.1"
+    repository: https://walnuss0815.github.io/helm-charts
+    condition: postgres.enabled

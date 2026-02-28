@@ -135,6 +135,21 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/paperless-ngx-0.1.0/paperless-ngx-0.1.0.tgz
     version: 0.1.0
+  postgres:
+  - apiVersion: v2
+    appVersion: "18.3"
+    created: "2026-02-28T22:48:30.245386269Z"
+    description: A Helm chart for PostgreSQL
+    digest: 0ef4c31df47c0aa01dcf8cd4ec5b71b84e41e5563285c82204e0f42bd1eb6670
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: postgres
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/postgres-0.1.1/postgres-0.1.1.tgz
+    version: 0.1.1
   tika:
   - apiVersion: v2
     appVersion: 3.2.3.0-full
@@ -165,4 +180,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-26T22:49:28.618805157Z"
+generated: "2026-02-28T22:48:30.245401191Z"

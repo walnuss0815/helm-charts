@@ -1,0 +1,4 @@
+immich:
+  url: "http://immich.example.com"
+  apiKey:
+    value: "my-api-key"

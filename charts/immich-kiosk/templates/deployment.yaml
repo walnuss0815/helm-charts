@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "immich-kiosk.fullname" . }}
+  labels:
+    {{- include "immich-kiosk.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "immich-kiosk.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "immich-kiosk.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "immich-kiosk.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              eval "cat <<EOF
+              $(cat /config.template/config.yaml)
+              EOF" > /config/config.yaml
+
+              /kiosk
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: KIOSK_IMMICH_URL
+              value: {{ .Values.immich.url }}
+            - name: KIOSK_IMMICH_API_KEY
+              {{- include "immich-kiosk.secretEnvVar" .Values.immich.apiKey | indent 14 }}
+            {{- if .Values.immich.externalURL }}
+            - name: KIOSK_IMMICH_EXTERNAL_URL
+              value: {{ .Values.immich.externalURL }}
+            {{- end }}
+            - name: KIOSK_BEHIND_PROXY
+              value: "true"
+            - name: KIOSK_PASSWORD
+              {{- include "immich-kiosk.secretEnvVar" .Values.password | indent 14 }}
+            - name: LANG
+              value: {{ .Values.lang }}
+            - name: TZ
+              value: {{ .Values.timeZone }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key | quote }}
+              value: {{ (tpl $value $) | quote }}
+            {{- end }}
+            {{- range $key, $value := .Values.envFrom }}
+            - name: {{ $key | quote }}
+              valueFrom: {{ toYaml $value | nindent 16 }}
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: config-template
+              mountPath: /config.template
+            - name: custom-css
+              mountPath: /custom.css
+              subPath: custom.css
+            - name: offline-assets
+              mountPath: /offline-assets
+      volumes:
+        - name: config
+          emptyDir: {}
+        - name: config-template
+          configMap:
+            name: {{ include "immich-kiosk.fullname" $ }}-config
+        - name: custom-css
+          configMap:
+            name: {{ include "immich-kiosk.fullname" $ }}-custom-css
+        - name: offline-assets
+          emptyDir:
+            sizeLimit: 500Mi
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

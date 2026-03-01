@@ -1,0 +1,10 @@
+apiVersion: v2
+name: immich-kiosk
+description: A Helm chart for Immich Kiosk
+type: application
+version: 0.1.0
+appVersion: "0.33.2"
+maintainers:
+  - name: walnuss0815
+    email: walnuss0815@gmail.com
+    url: https://github.com/walnuss0815

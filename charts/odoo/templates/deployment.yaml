@@ -69,7 +69,7 @@ spec:
                   key: password
             {{- else }}
             - name: DB_HOST
-              value: {{ .Values.database.host }}
+              value: {{ tpl .Values.database.host . }}
             - name: DB_PORT
               value: {{ .Values.database.port | quote }}
             - name: DB_USER

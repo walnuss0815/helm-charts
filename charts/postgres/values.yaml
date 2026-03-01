@@ -70,15 +70,18 @@ resources: {}
 livenessProbe:
   exec:
     command:
-    - pg_isready
-  initialDelaySeconds: 5
+      - sh
+      - -c
+      - pg_isready -U $POSTGRES_USER
   periodSeconds: 5
 
 # -- Readiness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 readinessProbe:
   exec:
     command:
-    - pg_isready
+      - sh
+      - -c
+      - psql -U $POSTGRES_USER -d $POSTGRES_DB -c "SELECT 1"
   initialDelaySeconds: 5
   periodSeconds: 5
 

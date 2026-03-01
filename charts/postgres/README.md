@@ -24,7 +24,7 @@ A Helm chart for PostgreSQL
 | image.tag | string | `"18.3"` | Image tag. Overrides the chart appVersion when set |
 | imagePullSecrets | list | `[]` | Secrets for pulling images from a private registry. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) |
 | initdb | object | `{}` | InitDB scripts to run on first startup. See [PostgreSQL Docker docs](https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts) |
-| livenessProbe | object | `{"exec":{"command":["pg_isready"]},"initialDelaySeconds":5,"periodSeconds":5}` | Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
+| livenessProbe | object | `{"exec":{"command":["sh","-c","pg_isready -U $POSTGRES_USER"]},"periodSeconds":5}` | Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
 | persistence | object | `{"pgdata":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}}` | Persistence configuration for PostgreSQL volumes |
@@ -37,7 +37,7 @@ A Helm chart for PostgreSQL
 | podLabels | object | `{}` | Labels to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | podSecurityContext | object | `{}` | Pod-level security context |
 | port | int | `5432` | PostgreSQL port |
-| readinessProbe | object | `{"exec":{"command":["pg_isready"]},"initialDelaySeconds":5,"periodSeconds":5}` | Readiness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
+| readinessProbe | object | `{"exec":{"command":["sh","-c","psql -U $POSTGRES_USER -d $POSTGRES_DB -c \"SELECT 1\""]},"initialDelaySeconds":5,"periodSeconds":5}` | Readiness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | resources | object | `{}` | Resource requests and limits for the PostgreSQL container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
 | secret | object | `{"create":true,"name":""}` | Secret configuration for database credentials |
 | secret.create | bool | `true` | Create a secret containing database credentials and connection details |

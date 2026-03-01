@@ -329,7 +329,56 @@
 
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
   <script>
+    async function loadCharts() {
+      const tbody = document.getElementById('charts-tbody');
+      try {
+        const res = await fetch('index.yaml');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = jsyaml.load(await res.text());
+
+        const rows = Object.entries(data.entries || {}).map(([name, versions]) => {
+          const chart = versions[0]; // latest version only
+          return { name, chart };
+        });
+
+        if (!rows.length) {
+          tbody.innerHTML = '<tr class="loading-row"><td colspan="5">No charts found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map(({ name, chart }) => `
+          <tr>
+            <td class="chart-name">${name}</td>
+            <td><span class="version-badge">${chart.version}</span></td>
+            <td class="app-version">${chart.appVersion ?? '–'}</td>
+            <td class="description">${chart.description ?? '–'}</td>
+            <td>
+              <button
+                class="install-btn"
+                onclick="copyInstall(this, '${name}')"
+              >⎈ helm install</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr class="loading-row"><td colspan="5">Failed to load charts: ${e.message}</td></tr>`;
+      }
+    }
+
+    function copyInstall(btn, chartName) {
+      const cmd = `helm install ${chartName} walnuss0815/${chartName}`;
+      navigator.clipboard.writeText(cmd).then(() => {
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '⎈ helm install';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
     function copyText(text, btn) {
       navigator.clipboard.writeText(text).then(() => {
         const original = btn.textContent;
@@ -341,6 +390,8 @@
         }, 2000);
       });
     }
+
+    loadCharts();
   </script>
 </body>
 </html>

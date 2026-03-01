@@ -70,10 +70,16 @@ spec:
           volumeMounts:
             - name: pgdata
               mountPath: /var/lib/postgresql
+            - name: inidb
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: pgdata
           persistentVolumeClaim:
             claimName: {{ include "postgres.fullname" $ }}-pgdata
+        - name: inidb
+          configMap:
+            name: {{ include "postgres.fullname" . }}-initdb
+            defaultMode: 0777
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

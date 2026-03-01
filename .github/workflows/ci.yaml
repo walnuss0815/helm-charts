@@ -29,6 +29,7 @@ jobs:
 
   lint-test:
     needs: list-changed
+    if: ${{ needs.list-changed.outputs.changed-charts != '[]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

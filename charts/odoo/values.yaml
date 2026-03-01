@@ -145,6 +145,9 @@ tolerations: []
 # -- Affinity rules for pod scheduling
 affinity: {}
 
+# -- Extra Kubernetes manifests to deploy
+extraManifests: []
+
 # -- Persistence configuration for Odoo volumes
 persistence:
   # -- Odoo data directory persistence configuration

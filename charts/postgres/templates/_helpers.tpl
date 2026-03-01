@@ -60,3 +60,14 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create the name of the credentials secret to use
+*/}}
+{{- define "postgres.secretName" -}}
+{{- if .Values.secret.create }}
+{{- default (include "postgres.fullname" .) .Values.secret.name }}
+{{- else }}
+{{- .Values.secret.name }}
+{{- end }}
+{{- end }}

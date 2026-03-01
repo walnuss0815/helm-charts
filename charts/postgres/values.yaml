@@ -89,11 +89,12 @@ affinity: {}
 # -- Extra Kubernetes manifests to deploy
 extraManifests: []
 
-# -- Name of a secret which contains `username` and `password`.
-secretName: ""
+secret:
+  # -- Create secret containing database credentials and connection details
+  create: true
+  # -- Name of a secret which contains `username` and `password`. Will be create automatically if `createSecret` is `true`.
+  name: ""
 
-# -- Create secret containing database credentials and connection details
-createSecret: true
 username: app
 database: app
 port: 5432

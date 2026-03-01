@@ -18,6 +18,25 @@ entries:
   odoo:
   - apiVersion: v2
     appVersion: "19.0"
+    created: "2026-03-01T19:45:33.363698775Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.3.1
+    description: A Helm chart for Odoo
+    digest: a5c76296676e91385a9a7c0a4db64049fd7f54ad7716b4c39e7e6fa90e9e1f39
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: odoo
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/odoo-0.2.0/odoo-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: "19.0"
     created: "2026-03-01T15:29:06.001371861Z"
     dependencies:
     - condition: postgres.enabled
@@ -242,4 +261,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-01T15:29:06.001390346Z"
+generated: "2026-03-01T19:45:33.363721468Z"

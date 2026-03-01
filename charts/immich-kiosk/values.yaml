@@ -1,0 +1,210 @@
+# Default values for immich-kiosk.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replicas for the deployment.
+replicaCount: 1
+
+# -- Container image configuration.
+image:
+  # -- Image repository.
+  repository: ghcr.io/damongolding/immich-kiosk
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Image tag. Overrides the chart appVersion when set.
+  tag: "0.33.2"
+
+# -- Secrets for pulling images from a private registry.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+
+# -- Override the chart name.
+nameOverride: ""
+
+# -- Override the full chart name.
+fullnameOverride: ""
+
+# -- Service account configuration.
+# ref: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # -- Specifies whether a service account should be created.
+  create: true
+  # -- Automatically mount the ServiceAccount's API credentials into the pod.
+  automount: true
+  # -- Annotations to add to the service account.
+  annotations: {}
+  # -- Name of the service account to use.
+  # If not set and `create` is true, a name is generated using the fullname template.
+  name: ""
+
+# -- Annotations to add to the pod.
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+
+# -- Labels to add to the pod.
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+# -- Pod-level security context.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Container-level security context.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# -- Kubernetes Service configuration.
+# ref: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  # -- Service type.
+  type: ClusterIP
+  # -- Service port.
+  port: 3000
+
+# -- Ingress configuration.
+# ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  # -- Enable ingress.
+  enabled: false
+  # -- Ingress class name.
+  className: ""
+  # -- Ingress annotations.
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  # -- Ingress hosts configuration.
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- Ingress TLS configuration.
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# -- Expose the service via Gateway API HTTPRoute.
+# Requires Gateway API resources and a suitable controller installed in the cluster.
+# ref: https://gateway-api.sigs.k8s.io/guides/
+httpRoute:
+  # -- Enable HTTPRoute.
+  enabled: false
+  # -- HTTPRoute annotations.
+  annotations: {}
+  # -- Gateways this route is attached to.
+  parentRefs:
+  - name: gateway
+    sectionName: http
+    # namespace: default
+  # -- Hostnames matching the HTTP host header.
+  hostnames:
+  - chart-example.local
+  # -- List of routing rules and filters applied to matched requests.
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /headers
+
+# -- Resource requests and limits for the container.
+# ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- Liveness probe configuration.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+# -- Readiness probe configuration.
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+# -- Node selector for pod scheduling.
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling.
+tolerations: []
+
+# -- Affinity rules for pod scheduling.
+affinity: {}
+
+# -- Additional environment variables to set on the container.
+env: {}
+
+# -- Additional environment variables sourced from ConfigMaps or Secrets.
+envFrom: {}
+
+# -- Extra Kubernetes manifests to deploy alongside the chart.
+extraManifests: []
+
+# -- Immich server connection configuration.
+immich:
+  # -- URL of the Immich server (internal cluster URL).
+  url: ""
+  # -- External URL of the Immich server, used for generating links.
+  externalURL: ""
+  # -- Immich API key configuration.
+  apiKey:
+    # -- API key value (plaintext). Use `secretKeyRef` instead for production.
+    value: ""
+    # -- Reference to a Kubernetes Secret containing the API key.
+    secretKeyRef:
+      # -- Name of the secret.
+      name: ""
+      # -- Key within the secret.
+      key: ""
+
+# -- Password protection for the kiosk UI.
+# ref: https://docs.immichkiosk.app/configuration/additional-options/#password
+password:
+  # -- Password value (plaintext). Use `secretKeyRef` instead for production.
+  value: ""
+  # -- Reference to a Kubernetes Secret containing the password.
+  secretKeyRef:
+    # -- Name of the secret.
+    name: ""
+    # -- Key within the secret.
+    key: ""
+
+# -- Locale for Immich Kiosk display formatting.
+# ref: https://www.localeplanet.com/icu/
+lang: en_GB
+
+# -- Time zone for Immich Kiosk.
+# ref: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+timeZone: "UTC"
+
+# -- Immich Kiosk application configuration.
+# ref: https://docs.immichkiosk.app/configuration/
+config: {}
+  # ## Clock
+  # show_time: true
+  # time_format: 24
+  # show_date: true
+  # date_format: DDDD, DD. MMMM YYYY
+  #
+  # ## Immich API keys for specific users
+  # immich_users_api_keys:
+  #   user1: $USER1_API_KEY # Must be added to the pod as env var
+  # show_user: true
+
+# -- Custom CSS injected into the kiosk UI.
+customCSS: ""

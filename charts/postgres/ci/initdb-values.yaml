@@ -1,0 +1,66 @@
+initdb:
+  init.sh: |
+    echo "Initializing database..."
+  init.sql: |
+    \c {{ .Values.database }}
+
+    CREATE TABLE IF NOT EXISTS users (
+      id   SERIAL PRIMARY KEY,
+      name TEXT        NOT NULL,
+      email TEXT       NOT NULL UNIQUE
+    );
+
+    INSERT INTO users (name, email)
+    VALUES ('Alice', 'alice@example.com');
+
+extraManifests:
+  # Test pod to verify the entry has been created
+  - |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: "{{ include "postgres.fullname" . }}-test-initdb"
+      labels:
+        {{- include "postgres.labels" . | nindent 4 }}
+      annotations:
+        "helm.sh/hook": test
+    spec:
+      containers:
+        - name: psql
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          args:
+            - /bin/bash
+            - -c
+            - |
+              PGPASSWORD=$POSTGRES_PASSWORD psql \
+                -h {{ include "postgres.fullname" . }} \
+                -U $POSTGRES_USER \
+                -p {{ .Values.service.port }} \
+                -d $POSTGRES_DB \
+                -v ON_ERROR_STOP=1 \
+                -c "
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (
+                    SELECT 1 FROM users WHERE email = 'alice@example.com'
+                  ) THEN
+                    RAISE EXCEPTION 'Entry not found: alice@example.com';
+                  ELSE
+                    RAISE NOTICE 'OK: Entry found.';
+                  END IF;
+                END;
+                \$\$;"
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.secretName" . }}
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.secretName" . }}
+                  key: password
+            - name: POSTGRES_DB
+              value: {{ .Values.database }}
+      restartPolicy: Never

@@ -66,8 +66,8 @@ Create the name of the credentials secret to use
 */}}
 {{- define "postgres.secretName" -}}
 {{- if .Values.secret.create }}
-{{- default (include "postgres.fullname" .) .Values.secret.name }}
+{{- default (include "postgres.fullname" .) (tpl .Values.secret.name .) }}
 {{- else }}
-{{- .Values.secret.name }}
+{{- tpl .Values.secret.name . }}
 {{- end }}
 {{- end }}

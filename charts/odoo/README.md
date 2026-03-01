@@ -38,6 +38,7 @@ A Helm chart for Odoo
 | env | object | `{}` | Additional environment variables to set |
 | envFrom | object | `{}` | Additional environment variables from ConfigMaps or Secrets |
 | extraConfig | string | `""` | Extra content appended to the Odoo config file. Supports multiline INI-style options |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
 | fullnameOverride | string | `""` | Override the full chart name |
 | httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Expose the service via Gateway API HTTPRoute. Requires Gateway API resources and a suitable controller installed within the cluster (see: https://gateway-api.sigs.k8s.io/guides/) |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations |

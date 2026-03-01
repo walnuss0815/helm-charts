@@ -24,7 +24,7 @@ A Helm chart for PostgreSQL
 | image.tag | string | `"18.3"` | Image tag. Overrides the chart appVersion when set |
 | imagePullSecrets | list | `[]` | Secrets for pulling images from a private registry. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) |
 | initdb | object | `{}` | InitDB scripts to run on first startup. See [PostgreSQL Docker docs](https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts) |
-| livenessProbe | object | `{"exec":{"command":["sh","-c","pg_isready -U $POSTGRES_USER"]},"periodSeconds":5}` | Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
+| livenessProbe | object | `{"exec":{"command":["sh","-c","pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]},"periodSeconds":5}` | Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
 | persistence | object | `{"pgdata":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}}` | Persistence configuration for PostgreSQL volumes |

@@ -38,22 +38,22 @@ podAnnotations: {}
 podLabels: {}
 
 # -- Pod-level security context (e.g. fsGroup)
-podSecurityContext: {}
-  # fsGroup: 101
-  # fsGroupChangePolicy: OnRootMismatch
+podSecurityContext:
+  fsGroup: 101
+  fsGroupChangePolicy: OnRootMismatch
 
 # -- Container-level security context
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #     - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 100
-  # runAsGroup: 101
-  # seccompProfile:
-  #   type: RuntimeDefault
-  # allowPrivilegeEscalation: false
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 100
+  runAsGroup: 101
+  seccompProfile:
+    type: RuntimeDefault
+  allowPrivilegeEscalation: false
 
 # -- Kubernetes Service configuration
 service:

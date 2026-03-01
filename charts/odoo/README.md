@@ -1,6 +1,6 @@
 # odoo
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
 
 A Helm chart for Odoo
 
@@ -74,7 +74,7 @@ A Helm chart for Odoo
 | persistence.data.storageClass | string | `"-"` | Storage class for the Odoo data PVC. Use `"-"` to disable dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the Odoo pod |
 | podLabels | object | `{}` | Labels to add to the Odoo pod |
-| podSecurityContext | object | `{}` | Pod-level security context (e.g. fsGroup) |
+| podSecurityContext | object | `{"fsGroup":101,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod-level security context (e.g. fsGroup) |
 | postgres | object | `{"database":"postgres","enabled":true,"secret":{"create":true,"name":"{{ .Release.Name }}-db"}}` | PostgreSQL subchart configuration. See [postgresql chart](../postgres) for all available options |
 | postgres.database | string | `"postgres"` | Name of the PostgreSQL database to create |
 | postgres.enabled | bool | `true` | Enable the PostgreSQL subchart. Set to `false` to use an external database via `database.*` |
@@ -84,7 +84,7 @@ A Helm chart for Odoo
 | readinessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":5}` | Readiness probe configuration |
 | replicaCount | int | `1` | Number of replicas for the Odoo deployment |
 | resources | object | `{}` | Resource requests and limits for the Odoo container |
-| securityContext | object | `{}` | Container-level security context |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":101,"runAsNonRoot":true,"runAsUser":100,"seccompProfile":{"type":"RuntimeDefault"}}` | Container-level security context |
 | service | object | `{"port":8069,"type":"ClusterIP"}` | Kubernetes Service configuration |
 | service.port | int | `8069` | Service port for Odoo web interface |
 | service.type | string | `"ClusterIP"` | Service type |

@@ -23,7 +23,7 @@
     }
 
     .container {
-      max-width: 760px;
+      max-width: 900px;
       width: 100%;
     }
 
@@ -120,6 +120,102 @@
       text-decoration: underline;
     }
 
+    /* Charts Table */
+    .charts-table-wrapper {
+      overflow-x: auto;
+      margin-top: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 0.65rem 1rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+      border-bottom: 1px solid #2d3348;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #1a1e2e;
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: #252b3b;
+    }
+
+    tbody td {
+      padding: 0.85rem 1rem;
+      font-size: 0.88rem;
+      vertical-align: middle;
+    }
+
+    .chart-name {
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .version-badge {
+      display: inline-block;
+      background: #1d3a5f;
+      color: #7dd3fc;
+      border: 1px solid #2563eb44;
+      border-radius: 999px;
+      padding: 0.15rem 0.65rem;
+      font-size: 0.78rem;
+      font-family: monospace;
+    }
+
+    .app-version {
+      color: #94a3b8;
+      font-family: monospace;
+      font-size: 0.82rem;
+    }
+
+    .description {
+      color: #94a3b8;
+    }
+
+    .install-btn {
+      background: #1d3a5f;
+      border: 1px solid #2563eb44;
+      color: #7dd3fc;
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: monospace;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .install-btn:hover {
+      background: #1e3f6f;
+    }
+
+    .install-btn.copied {
+      color: #4ade80;
+      border-color: #4ade8044;
+      background: #14532d44;
+    }
+
+    .loading-row td {
+      color: #475569;
+      font-style: italic;
+      padding: 1.5rem 1rem;
+    }
+
     footer {
       margin-top: 48px;
       text-align: center;
@@ -203,6 +299,27 @@
           https://github.com/walnuss0815/helm-charts
         </a>
       </p>
+    </div>
+
+    <!-- Charts Table -->
+    <div class="card">
+      <h2 data-icon="📋">Available Charts</h2>
+      <div class="charts-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Chart</th>
+              <th>Version</th>
+              <th>App Version</th>
+              <th>Description</th>
+              <th>Install</th>
+            </tr>
+          </thead>
+          <tbody id="charts-tbody">
+            <tr class="loading-row"><td colspan="5">Loading charts…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <footer>

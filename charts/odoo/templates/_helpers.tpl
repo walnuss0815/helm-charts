@@ -68,9 +68,9 @@ Create environment variable for secret value
 {{- if and .secretKeyRef.name .secretKeyRef.key -}}
 valueFrom:
   secretKeyRef:
-    name: {{ tpl .secretKeyRef.name . }}
-    key: {{ tpl .secretKeyRef.key . }}
+    name: {{ tpl .secretKeyRef.name $ }}
+    key: {{ tpl .secretKeyRef.key $ }}
 {{- else -}}
-value: {{ tpl .value . }}
+value: {{ tpl .value $ }}
 {{- end }}
 {{- end }}

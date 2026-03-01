@@ -2,42 +2,46 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+# -- Container image configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/containers/images/)
 image:
+  # -- Image repository
   repository: postgres
-  # This sets the pull policy for images.
+  # -- Image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Image tag. Overrides the chart appVersion when set
   tag: "18.3"
 
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+# -- Secrets for pulling images from a private registry. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
 imagePullSecrets: []
-# This is to override the chart name.
+
+# -- Override the chart name
 nameOverride: ""
+
+# -- Override the full chart name
 fullnameOverride: ""
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+# -- Service account configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/security/service-accounts/)
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Automatically mount a ServiceAccount's API credentials?
+  # -- Automatically mount a ServiceAccount's API credentials
   automount: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- Name of the service account to use. If not set and `create` is `true`, a name is generated using the fullname template
   name: ""
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+# -- Annotations to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
 podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+
+# -- Labels to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
 podLabels: {}
 
+# -- Pod-level security context
 podSecurityContext: {}
   # fsGroup: 2000
 
+# -- Container-level security context
 securityContext: {}
   # capabilities:
   #   drop:
@@ -46,18 +50,15 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# -- Kubernetes Service configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/services-networking/service/)
 service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  # -- Service type. See [service types](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)
   type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+  # -- Service port
   port: 5432
 
+# -- Resource requests and limits for the PostgreSQL container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
@@ -65,7 +66,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# -- Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 livenessProbe:
   exec:
     command:
@@ -73,6 +74,7 @@ livenessProbe:
   initialDelaySeconds: 5
   periodSeconds: 5
 
+# -- Readiness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 readinessProbe:
   exec:
     command:
@@ -80,23 +82,32 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 5
 
+# -- Node selector for pod scheduling
 nodeSelector: {}
 
+# -- Tolerations for pod scheduling
 tolerations: []
 
+# -- Affinity rules for pod scheduling
 affinity: {}
 
 # -- Extra Kubernetes manifests to deploy
 extraManifests: []
 
+# -- Secret configuration for database credentials
 secret:
-  # -- Create secret containing database credentials and connection details
+  # -- Create a secret containing database credentials and connection details
   create: true
-  # -- Name of a secret which contains `username` and `password`. Will be create automatically if `createSecret` is `true`.
+  # -- Name of the secret containing `username` and `password`. Auto-generated if `create` is `true`
   name: ""
 
+# -- PostgreSQL username
 username: app
+
+# -- PostgreSQL database name
 database: app
+
+# -- PostgreSQL port
 port: 5432
 
 # -- Persistence configuration for PostgreSQL volumes
@@ -105,15 +116,15 @@ persistence:
   pgdata:
     # -- Annotations for the PostgreSQL data PVC
     annotations: {}
-    # -- Storage class for PostgreSQL data PVC
+    # -- Storage class for the PostgreSQL data PVC. Use `"-"` to disable dynamic provisioning
     storageClass: "-"
     # -- Size of the PostgreSQL data PVC
     size: "1Gi"
-    # -- Access modes for PostgreSQL data PVC
+    # -- Access modes for the PostgreSQL data PVC
     accessModes:
       - ReadWriteOnce
 
-# -- InitDB scripts (see [docs](https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts))
+# -- InitDB scripts to run on first startup. See [PostgreSQL Docker docs](https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts)
 initdb: {}
   # init.sh: |
   #   echo "Initializing database..."

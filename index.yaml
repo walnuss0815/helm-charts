@@ -15,6 +15,21 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/gotenberg-0.1.0/gotenberg-0.1.0.tgz
     version: 0.1.0
+  immich-kiosk:
+  - apiVersion: v2
+    appVersion: 0.33.2
+    created: "2026-03-03T21:12:28.494361802Z"
+    description: A Helm chart for Immich Kiosk
+    digest: 0697945e6a0eb7f16c348a7e5b86e5ae71a75a0b741d1ee528d32a669de35e23
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich-kiosk
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-kiosk-0.1.1/immich-kiosk-0.1.1.tgz
+    version: 0.1.1
   odoo:
   - apiVersion: v2
     appVersion: "19.0"
@@ -315,4 +330,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-03T20:59:14.9969619Z"
+generated: "2026-03-03T21:12:28.494388292Z"

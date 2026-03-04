@@ -3,6 +3,20 @@ entries:
   chisel:
   - apiVersion: v2
     appVersion: 1.11.3
+    created: "2026-03-04T21:52:53.757062142Z"
+    description: A Helm chart for Chisel
+    digest: e28cdf9d9cb8a52ff666db5c532787b827bafa41dc08b4e4d695b5dd7d0dc9db
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: chisel
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/chisel-0.1.1/chisel-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 1.11.3
     created: "2026-03-04T16:52:36.519478297Z"
     description: A Helm chart for Chisel
     digest: 98b04b5447687433375487eb98bee6d65fb1f741ac0f5122350f3ecae81a6bc1
@@ -359,4 +373,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-04T16:52:36.519503113Z"
+generated: "2026-03-04T21:52:53.757089964Z"

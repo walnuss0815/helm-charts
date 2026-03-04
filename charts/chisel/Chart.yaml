@@ -1,0 +1,10 @@
+apiVersion: v2
+name: chisel
+description: A Helm chart for Chisel
+type: application
+version: 0.1.0
+appVersion: "1.11.3"
+maintainers:
+  - name: walnuss0815
+    email: walnuss0815@gmail.com
+    url: https://github.com/walnuss0815

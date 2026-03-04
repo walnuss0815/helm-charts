@@ -1,0 +1,127 @@
+# Default values for chisel.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replica pods to run. See [ReplicaSet docs](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
+replicaCount: 1
+
+# -- Container image configuration. See [Images docs](https://kubernetes.io/docs/concepts/containers/images/)
+image:
+  # -- Image repository for the Chisel container
+  repository: jpillora/chisel
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag. Defaults to the chart's `appVersion` if not set
+  tag: "1.11.3"
+
+# -- List of image pull secrets for pulling from private registries. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
+imagePullSecrets: []
+# -- Overrides the chart name used in resource names
+nameOverride: ""
+# -- Overrides the full resource name
+fullnameOverride: ""
+
+# -- Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/)
+serviceAccount:
+  # -- Whether to create a service account
+  create: true
+  # -- Automatically mount the ServiceAccount API credentials into the pod
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- Name of the service account to use. If empty and `create` is true, a name is generated from the fullname template
+  name: ""
+
+# -- Annotations to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+podAnnotations: {}
+# -- Labels to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+podLabels: {}
+
+# -- Pod-level security context (e.g. fsGroup)
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Container-level security context
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# -- CPU/memory resource requests and limits. Leaving empty is recommended to keep charts portable across environments like Minikube
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- Liveness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+livenessProbe: {}
+# -- Readiness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+readinessProbe: {}
+
+# -- Additional volumes to mount on the Deployment
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# -- Additional volume mounts on the Deployment
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+# -- Node selector for pod scheduling
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling
+tolerations: []
+
+# -- Affinity rules for pod scheduling
+affinity: {}
+
+# -- Remote Chisel server connection configuration
+server:
+  # -- IP address or domain name of a remote server running Chisel
+  host: ""
+  # -- Port Chisel is using on the remote server
+  port: 8000
+  # -- Authentication string for the Chisel remote server
+  auth:
+    # -- Plain-text auth value (takes precedence if set)
+    value: ""
+    # -- Reference to a Kubernetes Secret key containing the auth value
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+
+# -- Chisel reverse port-forwarding rules. Each rule maps a port on the remote Chisel server to a host/port inside the cluster.
+# Example:
+# ```yaml
+# rules:
+#   - local:
+#       interface: 0.0.0.0
+#       port: 80
+#     remote:
+#       host: traefik-external.traefik-external.svc.cluster.local
+#       port: 80
+# ```
+rules: []
+  # - local:
+  #     port: 80
+  #   remote:
+  #     host: example
+  #     port: 80
+  # - local:
+  #     port: 443
+  #   remote:
+  #     host: example
+  #     port: 443

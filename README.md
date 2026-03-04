@@ -50,17 +50,12 @@ Contributions are welcome! Please follow these steps:
    - `values.yaml` – with documented default values (using `helm-docs` `# --` comments)
    - `templates/` – Kubernetes manifests
 
-3. **Bump the chart version** in `Chart.yaml` according to [SemVer](https://semver.org/):
-   - Patch (`0.1.x`) – bug fixes
-   - Minor (`0.x.0`) – new features, backwards compatible
-   - Major (`x.0.0`) – breaking changes
-
-4. **Lint your chart** before opening a PR:
+3. **Lint your chart** before opening a PR:
    ```bash
    helm lint charts/<chart-name>
    ```
 
-5. **Open a Pull Request** against `main`. The CI pipeline will automatically lint and test all changed charts.
+4. **Open a Pull Request** against `main`. The CI pipeline will automatically lint and test all changed charts. It will also update the readme and bump the chart version.
 
 ### Commit Style
 
@@ -74,7 +69,7 @@ docs(readme): update contributing guide
 
 ### Chart Documentation
 
-All `values.yaml` parameters should be documented with `helm-docs`-style comments:
+All `values.yaml` parameters should be documented with [`helm-docs`-style](https://github.com/norwoodj/helm-docs) comments:
 
 ```yaml
 # -- Number of replicas for the deployment

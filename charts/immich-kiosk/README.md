@@ -27,10 +27,10 @@ A Helm chart for Immich Kiosk
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames matching the HTTP host header. |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Gateways this route is attached to. |
 | httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | List of routing rules and filters applied to matched requests. |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/damongolding/immich-kiosk","tag":"0.33.2"}` | Container image configuration. |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/damongolding/immich-kiosk","tag":"0.33.3"}` | Container image configuration. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
 | image.repository | string | `"ghcr.io/damongolding/immich-kiosk"` | Image repository. |
-| image.tag | string | `"0.33.2"` | Image tag. Overrides the chart appVersion when set. |
+| image.tag | string | `"0.33.3"` | Image tag. Overrides the chart appVersion when set. |
 | imagePullSecrets | list | `[]` | Secrets for pulling images from a private registry. ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | immich | object | `{"apiKey":{"secretKeyRef":{"key":"","name":""},"value":""},"externalURL":"","url":""}` | Immich server connection configuration. |
 | immich.apiKey | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Immich API key configuration. |

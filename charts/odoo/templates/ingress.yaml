@@ -37,7 +37,16 @@ spec:
               service:
                 name: {{ include "odoo.fullname" $ }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ $.Values.ports.http }}
+          - path: {{ trimSuffix .path "/" }}/websocket
+            {{- with .pathType }}
+            pathType: {{ . }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ include "odoo.fullname" $ }}
+                port:
+                  number: {{ $.Values.ports.websocket }}
           {{- end }}
     {{- end }}
 {{- end }}

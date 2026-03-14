@@ -7,9 +7,13 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.ports.http }}
       targetPort: http
       protocol: TCP
       name: http
+    - port: {{ .Values.ports.websocket }}
+      targetPort: websocket
+      protocol: TCP
+      name: websocket
   selector:
     {{- include "odoo.selectorLabels" . | nindent 4 }}

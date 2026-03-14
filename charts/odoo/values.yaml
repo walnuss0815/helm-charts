@@ -59,8 +59,6 @@ securityContext:
 service:
   # -- Service type
   type: ClusterIP
-  # -- Service port for Odoo web interface
-  port: 8069
 
 # -- Ingress configuration for external HTTP access
 ingress:
@@ -175,6 +173,12 @@ persistence:
     # -- Access modes for the Odoo addons PVC
     accessModes:
       - ReadWriteOnce
+
+ports:
+  # -- Port for Odoo web interface
+  http: 8069
+  # -- Port for Odoo websocket
+  websocket: 8072
 
 # -- External database connection config. Only used if `postgres.enabled` is `false`
 database:

@@ -109,7 +109,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.ports.http }}
+              protocol: TCP
+            - name: websocket
+              containerPort: {{ .Values.ports.websocket }}
               protocol: TCP
           env:
             {{- range $key, $value := .Values.env }}

@@ -76,6 +76,8 @@ A Helm chart for Odoo
 | podAnnotations | object | `{}` | Annotations to add to the Odoo pod |
 | podLabels | object | `{}` | Labels to add to the Odoo pod |
 | podSecurityContext | object | `{"fsGroup":101,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod-level security context (e.g. fsGroup) |
+| ports.http | int | `8069` | Port for Odoo web interface |
+| ports.websocket | int | `8072` | Port for Odoo websocket |
 | postgres | object | `{"database":"postgres","enabled":true,"secret":{"create":true,"name":"{{ .Release.Name }}-db"}}` | PostgreSQL subchart configuration. See [postgresql chart](../postgres) for all available options |
 | postgres.database | string | `"postgres"` | Name of the PostgreSQL database to create |
 | postgres.enabled | bool | `true` | Enable the PostgreSQL subchart. Set to `false` to use an external database via `database.*` |
@@ -86,8 +88,7 @@ A Helm chart for Odoo
 | replicaCount | int | `1` | Number of replicas for the Odoo deployment |
 | resources | object | `{}` | Resource requests and limits for the Odoo container |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":101,"runAsNonRoot":true,"runAsUser":100,"seccompProfile":{"type":"RuntimeDefault"}}` | Container-level security context |
-| service | object | `{"port":8069,"type":"ClusterIP"}` | Kubernetes Service configuration |
-| service.port | int | `8069` | Service port for Odoo web interface |
+| service | object | `{"type":"ClusterIP"}` | Kubernetes Service configuration |
 | service.type | string | `"ClusterIP"` | Service type |
 | serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |

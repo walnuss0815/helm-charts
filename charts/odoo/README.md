@@ -1,6 +1,6 @@
 # odoo
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
 
 A Helm chart for Odoo
 
@@ -57,6 +57,7 @@ A Helm chart for Odoo
 | ingress.enabled | bool | `false` | Enable ingress |
 | ingress.hosts | list | `[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Ingress hosts configuration |
 | ingress.tls | list | `[]` | TLS configuration for ingress |
+| initContainer | list | `[]` | Configuration of init containers |
 | livenessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":5}` | Liveness probe configuration |
 | logLevel | string | `"info"` | Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/de/developer/reference/cli.html#cmdoption-odoo-bin-log-level) |
 | nameOverride | string | `""` | Override the chart name |

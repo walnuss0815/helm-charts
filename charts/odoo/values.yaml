@@ -107,6 +107,9 @@ httpRoute:
             type: PathPrefix
             value: /headers
 
+# -- Configuration of init containers
+initContainer: []
+
 # -- Additional environment variables to set
 env: {}
 

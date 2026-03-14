@@ -96,6 +96,9 @@ spec:
               mountPath: /etc/odoo.template
             - name: config
               mountPath: /etc/odoo
+      {{- with .Values.initContainers }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}

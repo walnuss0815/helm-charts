@@ -1,0 +1,23 @@
+configDir: /etc/odoo
+configFilePath: '{{ .Values.configDir }}/odoo.conf'
+
+initContainers:
+  - name: example
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+    imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for config file..."
+        while ! test -f "$CONFIG_FILE_PATH"; do
+          sleep 10
+          echo "Still waiting"
+        done
+        echo "Config file has been created!"
+    env:
+      - name: CONFIG_FILE_PATH
+        value: '{{ tpl .Values.configFilePath $ }}'
+    volumeMounts:
+      - name: config
+        mountPath: '{{ .Values.configDir }}'

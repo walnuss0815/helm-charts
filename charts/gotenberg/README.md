@@ -1,6 +1,6 @@
 # gotenberg
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 8.23](https://img.shields.io/badge/AppVersion-8.23-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 8.23](https://img.shields.io/badge/AppVersion-8.23-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -21,10 +21,10 @@ A Helm chart for Kubernetes
 | autoscaling.minReplicas | int | `1` | Minimum number of replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage for autoscaling |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"gotenberg/gotenberg","tag":"8.27"}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"gotenberg/gotenberg","tag":"8.28"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"gotenberg/gotenberg"` | Container image repository |
-| image.tag | string | `"8.27"` | Overrides the image tag whose default is the chart appVersion |
+| image.tag | string | `"8.28"` | Overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | livenessProbe | object | `{"httpGet":{"path":"/health","port":"http"}}` | Liveness probe configuration |
 | livenessProbe.httpGet | object | `{"path":"/health","port":"http"}` | HTTP GET configuration for liveness probe |

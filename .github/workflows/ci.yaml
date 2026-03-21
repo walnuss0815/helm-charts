@@ -1,4 +1,4 @@
-name: Lint and Test Charts
+name: CI
 
 on: pull_request
 
@@ -6,6 +6,7 @@ permissions: {}
 
 jobs:
   list-changed:
+    name: List changed Helm Charts
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,10 +25,89 @@ jobs:
         id: list-changed
         run: |
           changed=$(ct list-changed --config ct.yaml --target-branch ${{ github.event.repository.default_branch }})
-          charts_json=$(echo "$changed" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          charts_json=$(echo "${changed#"charts/"}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(split("/")[-1])')
           echo "changed-charts=$charts_json" >> "$GITHUB_OUTPUT"
 
+  generate-docs:
+    name: Generate Helm Docs
+    needs: list-changed
+    if: ${{ needs.list-changed.outputs.changed-charts != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chart: ${{ fromJson(needs.list-changed.outputs.changed-charts) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Run helm-docs
+        uses: losisin/helm-docs-github-action@v1
+        with:
+          chart-search-root: charts/${{ matrix.chart }}
+          git-push: true
+          git-commit-message: "chore(${{ matrix.chart }}): update Helm documentation"
+
+  version:
+    name: Version Helm Charts
+    needs: list-changed
+    if: ${{ needs.list-changed.outputs.changed-charts != '[]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        chart: ${{ fromJson(needs.list-changed.outputs.changed-charts) }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
+
+      - name: Compute next version for ${{ matrix.chart }}
+        id: semver
+        uses: paulhatch/semantic-version@v6.0.1
+        with:
+          tag_prefix: "${{ matrix.chart }}-"
+          change_path: "charts/${{ matrix.chart }}"
+          major_pattern: "/(BREAKING CHANGE|!:)/"
+          minor_pattern: "/^feat/"
+          version_format: "${major}.${minor}.${patch}"
+          bump_each_commit: false
+
+      - name: Update Chart.yaml
+        if: steps.semver.outputs.changed == 'true'
+        run: |
+          sed -i "s/^version:.*/version: ${{ steps.semver.outputs.version }}/" \
+            charts/${{ matrix.chart }}/Chart.yaml
+
+      - name: Commit version bump
+        if: steps.semver.outputs.changed == 'true'
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+          git add charts/${{ matrix.chart }}/Chart.yaml
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit, skipping."
+          else
+            git commit -m "chore(${{ matrix.chart }}): bump version to ${{ steps.semver.outputs.version }}"
+            git push
+          fi
+
   lint-test:
+    name: Test and lint Helm Charts
     needs: list-changed
     if: ${{ needs.list-changed.outputs.changed-charts != '[]' }}
     runs-on: ubuntu-latest
@@ -48,25 +128,28 @@ jobs:
 
       - uses: actions/setup-python@v6.2.0
         with:
-          python-version: '3.x'
+          python-version: "3.x"
           check-latest: true
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.8.0
 
       - name: Run chart-testing (lint)
-        run: ct lint --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts ${{ matrix.chart }}
+        run: ct lint --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts charts/${{ matrix.chart }}
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.14.0
 
       - name: Run chart-testing (install)
-        run: ct install --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts ${{ matrix.chart }}
+        run: ct install --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts charts/${{ matrix.chart }}
 
   check:
+    name: Check CI status
     if: always()
     needs:
       - list-changed
+      - generate-docs
+      - version
       - lint-test
     runs-on: ubuntu-latest
     steps:

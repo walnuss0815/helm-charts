@@ -1,0 +1,27 @@
+{{- with .Values.persistence.config }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "kavita.fullname" $ }}-config
+  labels:
+    {{- include "kavita.labels" $ | nindent 4 }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- if not (empty .accessModes) }}
+  {{- range .accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  {{- else }}
+    - {{ .accessMode | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .size | quote }}
+  {{- if not (eq .storageClass "-") }}
+  storageClassName: {{ .storageClass }}
+  {{- end }}
+{{- end }}

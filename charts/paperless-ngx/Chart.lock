@@ -7,12 +7,12 @@ dependencies:
   version: 0.1.0
 - name: tika
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.0
+  version: 0.1.1
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
 - name: paperless-ai
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
-digest: sha256:4749bf6d053886752b64db9610a01797a34aa06378013b77ec4e3ca4638819aa
-generated: "2026-02-26T23:10:26.24078204+01:00"
+digest: sha256:fa0771423158f56a5be1ddcbf440a70f8f3930e6369940188a8ccd5f55205439
+generated: "2026-04-03T19:34:18.966708574Z"

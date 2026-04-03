@@ -19,7 +19,7 @@ dependencies:
     repository: https://walnuss0815.github.io/helm-charts
     condition: webdav.enabled
   - name: tika
-    version: "0.1.0"
+    version: "0.1.1"
     repository: https://walnuss0815.github.io/helm-charts
     condition: tika.enabled
   - name: gotenberg

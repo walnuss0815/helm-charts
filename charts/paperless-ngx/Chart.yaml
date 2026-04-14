@@ -2,7 +2,7 @@ apiVersion: v2
 name: paperless-ngx
 description: A Helm chart for Kubernetes
 type: application
-version: 0.1.7
+version: 0.1.8
 appVersion: "2.20.8"
 maintainers:
   - name: walnuss0815
@@ -15,7 +15,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
   - name: webdav
-    version: "0.1.0"
+    version: "0.1.3"
     repository: https://walnuss0815.github.io/helm-charts
     condition: webdav.enabled
   - name: tika

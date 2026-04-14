@@ -15,7 +15,7 @@ A Helm chart for Kubernetes
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | redis | 21.2.14 |
-| https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.0 |
+| https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.3 |
 | https://walnuss0815.github.io/helm-charts | paperless-ai | 0.1.0 |
 | https://walnuss0815.github.io/helm-charts | tika | 0.1.1 |
 | https://walnuss0815.github.io/helm-charts | webdav | 0.1.3 |

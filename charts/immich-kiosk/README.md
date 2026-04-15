@@ -1,6 +1,6 @@
 # immich-kiosk
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.33.2](https://img.shields.io/badge/AppVersion-0.33.2-informational?style=flat-square)
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.33.2](https://img.shields.io/badge/AppVersion-0.33.2-informational?style=flat-square)
 
 A Helm chart for Immich Kiosk
 
@@ -27,10 +27,10 @@ A Helm chart for Immich Kiosk
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames matching the HTTP host header. |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Gateways this route is attached to. |
 | httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | List of routing rules and filters applied to matched requests. |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/damongolding/immich-kiosk","tag":"0.35.0"}` | Container image configuration. |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/damongolding/immich-kiosk","tag":"0.36.0"}` | Container image configuration. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
 | image.repository | string | `"ghcr.io/damongolding/immich-kiosk"` | Image repository. |
-| image.tag | string | `"0.35.0"` | Image tag. Overrides the chart appVersion when set. |
+| image.tag | string | `"0.36.0"` | Image tag. Overrides the chart appVersion when set. |
 | imagePullSecrets | list | `[]` | Secrets for pulling images from a private registry. ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | immich | object | `{"apiKey":{"secretKeyRef":{"key":"","name":""},"value":""},"externalURL":"","url":""}` | Immich server connection configuration. |
 | immich.apiKey | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Immich API key configuration. |

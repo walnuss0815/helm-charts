@@ -1,0 +1,3 @@
+[config]
+model="openrouter/free"
+fallback_models=[]

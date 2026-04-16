@@ -17,9 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: PR Agent action step
-        uses: Codium-ai/pr-agent@main
+        uses: Codium-ai/pr-agent@v0.34
         env:
-          OPENAI.KEY: ${{ secrets.OPENROUTER_KEY }}
-          OPENAI.API_BASE: https://openrouter.ai/api/v1
-          CONFIG.MODEL_LIST: "openrouter/free"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER.KEY: ${{ secrets.OPENROUTER_KEY }}

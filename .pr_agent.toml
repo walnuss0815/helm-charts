@@ -1,3 +1,4 @@
 [config]
 model="openrouter/free"
 fallback_models=[]
+custom_model_max_tokens = 4000

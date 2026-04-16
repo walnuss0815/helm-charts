@@ -1,4 +1,11 @@
 [config]
-model="openrouter/free"
-fallback_models=[]
-custom_model_max_tokens = 4000
+model = "openrouter/google/gemma-4-31b-it:free"
+fallback_models = [
+  "openrouter/mistralai/devstral-2:free",
+  "openrouter/qwen/qwen3-coder-480b-a35b-instruct:free",
+  "openrouter/nvidia/nemotron-super-49b-v1:free",
+  "openrouter/openai/gpt-oss-120b:free",
+  "openrouter/nousresearch/hermes-3-llama-3.1-405b:free",
+  "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+]
+custom_model_max_tokens = 65000

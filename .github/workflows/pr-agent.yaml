@@ -1,0 +1,25 @@
+name: PR Agent
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  pr_agent_job:
+    name: PR Agent
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR Agent action step
+        uses: Codium-ai/pr-agent@main
+        env:
+          OPENAI.KEY: ${{ secrets.OPENROUTER_KEY }}
+          OPENAI.API_BASE: https://openrouter.ai/api/v1
+          CONFIG.MODEL_LIST: "openrouter/free"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

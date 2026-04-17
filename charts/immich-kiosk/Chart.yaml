@@ -2,7 +2,7 @@ apiVersion: v2
 name: immich-kiosk
 description: A Helm chart for Immich Kiosk
 type: application
-version: 0.1.5
+version: 0.1.6
 appVersion: "0.33.2"
 maintainers:
   - name: walnuss0815

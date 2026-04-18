@@ -4,7 +4,7 @@ dependencies:
   version: 21.2.14
 - name: webdav
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.3
+  version: 0.1.4
 - name: tika
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.1
@@ -14,5 +14,5 @@ dependencies:
 - name: paperless-ai
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
-digest: sha256:433d2033c913de19f7a9eb439a0f4fbda508ac84f5b745a443a67c4392fe43ec
-generated: "2026-04-14T16:45:47.954185827Z"
+digest: sha256:1b7b30d6c66e2ea82c024f16d8ec1d44a77e7729a8672d65e0c9eb6956128a66
+generated: "2026-04-18T10:33:41.162319256Z"

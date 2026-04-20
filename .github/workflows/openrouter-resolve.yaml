@@ -1,0 +1,20 @@
+name: OpenHands Issue Resolver
+
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+
+jobs:
+  resolve-issue:
+    if: >
+      github.event.label.name == 'fix-me' ||
+      contains(github.event.comment.body, '@openhands-agent')
+    uses: OpenHands/OpenHands/.github/workflows/openhands-resolver.yml@main
+    with:
+      LLM_MODEL: openrouter/openai/gpt-oss-120b:free
+    secrets:
+      LLM_API_KEY: ${{ secrets.OPENROUTER_KEY }}
+      PAT_TOKEN: ${{ secrets.GH_PAT }}
+      PAT_USERNAME: ${{ github.repository_owner }}

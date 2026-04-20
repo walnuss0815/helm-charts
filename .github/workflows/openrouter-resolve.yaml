@@ -13,7 +13,7 @@ jobs:
       contains(github.event.comment.body, '@openhands-agent')
     uses: OpenHands/OpenHands/.github/workflows/openhands-resolver.yml@main
     with:
-      LLM_MODEL: openrouter/openai/gpt-oss-120b:free
+      LLM_MODEL: openrouter/deepseek/deepseek-v3.2
     secrets:
       LLM_API_KEY: ${{ secrets.OPENROUTER_KEY }}
       PAT_TOKEN: ${{ secrets.GH_PAT }}

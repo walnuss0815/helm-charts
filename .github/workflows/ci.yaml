@@ -28,8 +28,8 @@ jobs:
           charts_json=$(echo "${changed#"charts/"}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(split("/")[-1])')
           echo "changed-charts=$charts_json" >> "$GITHUB_OUTPUT"
 
-  generate-docs:
-    name: Generate Helm Docs
+  update-files:
+    name: Update files
     needs: list-changed
     if: ${{ needs.list-changed.outputs.changed-charts != '[]' }}
     runs-on: ubuntu-latest
@@ -38,36 +38,6 @@ jobs:
         chart: ${{ fromJson(needs.list-changed.outputs.changed-charts) }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.ACTIONS_TOKEN }}
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@v1
-        with:
-          chart-search-root: charts/${{ matrix.chart }}
-          git-push: true
-          git-commit-message: "chore(${{ matrix.chart }}): update Helm documentation"
-
-  version:
-    name: Version Helm Charts
-    needs: list-changed
-    if: ${{ needs.list-changed.outputs.changed-charts != '[]' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    strategy:
-      matrix:
-        chart: ${{ fromJson(needs.list-changed.outputs.changed-charts) }}
-    steps:
-      - uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
           repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -85,17 +55,14 @@ jobs:
           version_format: "${major}.${minor}.${patch}"
           bump_each_commit: false
 
-      - name: Update Chart.yaml
+      - name: Update version in Chart.yaml
         if: steps.semver.outputs.changed == 'true'
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           sed -i "s/^version:.*/version: ${{ steps.semver.outputs.version }}/" \
             charts/${{ matrix.chart }}/Chart.yaml
-
-      - name: Commit version bump
-        if: steps.semver.outputs.changed == 'true'
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
           git add charts/${{ matrix.chart }}/Chart.yaml
 
@@ -103,8 +70,19 @@ jobs:
             echo "No changes to commit, skipping."
           else
             git commit -m "chore(${{ matrix.chart }}): bump version to ${{ steps.semver.outputs.version }}"
-            git push
           fi
+
+      - name: Run helm-docs
+        uses: losisin/helm-docs-github-action@v1
+        with:
+          git-push: true
+          chart-search-root: charts/${{ matrix.chart }}
+          git-commit-message: "chore(${{ matrix.chart }}): update Helm documentation"
+
+      - name: Push changes
+        if: steps.semver.outputs.changed == 'true'
+        run: |
+          git push
 
   lint-test:
     name: Test and lint Helm Charts
@@ -148,13 +126,12 @@ jobs:
     if: always()
     needs:
       - list-changed
-      - generate-docs
-      - version
+      - update-files
       - lint-test
     runs-on: ubuntu-latest
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
         with:
-          allowed-skips: generate-docs,version,lint-test
+          allowed-skips: update-files,lint-test
           jobs: ${{ toJSON(needs) }}

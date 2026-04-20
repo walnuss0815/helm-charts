@@ -6,6 +6,9 @@ on:
   issue_comment:
     types: [created]
 
+env:
+  LLM_MAX_OUTPUT_TOKENS: 4096
+
 jobs:
   resolve-issue:
     if: >
@@ -14,7 +17,6 @@ jobs:
     uses: OpenHands/OpenHands/.github/workflows/openhands-resolver.yml@main
     with:
       LLM_MODEL: openrouter/deepseek/deepseek-v3.2
-      LLM_MAX_OUTPUT_TOKENS: 4096
     secrets:
       LLM_API_KEY: ${{ secrets.OPENROUTER_KEY }}
       PAT_TOKEN: ${{ secrets.GH_PAT }}

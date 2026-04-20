@@ -1,7 +1,7 @@
 dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 21.2.14
+  version: 25.3.11
 - name: webdav
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.4
@@ -14,5 +14,5 @@ dependencies:
 - name: paperless-ai
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.0
-digest: sha256:663cac7e3480a1415a2534573dadbd79c1db7b6937f2167f9f0cb89969ff7a0e
-generated: "2026-04-18T13:57:25.89746029Z"
+digest: sha256:243b3cd9d66de0c7650dc7c7ed25efc2e79521a899b41b45e26f04b36c8decd0
+generated: "2026-04-20T13:08:27.120860707Z"

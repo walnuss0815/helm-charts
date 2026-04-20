@@ -11,7 +11,7 @@ maintainers:
 
 dependencies:
   - name: redis
-    version: "21.2.14"
+    version: "25.3.11"
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
   - name: webdav

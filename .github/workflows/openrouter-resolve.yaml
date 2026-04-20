@@ -16,6 +16,5 @@ jobs:
       LLM_MODEL: openrouter/deepseek/deepseek-v3.2
     secrets:
       LLM_API_KEY: ${{ secrets.OPENROUTER_KEY }}
-      LLM_MAX_OUTPUT_TOKENS: 4096
       PAT_TOKEN: ${{ secrets.GH_PAT }}
       PAT_USERNAME: ${{ github.repository_owner }}

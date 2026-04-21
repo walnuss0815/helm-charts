@@ -1,6 +1,6 @@
 # chisel
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.11.3](https://img.shields.io/badge/AppVersion-1.11.3-informational?style=flat-square)
+![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.11.3](https://img.shields.io/badge/AppVersion-1.11.3-informational?style=flat-square)
 
 A Helm chart for Chisel
 
@@ -14,24 +14,24 @@ A Helm chart for Chisel
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` | Affinity rules for pod scheduling |
-| fullnameOverride | string | `""` | Overrides the full resource name |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"jpillora/chisel","tag":"1.11.5"}` | Container image configuration. See [Images docs](https://kubernetes.io/docs/concepts/containers/images/) |
+| affinity | object | `{}` | Affinity rules for pod assignment |
+| fullnameOverride | string | `""` | Override the fullname of the chart |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"jpillora/chisel","tag":"1.11.5"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| image.repository | string | `"jpillora/chisel"` | Image repository for the Chisel container |
-| image.tag | string | `"1.11.5"` | Image tag. Defaults to the chart's `appVersion` if not set |
-| imagePullSecrets | list | `[]` | List of image pull secrets for pulling from private registries. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) |
-| livenessProbe | object | `{}` | Liveness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
-| nameOverride | string | `""` | Overrides the chart name used in resource names |
-| nodeSelector | object | `{}` | Node selector for pod scheduling |
-| podAnnotations | object | `{}` | Annotations to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
-| podLabels | object | `{}` | Labels to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
-| podSecurityContext | object | `{}` | Pod-level security context (e.g. fsGroup) |
-| readinessProbe | object | `{}` | Readiness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
-| replicaCount | int | `1` | Number of replica pods to run. See [ReplicaSet docs](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/) |
-| resources | object | `{}` | CPU/memory resource requests and limits. Leaving empty is recommended to keep charts portable across environments like Minikube |
+| image.repository | string | `"jpillora/chisel"` | Container image repository |
+| image.tag | string | `"1.11.5"` | Overrides the image tag whose default is the chart appVersion |
+| imagePullSecrets | list | `[]` | Image pull secrets for private registries |
+| livenessProbe | object | `{}` | Liveness probe configuration (disabled by default) livenessProbe:   httpGet:     path: /     port: http |
+| nameOverride | string | `""` | Override the name of the chart |
+| nodeSelector | object | `{}` | Node selector for pod assignment |
+| podAnnotations | object | `{}` | Annotations to add to the pod |
+| podLabels | object | `{}` | Labels to add to the pod |
+| podSecurityContext | object | `{}` | Pod security context configuration |
+| readinessProbe | object | `{}` | Readiness probe configuration (disabled by default) readinessProbe:   httpGet:     path: /     port: http |
+| replicaCount | int | `1` | Number of replicas for the Chisel deployment |
+| resources | object | `{}` | Resource limits and requests for the Chisel container |
 | rules | list | `[]` | Chisel reverse port-forwarding rules. Each rule maps a port on the remote Chisel server to a host/port inside the cluster. Example: ```yaml rules:   - local:       interface: 0.0.0.0       port: 80     remote:       host: traefik-external.traefik-external.svc.cluster.local       port: 80 ``` |
-| securityContext | object | `{}` | Container-level security context |
+| securityContext | object | `{}` | Container security context configuration |
 | server | object | `{"auth":{"secretKeyRef":{"key":"","name":""},"value":""},"host":"","port":8000}` | Remote Chisel server connection configuration |
 | server.auth | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Authentication string for the Chisel remote server |
 | server.auth.secretKeyRef | object | `{"key":"","name":""}` | Reference to a Kubernetes Secret key containing the auth value |
@@ -40,12 +40,12 @@ A Helm chart for Chisel
 | server.auth.value | string | `""` | Plain-text auth value (takes precedence if set) |
 | server.host | string | `""` | IP address or domain name of a remote server running Chisel |
 | server.port | int | `8000` | Port Chisel is using on the remote server |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
+| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount the ServiceAccount API credentials into the pod |
-| serviceAccount.create | bool | `true` | Whether to create a service account |
-| serviceAccount.name | string | `""` | Name of the service account to use. If empty and `create` is true, a name is generated from the fullname template |
-| tolerations | list | `[]` | Tolerations for pod scheduling |
+| serviceAccount.automount | bool | `true` | Automatically mount a ServiceAccount's API credentials |
+| serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| serviceAccount.name | string | `""` | The name of the service account to use (if not set and create is true, a name is generated using the fullname template) |
+| tolerations | list | `[]` | Tolerations for pod assignment |
 | volumeMounts | list | `[]` | Additional volume mounts on the Deployment |
 | volumes | list | `[]` | Additional volumes to mount on the Deployment |
 

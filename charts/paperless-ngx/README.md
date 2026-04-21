@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 0.1.12](https://img.shields.io/badge/Version-0.1.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
+![Version: 0.1.13](https://img.shields.io/badge/Version-0.1.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -41,8 +41,8 @@ A Helm chart for Kubernetes
 | database.username.secretKeyRef.key | string | `""` | Key within the secret |
 | database.username.secretKeyRef.name | string | `""` | Name of the secret |
 | database.username.value | string | `"paperless"` | Database username value |
-| env | object | `{}` | Additional environment variables to set |
-| envFrom | object | `{}` | Additional environment variables from ConfigMaps or Secrets |
+| env | object | `{}` | Additional environment variables to set in the container |
+| envFrom | object | `{}` | Additional environment variables from ConfigMaps or Secrets to set in the container |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
 | gotenberg | object | `{"enabled":true}` | Gotenberg subchart configuration (for document conversion) |
@@ -63,12 +63,8 @@ A Helm chart for Kubernetes
 | ingress.annotations | object | `{}` | Ingress annotations |
 | ingress.className | string | `""` | Ingress class name |
 | ingress.enabled | bool | `false` | Enable ingress |
-| ingress.host | string | `"{{ .Values.host }}"` | Ingress hostname |
 | ingress.tls | list | `[]` | TLS configuration |
-| livenessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":30,"timeoutSeconds":5}` | Liveness probe configuration |
-| livenessProbe.httpGet | object | `{"path":"/","port":"http"}` | HTTP GET configuration for liveness probe |
-| livenessProbe.initialDelaySeconds | int | `30` | Initial delay before starting probes |
-| livenessProbe.timeoutSeconds | int | `5` | Timeout in seconds for the probe |
+| livenessProbe | object | `{}` | Liveness probe configuration (disabled by default) livenessProbe:   httpGet:     path: /     port: http   timeoutSeconds: 5   initialDelaySeconds: 30 |
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | ocr | object | `{"languages":["eng"]}` | OCR (Optical Character Recognition) configuration |
@@ -79,20 +75,23 @@ A Helm chart for Kubernetes
 | parser.datetime | list | `["en"]` | Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html) |
 | pdfDecryption | object | `{"secrets":[]}` | PDF decryption configuration |
 | pdfDecryption.secrets | list | `[]` | List of secrets containing PDF passwords for decryption |
-| persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":"-"}}` | Persistence configuration for paperless-ngx volumes |
-| persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"}` | Consumption directory persistence configuration |
+| persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"claimName":"","size":"512Mi","storageClass":"-"},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":"-"},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"8Gi","storageClass":"-"}}` | Persistence configuration for paperless-ngx volumes |
+| persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"claimName":"","size":"512Mi","storageClass":"-"}` | Consumption directory persistence configuration |
 | persistence.consumption.accessModes | list | `["ReadWriteMany"]` | Access modes for consumption PVC |
 | persistence.consumption.annotations | object | `{}` | Annotations for the consumption PVC |
+| persistence.consumption.claimName | string | `""` | Existing PVC claim name to use (if empty, creates new PVC) |
 | persistence.consumption.size | string | `"512Mi"` | Size of the consumption PVC |
 | persistence.consumption.storageClass | string | `"-"` | Storage class for consumption PVC |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}` | Data directory persistence configuration |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":"-"}` | Data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
+| persistence.data.claimName | string | `""` | Existing PVC claim name to use (if empty, creates new PVC) |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `"-"` | Storage class for data PVC |
-| persistence.media | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":"-"}` | Media directory persistence configuration |
+| persistence.media | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"8Gi","storageClass":"-"}` | Media directory persistence configuration |
 | persistence.media.accessModes | list | `["ReadWriteOnce"]` | Access modes for media PVC |
 | persistence.media.annotations | object | `{}` | Annotations for the media PVC |
+| persistence.media.claimName | string | `""` | Existing PVC claim name to use (if empty, creates new PVC) |
 | persistence.media.size | string | `"8Gi"` | Size of the media PVC |
 | persistence.media.storageClass | string | `"-"` | Storage class for media PVC |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
@@ -100,15 +99,12 @@ A Helm chart for Kubernetes
 | podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod security context configuration |
 | podSecurityContext.fsGroup | int | `1000` | Set filesystem group ownership for mounted volumes |
 | podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` | Define behavior when fsGroup changes |
-| readinessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":30,"timeoutSeconds":5}` | Readiness probe configuration |
-| readinessProbe.httpGet | object | `{"path":"/","port":"http"}` | HTTP GET configuration for readiness probe |
-| readinessProbe.initialDelaySeconds | int | `30` | Initial delay before starting probes |
-| readinessProbe.timeoutSeconds | int | `5` | Timeout in seconds for the probe |
+| readinessProbe | object | `{}` | Readiness probe configuration (disabled by default) readinessProbe:   httpGet:     path: /     port: http   timeoutSeconds: 5   initialDelaySeconds: 30 |
 | redis | object | `{"architecture":"standalone","auth":{"enabled":false},"enabled":true,"global":{"security":{"allowInsecureImages":true}},"image":{"repository":"bitnamilegacy/redis"}}` | Redis subchart configuration (Bitnami Redis) |
 | redis.architecture | string | `"standalone"` | Redis deployment architecture |
 | redis.auth | object | `{"enabled":false}` | Redis authentication configuration |
-| redis.auth.enabled | bool | `false` | Enable Redis password authentication (TODO: Enable in production) |
-| redis.enabled | bool | `true` | Enable Redis as a subchart |
+| redis.auth.enabled | bool | `false` | Enable Redis password authentication |
+| redis.enabled | bool | `true` | Enable or disable the Redis subchart |
 | redis.global | object | `{"security":{"allowInsecureImages":true}}` | Global Redis configuration |
 | redis.global.security.allowInsecureImages | bool | `true` | Allow insecure container images |
 | redis.image | object | `{"repository":"bitnamilegacy/redis"}` | Redis image configuration |
@@ -168,10 +164,10 @@ A Helm chart for Kubernetes
 | tolerations | list | `[]` | Tolerations for pod assignment |
 | url | string | `"https://{{ .Values.host }}"` | URL for the paperless-ngx instance |
 | webdav | object | `{"enabled":false,"persistence":{"data":{"claimName":"{{ .Release.Name }}-consumption"}}}` | WebDAV configuration for document consumption |
-| webdav.enabled | bool | `false` | Enable WebDAV integration |
+| webdav.enabled | bool | `false` | Enable or disable WebDAV integration |
 | webdav.persistence | object | `{"data":{"claimName":"{{ .Release.Name }}-consumption"}}` | WebDAV persistence configuration |
-| webdav.persistence.data | object | `{"claimName":"{{ .Release.Name }}-consumption"}` | Data directory configuration |
-| webdav.persistence.data.claimName | string | `"{{ .Release.Name }}-consumption"` | PVC claim name for WebDAV consumption |
+| webdav.persistence.data | object | `{"claimName":"{{ .Release.Name }}-consumption"}` | Data directory persistence configuration |
+| webdav.persistence.data.claimName | string | `"{{ .Release.Name }}-consumption"` | Existing PVC claim name for WebDAV consumption (if empty, creates new PVC) |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

@@ -1,6 +1,6 @@
 # gotenberg
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 8.23](https://img.shields.io/badge/AppVersion-8.23-informational?style=flat-square)
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 8.23](https://img.shields.io/badge/AppVersion-8.23-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -16,27 +16,23 @@ A Helm chart for Kubernetes
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment |
 | autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Horizontal Pod Autoscaler configuration |
-| autoscaling.enabled | bool | `false` | Enable autoscaling |
-| autoscaling.maxReplicas | int | `100` | Maximum number of replicas |
-| autoscaling.minReplicas | int | `1` | Minimum number of replicas |
-| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage for autoscaling |
+| autoscaling.enabled | bool | `false` | Enable or disable Horizontal Pod Autoscaler |
+| autoscaling.maxReplicas | int | `100` | Maximum number of replicas for autoscaling |
+| autoscaling.minReplicas | int | `1` | Minimum number of replicas for autoscaling |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization (percentage) to trigger autoscaling |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
 | image | object | `{"pullPolicy":"IfNotPresent","repository":"gotenberg/gotenberg","tag":"8.31"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"gotenberg/gotenberg"` | Container image repository |
 | image.tag | string | `"8.31"` | Overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
-| livenessProbe | object | `{"httpGet":{"path":"/health","port":"http"}}` | Liveness probe configuration |
-| livenessProbe.httpGet | object | `{"path":"/health","port":"http"}` | HTTP GET configuration for liveness probe |
-| livenessProbe.httpGet.path | string | `"/health"` | Health check endpoint path |
+| livenessProbe | object | `{}` | Liveness probe configuration (disabled by default) livenessProbe:   httpGet:     path: /health     port: http |
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
 | podLabels | object | `{}` | Labels to add to the pod |
 | podSecurityContext | object | `{}` | Pod security context configuration |
-| readinessProbe | object | `{"httpGet":{"path":"/health","port":"http"}}` | Readiness probe configuration |
-| readinessProbe.httpGet | object | `{"path":"/health","port":"http"}` | HTTP GET configuration for readiness probe |
-| readinessProbe.httpGet.path | string | `"/health"` | Health check endpoint path |
+| readinessProbe | object | `{}` | Readiness probe configuration (disabled by default) readinessProbe:   httpGet:     path: /health     port: http |
 | replicaCount | int | `1` | Number of replicas for the gotenberg deployment |
 | resources | object | `{}` | Resource limits and requests for the gotenberg container |
 | securityContext | object | `{}` | Container security context configuration |

@@ -74,33 +74,31 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# -- Liveness probe configuration
-livenessProbe:
-  # -- HTTP GET configuration for liveness probe
-  httpGet:
-    # -- Health check endpoint path
-    path: /health
-    port: http
+# -- Liveness probe configuration (disabled by default)
+# livenessProbe:
+#   httpGet:
+#     path: /health
+#     port: http
+livenessProbe: {}
 
-# -- Readiness probe configuration
-readinessProbe:
-  # -- HTTP GET configuration for readiness probe
-  httpGet:
-    # -- Health check endpoint path
-    path: /health
-    port: http
+# -- Readiness probe configuration (disabled by default)
+# readinessProbe:
+#   httpGet:
+#     path: /health
+#     port: http
+readinessProbe: {}
 
 # -- Horizontal Pod Autoscaler configuration
 autoscaling:
-  # -- Enable autoscaling
+  # -- Enable or disable Horizontal Pod Autoscaler
   enabled: false
-  # -- Minimum number of replicas
+  # -- Minimum number of replicas for autoscaling
   minReplicas: 1
-  # -- Maximum number of replicas
+  # -- Maximum number of replicas for autoscaling
   maxReplicas: 100
-  # -- Target CPU utilization percentage for autoscaling
+  # -- Target CPU utilization (percentage) to trigger autoscaling
   targetCPUUtilizationPercentage: 80
-  # -- Target memory utilization percentage for autoscaling (optional)
+  # -- Target memory utilization (percentage) to trigger autoscaling (optional)
   # targetMemoryUtilizationPercentage: 80
 
 # -- Node selector for pod assignment

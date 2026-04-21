@@ -85,7 +85,6 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  # -- Ingress hostname
   host: "{{ .Values.host }}"
   # -- TLS configuration
   tls: []
@@ -142,27 +141,23 @@ resources: {}
   #   cpu: 500m
   #   memory: 768Mi
 
-# -- Liveness probe configuration
-livenessProbe:
-  # -- HTTP GET configuration for liveness probe
-  httpGet:
-    path: /
-    port: http
-  # -- Timeout in seconds for the probe
-  timeoutSeconds: 5
-  # -- Initial delay before starting probes
-  initialDelaySeconds: 30
+# -- Liveness probe configuration (disabled by default)
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+#   timeoutSeconds: 5
+#   initialDelaySeconds: 30
+livenessProbe: {}
 
-# -- Readiness probe configuration
-readinessProbe:
-  # -- HTTP GET configuration for readiness probe
-  httpGet:
-    path: /
-    port: http
-  # -- Timeout in seconds for the probe
-  timeoutSeconds: 5
-  # -- Initial delay before starting probes
-  initialDelaySeconds: 30
+# -- Readiness probe configuration (disabled by default)
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+#   timeoutSeconds: 5
+#   initialDelaySeconds: 30
+readinessProbe: {}
 
 # -- Node selector for pod assignment
 nodeSelector: {}
@@ -193,16 +188,18 @@ secretKey:
     # -- Key within the secret
     key: ""
 
-# -- Additional environment variables to set
+# -- Additional environment variables to set in the container
 env: {}
 
-# -- Additional environment variables from ConfigMaps or Secrets
+# -- Additional environment variables from ConfigMaps or Secrets to set in the container
 envFrom: {}
 
 # -- Persistence configuration for paperless-ngx volumes
 persistence:
   # -- Data directory persistence configuration
   data:
+    # -- Existing PVC claim name to use (if empty, creates new PVC)
+    claimName: ""
     # -- Annotations for the data PVC
     annotations: {}
     # -- Storage class for data PVC
@@ -214,6 +211,8 @@ persistence:
       - ReadWriteOnce
   # -- Media directory persistence configuration
   media:
+    # -- Existing PVC claim name to use (if empty, creates new PVC)
+    claimName: ""
     # -- Annotations for the media PVC
     annotations: {}
     # -- Storage class for media PVC
@@ -225,6 +224,8 @@ persistence:
       - ReadWriteOnce
   # -- Consumption directory persistence configuration
   consumption:
+    # -- Existing PVC claim name to use (if empty, creates new PVC)
+    claimName: ""
     # -- Annotations for the consumption PVC
     annotations: {}
     # -- Storage class for consumption PVC
@@ -344,7 +345,7 @@ smtp:
 
 # -- Redis subchart configuration (Bitnami Redis)
 redis:
-  # -- Enable Redis as a subchart
+  # -- Enable or disable the Redis subchart
   enabled: true
   # -- Global Redis configuration
   global:
@@ -359,18 +360,18 @@ redis:
   architecture: standalone
   # -- Redis authentication configuration
   auth:
-    # -- Enable Redis password authentication (TODO: Enable in production)
+    # -- Enable Redis password authentication
     enabled: false
 
 # -- WebDAV configuration for document consumption
 webdav:
-  # -- Enable WebDAV integration
+  # -- Enable or disable WebDAV integration
   enabled: false
   # -- WebDAV persistence configuration
   persistence:
-    # -- Data directory configuration
+    # -- Data directory persistence configuration
     data:
-      # -- PVC claim name for WebDAV consumption
+      # -- Existing PVC claim name for WebDAV consumption (if empty, creates new PVC)
       claimName: "{{ .Release.Name }}-consumption"
 
 # -- Apache Tika subchart configuration (for document parsing)

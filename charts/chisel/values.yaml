@@ -2,46 +2,51 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# -- Number of replica pods to run. See [ReplicaSet docs](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
+# -- Number of replicas for the Chisel deployment
+# @default -- `1`
 replicaCount: 1
 
-# -- Container image configuration. See [Images docs](https://kubernetes.io/docs/concepts/containers/images/)
+
+# -- Container image configuration
 image:
-  # -- Image repository for the Chisel container
+  # -- Container image repository
   repository: jpillora/chisel
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- Image tag. Defaults to the chart's `appVersion` if not set
+  # -- Overrides the image tag whose default is the chart appVersion
   tag: "1.11.5"
 
-# -- List of image pull secrets for pulling from private registries. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
+# -- Image pull secrets for private registries
 imagePullSecrets: []
-# -- Overrides the chart name used in resource names
+
+# -- Override the name of the chart
 nameOverride: ""
-# -- Overrides the full resource name
+
+# -- Override the fullname of the chart
 fullnameOverride: ""
 
-# -- Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/)
+# -- Service account configuration
 serviceAccount:
-  # -- Whether to create a service account
+  # -- Specifies whether a service account should be created
   create: true
-  # -- Automatically mount the ServiceAccount API credentials into the pod
+  # -- Automatically mount a ServiceAccount's API credentials
   automount: true
   # -- Annotations to add to the service account
   annotations: {}
-  # -- Name of the service account to use. If empty and `create` is true, a name is generated from the fullname template
+  # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
   name: ""
 
-# -- Annotations to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+# -- Annotations to add to the pod
 podAnnotations: {}
-# -- Labels to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+
+# -- Labels to add to the pod
 podLabels: {}
 
-# -- Pod-level security context (e.g. fsGroup)
+# -- Pod security context configuration
 podSecurityContext: {}
   # fsGroup: 2000
 
-# -- Container-level security context
+# -- Container security context configuration
 securityContext: {}
   # capabilities:
   #   drop:
@@ -50,8 +55,12 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-# -- CPU/memory resource requests and limits. Leaving empty is recommended to keep charts portable across environments like Minikube
+# -- Resource limits and requests for the Chisel container
 resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
@@ -59,9 +68,18 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# -- Liveness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+# -- Liveness probe configuration (disabled by default)
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: http
 livenessProbe: {}
-# -- Readiness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+
+# -- Readiness probe configuration (disabled by default)
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: http
 readinessProbe: {}
 
 # -- Additional volumes to mount on the Deployment
@@ -77,13 +95,13 @@ volumeMounts: []
 #   mountPath: "/etc/foo"
 #   readOnly: true
 
-# -- Node selector for pod scheduling
+# -- Node selector for pod assignment
 nodeSelector: {}
 
-# -- Tolerations for pod scheduling
+# -- Tolerations for pod assignment
 tolerations: []
 
-# -- Affinity rules for pod scheduling
+# -- Affinity rules for pod assignment
 affinity: {}
 
 # -- Remote Chisel server connection configuration

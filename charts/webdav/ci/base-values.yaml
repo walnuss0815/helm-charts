@@ -1,5 +1,7 @@
 user:
   username:
+    # -- Username value
     value: "my-user"
   password:
+    # -- Password value (use secretKeyRef in production)
     value: "my-password"

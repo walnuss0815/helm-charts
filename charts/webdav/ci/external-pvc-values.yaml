@@ -1,14 +1,19 @@
 user:
   username:
+    # -- Username value
     value: "my-user"
   password:
+    # -- Password value (use secretKeyRef in production)
     value: "my-password"
 
 persistence:
+  # -- Enable persistence for WebDAV
   enabled: true
   data:
+    # -- Existing PVC claim name to use (if empty, creates new PVC)
     claimName: "my-data"
 
+# -- Extra Kubernetes manifests to deploy
 extraManifests:
   - |
     apiVersion: v1

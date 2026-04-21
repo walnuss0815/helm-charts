@@ -27,12 +27,15 @@ fullnameOverride: ""
 # -- Service account configuration
 serviceAccount:
   # -- Specifies whether a service account should be created
+  # @default -- `true`
   create: true
   # -- Automatically mount a ServiceAccount's API credentials
+  # @default -- `true`
   automount: true
   # -- Annotations to add to the service account
   annotations: {}
   # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
+  # @default -- `""`
   name: ""
 
 # -- Annotations to add to the pod
@@ -44,42 +47,55 @@ podLabels: {}
 # -- Pod security context configuration
 podSecurityContext:
   # -- Set filesystem group ownership for mounted volumes
+  # @default -- `1000`
   fsGroup: 1000
   # -- Define behavior when fsGroup changes
+  # @default -- `OnRootMismatch`
   fsGroupChangePolicy: OnRootMismatch
 
 # -- Container security context configuration
 securityContext:
   # -- Linux capabilities to drop
   capabilities:
+    # @default -- `ALL`
     drop:
       - ALL
   # -- Mount root filesystem as read-only
+  # @default -- `true`
   readOnlyRootFilesystem: true
   # -- Run container as non-root user
+  # @default -- `true`
   runAsNonRoot: true
   # -- User ID to run the container as
+  # @default -- `1000`
   runAsUser: 1000
   # -- Group ID to run the container as
+  # @default -- `1000`
   runAsGroup: 1000
   # -- Seccomp profile configuration
+  # @default -- `RuntimeDefault`
   seccompProfile:
     type: RuntimeDefault
   # -- Prevent privilege escalation
+  # @default -- `false`
   allowPrivilegeEscalation: false
 
 # -- Service configuration
 service:
   # -- Service type (ClusterIP, NodePort, LoadBalancer)
+  # @default -- `ClusterIP`
   type: ClusterIP
   # -- Service port (WebDAV default port)
+  # @default -- `6060`
   port: 6060
 
 # -- Ingress configuration
 ingress:
   # -- Enable ingress
+  # @default -- false
   enabled: false
   # -- Ingress class name
+  # @default -- `""`
   className: ""
   # -- Ingress annotations
   annotations: {}
@@ -88,12 +104,15 @@ ingress:
   # -- Ingress hosts configuration
   hosts:
     # -- Hostname for ingress
+    # @default -- `chart-example.local`
     - host: chart-example.local
       # -- Paths configuration for the host
       paths:
         # -- Path to route
+        # @default -- `/`
         - path: /
           # -- Path type (ImplementationSpecific, Exact, Prefix)
+          # @default -- `ImplementationSpecific`
           pathType: ImplementationSpecific
   # -- TLS configuration
   tls: []
@@ -104,6 +123,7 @@ ingress:
 # -- Gateway API HTTPRoute configuration (requires Gateway API CRDs installed)
 httpRoute:
   # -- Enable HTTPRoute
+  # @default -- false
   enabled: false
   # -- HTTPRoute annotations
   annotations: {}
@@ -113,13 +133,16 @@ httpRoute:
       sectionName: http
       # namespace: default
   # -- Hostnames for HTTP header matching
+  # @default -- `chart-example.local`
   hostnames:
     - chart-example.local
   # -- Routing rules and filters
   rules:
     - matches:
         - path:
+            # @default -- `PathPrefix`
             type: PathPrefix
+            # @default -- `/headers`
             value: /headers
   #   filters:
   #   - type: RequestHeaderModifier
@@ -150,18 +173,12 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# -- Liveness probe configuration (disabled by default)
-# livenessProbe:
-#   httpGet:
-#     path: /
-#     port: http
+# -- Liveness probe configuration
+# @default -- `{}` (disabled)
 livenessProbe: {}
 
-# -- Readiness probe configuration (disabled by default)
-# readinessProbe:
-#   httpGet:
-#     path: /
-#     port: http
+# -- Readiness probe configuration
+# @default -- `{}` (disabled)
 readinessProbe: {}
 
 # -- Node selector for pod assignment
@@ -181,14 +198,18 @@ persistence:
   # -- Data directory persistence configuration
   data:
     # -- Existing PVC claim name to use (if empty, creates new PVC)
+    # @default -- `""`
     claimName: ""
     # -- Annotations for the data PVC
     annotations: {}
     # -- Storage class for data PVC
+    # @default -- `"-"`
     storageClass: "-"
     # -- Size of the data PVC
+    # @default -- `"1Gi"`
     size: "1Gi"
     # -- Access modes for data PVC
+    # @default -- `ReadWriteOnce`
     accessModes:
       - ReadWriteOnce
 
@@ -197,36 +218,62 @@ user:
   # -- Username configuration
   username:
     # -- Username value
+    # @default -- `""`
     value: ""
     # -- Reference to existing secret containing username
     secretKeyRef:
       # -- Name of the secret
+      # @default -- `""`
       name: ""
       # -- Key within the secret
+      # @default -- `""`
       key: ""
   # -- Password configuration
   password:
     # -- Password value (use secretKeyRef in production)
+    # @default -- `""`
     value: ""
     # -- Reference to existing secret containing password
     secretKeyRef:
       # -- Name of the secret
+      # @default -- `""`
       name: ""
       # -- Key within the secret
+      # @default -- `""`
       key: ""
 
 # -- WebDAV server configuration
 config:
+  # -- Port for the WebDAV server to listen on
+  # @default -- `6060`
   port: 6060
+  # -- Enable debug logging
+  # @default -- `false`
   debug: false
   log:
+    # -- Log format (e.g., json, text)
+    # @default -- `json`
     format: json
+  # -- Enable X-Content-Type-Options: nosniff header
+  # @default -- `false`
   noSniff: false
+  # -- Configure WebDAV to operate behind a proxy
+  # @default -- `true`
   behindProxy: true
+  # -- Permissions for WebDAV operations (e.g., CRUD, R)
+  # @default -- `CRUD`
   permissions: CRUD
+  # -- Directory to serve WebDAV from
+  # @default -- `/data`
   directory: /data
   cors:
+    # -- Enable CORS
+    # @default -- `false`
     enabled: false
   users:
+    # -- Username for basic authentication
+    # @default -- `"{env}USER_USERNAME"`
     - username: "{env}USER_USERNAME"
+      # -- Password for basic authentication
+      # @default -- `"{env}USER_PASSWORD"`
       password: "{env}USER_PASSWORD"

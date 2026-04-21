@@ -28,6 +28,11 @@ This repository contains a collection of Helm charts for various containerized a
 - **Comments:** Use standard `helm-docs` comment blocks (e.g., `## @param`, `## @extra`) above configuration blocks so that README files can be automatically generated.
 - **Clarity:** Keep descriptions concise but highly informative, explaining what the value does and providing examples for complex objects.
 
+## 6. Branch Naming and Commit Messages
+- **Branch Naming:** Always use the [conventional branch](https://conventional-branch.github.io/#specification) specification for naming branches in Git.
+- **Commit Messages:** Always use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) specification for writing Git commit messages.
+- **Pull Request/Merge Request Titles:** Always use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) specification for Pull Request/merge Requests titles. The related issue must be added to the end of the title in braces and prefixed with a hashtag.
+
 ---
 
 ### Agent Instructions summary:

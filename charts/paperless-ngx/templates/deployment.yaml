@@ -55,8 +55,6 @@ spec:
               value: /volumes/media
             - name: PAPERLESS_CONSUMPTION_DIR
               value: /volumes/consumption
-            - name: PAPERLESS_SCRATCH_DIR
-              value: /volumes/data/scratch
             {{- if .Values.database.enabled }}
             - name: PAPERLESS_DBHOST
               value: {{ .Values.database.host }}

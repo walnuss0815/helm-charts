@@ -1,6 +1,6 @@
 # tika
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.2.3.0-full](https://img.shields.io/badge/AppVersion-3.2.3.0--full-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.2.3.0-full](https://img.shields.io/badge/AppVersion-3.2.3.0--full-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -21,10 +21,10 @@ A Helm chart for Kubernetes
 | autoscaling.minReplicas | int | `1` | Minimum number of replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization percentage for autoscaling |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"apache/tika","tag":"3.3.0.0-full"}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"apache/tika","tag":"3.3.1.0-full"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"apache/tika"` | Container image repository |
-| image.tag | string | `"3.3.0.0-full"` | Overrides the image tag whose default is the chart appVersion |
+| image.tag | string | `"3.3.1.0-full"` | Overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | livenessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Liveness probe configuration |
 | livenessProbe.httpGet | object | `{"path":"/","port":"http"}` | HTTP GET configuration for liveness probe |

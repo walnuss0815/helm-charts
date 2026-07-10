@@ -127,15 +127,17 @@ resources: {}
 # -- Liveness probe configuration.
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
-  httpGet:
-    path: /health
-    port: http
+  exec:
+    command:
+      - /kiosk
+      - --healthcheck
 
 # -- Readiness probe configuration.
 readinessProbe:
-  httpGet:
-    path: /health
-    port: http
+  exec:
+    command:
+      - /kiosk
+      - --healthcheck
 
 # -- Node selector for pod scheduling.
 nodeSelector: {}

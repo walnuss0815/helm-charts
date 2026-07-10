@@ -47,7 +47,7 @@ A Helm chart for Immich Kiosk
 | ingress.hosts | list | `[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Ingress hosts configuration. |
 | ingress.tls | list | `[]` | Ingress TLS configuration. |
 | lang | string | `"en_GB"` | Locale for Immich Kiosk display formatting. ref: https://www.localeplanet.com/icu/ |
-| livenessProbe | object | `{"httpGet":{"path":"/health","port":"http"}}` | Liveness probe configuration. ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ |
+| livenessProbe | object | `{"exec":{"command":["/kiosk","--healthcheck"]}}` | Liveness probe configuration. ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ |
 | nameOverride | string | `""` | Override the chart name. |
 | nodeSelector | object | `{}` | Node selector for pod scheduling. |
 | password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Password protection for the kiosk UI. ref: https://docs.immichkiosk.app/configuration/additional-options/#password |
@@ -58,7 +58,7 @@ A Helm chart for Immich Kiosk
 | podAnnotations | object | `{}` | Annotations to add to the pod. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | podLabels | object | `{}` | Labels to add to the pod. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | podSecurityContext | object | `{}` | Pod-level security context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
-| readinessProbe | object | `{"httpGet":{"path":"/health","port":"http"}}` | Readiness probe configuration. |
+| readinessProbe | object | `{"exec":{"command":["/kiosk","--healthcheck"]}}` | Readiness probe configuration. |
 | replicaCount | int | `1` | Number of replicas for the deployment. |
 | resources | object | `{}` | Resource requests and limits for the container. ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | securityContext | object | `{}` | Container-level security context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container |

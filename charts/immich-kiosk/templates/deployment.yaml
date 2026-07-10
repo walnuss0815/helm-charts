@@ -38,15 +38,6 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - /bin/sh
-            - -c
-            - |
-              eval "cat <<EOF
-              $(cat /config.template/config.yaml)
-              EOF" > /config/config.yaml
-
-              /kiosk
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -91,8 +82,6 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
-            - name: config-template
-              mountPath: /config.template
             - name: custom-css
               mountPath: /custom.css
               subPath: custom.css
@@ -100,8 +89,6 @@ spec:
               mountPath: /offline-assets
       volumes:
         - name: config
-          emptyDir: {}
-        - name: config-template
           configMap:
             name: {{ include "immich-kiosk.fullname" $ }}-config
         - name: custom-css

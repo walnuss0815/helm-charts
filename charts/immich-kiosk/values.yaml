@@ -12,7 +12,7 @@ image:
   # -- Image pull policy.
   pullPolicy: IfNotPresent
   # -- Image tag. Overrides the chart appVersion when set.
-  tag: "0.37.0"
+  tag: "0.40.2"
 
 # -- Secrets for pulling images from a private registry.
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -127,15 +127,17 @@ resources: {}
 # -- Liveness probe configuration.
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
-  httpGet:
-    path: /health
-    port: http
+  exec:
+    command:
+      - /kiosk
+      - --healthcheck
 
 # -- Readiness probe configuration.
 readinessProbe:
-  httpGet:
-    path: /health
-    port: http
+  exec:
+    command:
+      - /kiosk
+      - --healthcheck
 
 # -- Node selector for pod scheduling.
 nodeSelector: {}
@@ -201,9 +203,6 @@ config: {}
   # show_date: true
   # date_format: DDDD, DD. MMMM YYYY
   #
-  # ## Immich API keys for specific users
-  # immich_users_api_keys:
-  #   user1: $USER1_API_KEY # Must be added to the pod as env var
   # show_user: true
 
 # -- Custom CSS injected into the kiosk UI.

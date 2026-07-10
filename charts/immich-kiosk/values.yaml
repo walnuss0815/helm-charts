@@ -203,9 +203,6 @@ config: {}
   # show_date: true
   # date_format: DDDD, DD. MMMM YYYY
   #
-  # ## Immich API keys for specific users
-  # immich_users_api_keys:
-  #   user1: $USER1_API_KEY # Must be added to the pod as env var
   # show_user: true
 
 # -- Custom CSS injected into the kiosk UI.

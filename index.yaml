@@ -286,6 +286,20 @@ entries:
   kavita:
   - apiVersion: v2
     appVersion: 0.8.9
+    created: "2026-07-12T09:02:26.094642202Z"
+    description: A Helm chart for Kavita
+    digest: f9e05afb4e22a663e9716d116db71c18cf53b379b93b748673bba34e6f4453ec
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: kavita
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/kavita-0.1.1/kavita-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 0.8.9
     created: "2026-03-21T14:53:57.639987471Z"
     description: A Helm chart for Kavita
     digest: 642dc6260fc3d88b2ce1d970f0edddee7cc24cf4df9a66bfc278aaff6138e04b
@@ -1149,4 +1163,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-12T08:59:01.365508518Z"
+generated: "2026-07-12T09:02:26.094716661Z"

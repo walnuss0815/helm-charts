@@ -1,6 +1,6 @@
 # webdav
 
-![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.8.0](https://img.shields.io/badge/AppVersion-v5.8.0-informational?style=flat-square)
+![Version: 0.1.8](https://img.shields.io/badge/Version-0.1.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.8.0](https://img.shields.io/badge/AppVersion-v5.8.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -24,10 +24,10 @@ A Helm chart for Kubernetes
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames for HTTP header matching |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Parent gateway references to attach this route to |
 | httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules and filters |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"hacdias/webdav","tag":"v5.14.0"}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"hacdias/webdav","tag":"v5.14.1"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"hacdias/webdav"` | Container image repository |
-| image.tag | string | `"v5.14.0"` | Overrides the image tag whose default is the chart appVersion |
+| image.tag | string | `"v5.14.1"` | Overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |

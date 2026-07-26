@@ -26,7 +26,3 @@ dependencies:
     version: "0.1.5"
     repository: https://walnuss0815.github.io/helm-charts
     condition: gotenberg.enabled
-  - name: paperless-ai
-    version: "0.1.0"
-    repository: https://walnuss0815.github.io/helm-charts
-    condition: paperless-ai.enabled

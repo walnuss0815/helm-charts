@@ -383,7 +383,3 @@ gotenberg:
   # -- Enable Gotenberg service
   enabled: true
 
-# -- Paperless-AI subchart configuration (for AI-powered features)
-paperless-ai:
-  # -- Enable Paperless-AI service
-  enabled: false

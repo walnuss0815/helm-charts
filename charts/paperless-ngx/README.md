@@ -16,7 +16,6 @@ A Helm chart for Kubernetes
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | redis | 21.2.14 |
 | https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.5 |
-| https://walnuss0815.github.io/helm-charts | paperless-ai | 0.1.0 |
 | https://walnuss0815.github.io/helm-charts | tika | 0.1.2 |
 | https://walnuss0815.github.io/helm-charts | webdav | 0.1.4 |
 
@@ -73,8 +72,6 @@ A Helm chart for Kubernetes
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | ocr | object | `{"languages":["eng"]}` | OCR (Optical Character Recognition) configuration |
 | ocr.languages | list | `["eng"]` | OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) |
-| paperless-ai | object | `{"enabled":false}` | Paperless-AI subchart configuration (for AI-powered features) |
-| paperless-ai.enabled | bool | `false` | Enable Paperless-AI service |
 | parser | object | `{"datetime":["en"]}` | Document parser configuration |
 | parser.datetime | list | `["en"]` | Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html) |
 | pdfDecryption | object | `{"secrets":[]}` | PDF decryption configuration |

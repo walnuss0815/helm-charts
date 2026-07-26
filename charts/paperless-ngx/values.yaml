@@ -302,11 +302,6 @@ database:
       # -- Key within the secret
       key: ""
 
-# -- PDF decryption configuration
-pdfDecryption:
-  # -- List of secrets containing PDF passwords for decryption
-  secrets: []
-
 # -- SMTP email configuration
 smtp:
   # -- Enable SMTP email functionality

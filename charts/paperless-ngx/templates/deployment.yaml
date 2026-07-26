@@ -91,10 +91,6 @@ spec:
               value: {{ join "+" .Values.ocr.languages | quote }}
             - name: PAPERLESS_DATE_PARSER_LANGUAGES
               value: {{ join "+" .Values.parser.datetime | quote }}
-            - name: PAPERLESS_PRE_CONSUME_SCRIPT
-              value: /scripts/pre-consume-script.sh
-            - name: PDF_DECRYPTION_PASSWORD_PATH
-              value: /pdfdecryption
             - name: PAPERLESS_TIKA_ENABLED
               value: {{ .Values.tika.enabled | quote }}
             {{- if .Values.tika.enabled }}
@@ -148,13 +144,6 @@ spec:
             - name: {{ $key }}
               mountPath: /volumes/{{ $key }}
           {{- end }}
-            - name: scripts
-              mountPath: "/scripts"
-          {{- range $value := .Values.pdfDecryption.secrets }}
-            - name: {{ $value }}-decrypt
-              readOnly: true
-              mountPath: /pdfdecryption/{{ $value }}
-          {{- end }}
       volumes:
         - name: run
           emptyDir: {}
@@ -164,15 +153,6 @@ spec:
         - name: {{ $key }}
           persistentVolumeClaim:
             claimName: '{{ include "paperless-ngx.fullname" $ }}-{{ $key }}'
-        {{- end }}
-        - name: scripts
-          configMap:
-            name: {{ include "paperless-ngx.fullname" $ }}-scripts
-            defaultMode: 0777
-        {{- range $value := .Values.pdfDecryption.secrets }}
-        - name: {{ $value }}-decrypt
-          secret:
-            secretName: {{ $value }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

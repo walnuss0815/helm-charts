@@ -74,8 +74,6 @@ A Helm chart for Kubernetes
 | ocr.languages | list | `["eng"]` | OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) |
 | parser | object | `{"datetime":["en"]}` | Document parser configuration |
 | parser.datetime | list | `["en"]` | Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html) |
-| pdfDecryption | object | `{"secrets":[]}` | PDF decryption configuration |
-| pdfDecryption.secrets | list | `[]` | List of secrets containing PDF passwords for decryption |
 | persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":"-"}}` | Persistence configuration for paperless-ngx volumes |
 | persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"}` | Consumption directory persistence configuration |
 | persistence.consumption.accessModes | list | `["ReadWriteMany"]` | Access modes for consumption PVC |

@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 0.1.16](https://img.shields.io/badge/Version-0.1.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -16,7 +16,6 @@ A Helm chart for Kubernetes
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | redis | 21.2.14 |
 | https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.5 |
-| https://walnuss0815.github.io/helm-charts | paperless-ai | 0.1.0 |
 | https://walnuss0815.github.io/helm-charts | tika | 0.1.2 |
 | https://walnuss0815.github.io/helm-charts | webdav | 0.1.4 |
 
@@ -25,6 +24,25 @@ A Helm chart for Kubernetes
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment |
+| ai | object | `{"enabled":false,"indexTaskCron":"10 2 * * *","llm":{"allowInternalEndpoints":true,"apiKey":{"secretKeyRef":{"key":"","name":""},"value":""},"backend":"","contextSize":8192,"embedding":{"backend":"","chunkSize":1024,"endpoint":"","model":""},"endpoint":"","model":"","outputLanguage":"","requestTimeout":120}}` | AI features configuration (LLM-powered suggestions, RAG, and document chat) |
+| ai.enabled | bool | `false` | Enable AI features (master switch) |
+| ai.indexTaskCron | string | `"10 2 * * *"` | Cron schedule for updating AI embeddings index |
+| ai.llm.allowInternalEndpoints | bool | `true` | Allow AI endpoint URLs that resolve to private/loopback addresses |
+| ai.llm.apiKey | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | API key for the LLM backend (required for OpenAI-compatible backends) |
+| ai.llm.apiKey.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing the API key |
+| ai.llm.apiKey.secretKeyRef.key | string | `""` | Key within the secret |
+| ai.llm.apiKey.secretKeyRef.name | string | `""` | Name of the secret |
+| ai.llm.apiKey.value | string | `""` | API key value (use secretKeyRef in production) |
+| ai.llm.backend | string | `""` | LLM backend to use ("openai-like" or "ollama") |
+| ai.llm.contextSize | int | `8192` | Context size for AI prompts and RAG retrieval |
+| ai.llm.embedding.backend | string | `""` | Embedding backend for RAG ("openai-like", "huggingface", or "ollama") |
+| ai.llm.embedding.chunkSize | int | `1024` | Chunk size when splitting document text for RAG embeddings |
+| ai.llm.embedding.endpoint | string | `""` | Embedding endpoint URL (defaults to LLM endpoint if not set) |
+| ai.llm.embedding.model | string | `""` | Embedding model (defaults depend on backend) |
+| ai.llm.endpoint | string | `""` | Endpoint URL for the LLM backend (required for Ollama; optional for OpenAI-compatible) |
+| ai.llm.model | string | `""` | LLM model to use (defaults to "gpt-3.5-turbo" for OpenAI-compatible or "llama3.1" for Ollama) |
+| ai.llm.outputLanguage | string | `""` | Language for AI suggestions (defaults to user's UI language) |
+| ai.llm.requestTimeout | int | `120` | Timeout in seconds for requests to the AI backend |
 | database | object | `{"enabled":false,"engine":"postgresql","host":"","name":"paperless","password":{"secretKeyRef":{"key":"","name":""},"value":"paperless"},"port":5432,"username":{"secretKeyRef":{"key":"","name":""},"value":"paperless"}}` | External database configuration |
 | database.enabled | bool | `false` | Enable external database (if false, uses SQLite) |
 | database.engine | string | `"postgresql"` | Database engine (postgresql, mysql, mariadb) |
@@ -54,10 +72,10 @@ A Helm chart for Kubernetes
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames for HTTP header matching |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Parent gateway references to attach this route to |
 | httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules and filters |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/paperless-ngx/paperless-ngx","tag":"2.20.15"}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/paperless-ngx/paperless-ngx","tag":"3.0.3"}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"ghcr.io/paperless-ngx/paperless-ngx"` | Container image repository |
-| image.tag | string | `"2.20.15"` | Overrides the image tag whose default is the chart appVersion |
+| image.tag | string | `"3.0.3"` | Overrides the image tag whose default is the chart appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | ingress | object | `{"annotations":{},"className":"","enabled":false,"host":"{{ .Values.host }}","tls":[]}` | Ingress configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |
@@ -73,12 +91,8 @@ A Helm chart for Kubernetes
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | ocr | object | `{"languages":["eng"]}` | OCR (Optical Character Recognition) configuration |
 | ocr.languages | list | `["eng"]` | OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) |
-| paperless-ai | object | `{"enabled":false}` | Paperless-AI subchart configuration (for AI-powered features) |
-| paperless-ai.enabled | bool | `false` | Enable Paperless-AI service |
 | parser | object | `{"datetime":["en"]}` | Document parser configuration |
 | parser.datetime | list | `["en"]` | Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html) |
-| pdfDecryption | object | `{"secrets":[]}` | PDF decryption configuration |
-| pdfDecryption.secrets | list | `[]` | List of secrets containing PDF passwords for decryption |
 | persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":"-"}}` | Persistence configuration for paperless-ngx volumes |
 | persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"}` | Consumption directory persistence configuration |
 | persistence.consumption.accessModes | list | `["ReadWriteMany"]` | Access modes for consumption PVC |

@@ -11,8 +11,5 @@ dependencies:
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.5
-- name: paperless-ai
-  repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.0
-digest: sha256:c3b6f8b3cb1712c34137b30a21240469de454880a0e6be1cae3d065d62c8f40f
-generated: "2026-07-12T09:55:22.501603457Z"
+digest: sha256:4650efe9d25fc1f2e650718c924da10e7098ab84dffd176ea873b17c4ef08758
+generated: "2026-07-26T17:00:25.671476028+02:00"

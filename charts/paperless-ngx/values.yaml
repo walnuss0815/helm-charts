@@ -378,3 +378,43 @@ gotenberg:
   # -- Enable Gotenberg service
   enabled: true
 
+# -- AI features configuration (LLM-powered suggestions, RAG, and document chat)
+ai:
+  # -- Enable AI features (master switch)
+  enabled: false
+  llm:
+    # -- LLM backend to use ("openai-like" or "ollama")
+    backend: ""
+    # -- LLM model to use (defaults to "gpt-3.5-turbo" for OpenAI-compatible or "llama3.1" for Ollama)
+    model: ""
+    # -- API key for the LLM backend (required for OpenAI-compatible backends)
+    apiKey:
+      # -- API key value (use secretKeyRef in production)
+      value: ""
+      # -- Reference to existing secret containing the API key
+      secretKeyRef:
+        # -- Name of the secret
+        name: ""
+        # -- Key within the secret
+        key: ""
+    # -- Endpoint URL for the LLM backend (required for Ollama; optional for OpenAI-compatible)
+    endpoint: ""
+    # -- Language for AI suggestions (defaults to user's UI language)
+    outputLanguage: ""
+    # -- Context size for AI prompts and RAG retrieval
+    contextSize: 8192
+    # -- Timeout in seconds for requests to the AI backend
+    requestTimeout: 120
+    # -- Allow AI endpoint URLs that resolve to private/loopback addresses
+    allowInternalEndpoints: true
+    embedding:
+      # -- Embedding backend for RAG ("openai-like", "huggingface", or "ollama")
+      backend: ""
+      # -- Embedding model (defaults depend on backend)
+      model: ""
+      # -- Embedding endpoint URL (defaults to LLM endpoint if not set)
+      endpoint: ""
+      # -- Chunk size when splitting document text for RAG embeddings
+      chunkSize: 1024
+  # -- Cron schedule for updating AI embeddings index
+  indexTaskCron: "10 2 * * *"

@@ -24,6 +24,25 @@ A Helm chart for Kubernetes
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment |
+| ai | object | `{"enabled":false,"indexTaskCron":"10 2 * * *","llm":{"allowInternalEndpoints":true,"apiKey":{"secretKeyRef":{"key":"","name":""},"value":""},"backend":"","contextSize":8192,"embedding":{"backend":"","chunkSize":1024,"endpoint":"","model":""},"endpoint":"","model":"","outputLanguage":"","requestTimeout":120}}` | AI features configuration (LLM-powered suggestions, RAG, and document chat) |
+| ai.enabled | bool | `false` | Enable AI features (master switch) |
+| ai.indexTaskCron | string | `"10 2 * * *"` | Cron schedule for updating AI embeddings index |
+| ai.llm.allowInternalEndpoints | bool | `true` | Allow AI endpoint URLs that resolve to private/loopback addresses |
+| ai.llm.apiKey | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | API key for the LLM backend (required for OpenAI-compatible backends) |
+| ai.llm.apiKey.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing the API key |
+| ai.llm.apiKey.secretKeyRef.key | string | `""` | Key within the secret |
+| ai.llm.apiKey.secretKeyRef.name | string | `""` | Name of the secret |
+| ai.llm.apiKey.value | string | `""` | API key value (use secretKeyRef in production) |
+| ai.llm.backend | string | `""` | LLM backend to use ("openai-like" or "ollama") |
+| ai.llm.contextSize | int | `8192` | Context size for AI prompts and RAG retrieval |
+| ai.llm.embedding.backend | string | `""` | Embedding backend for RAG ("openai-like", "huggingface", or "ollama") |
+| ai.llm.embedding.chunkSize | int | `1024` | Chunk size when splitting document text for RAG embeddings |
+| ai.llm.embedding.endpoint | string | `""` | Embedding endpoint URL (defaults to LLM endpoint if not set) |
+| ai.llm.embedding.model | string | `""` | Embedding model (defaults depend on backend) |
+| ai.llm.endpoint | string | `""` | Endpoint URL for the LLM backend (required for Ollama; optional for OpenAI-compatible) |
+| ai.llm.model | string | `""` | LLM model to use (defaults to "gpt-3.5-turbo" for OpenAI-compatible or "llama3.1" for Ollama) |
+| ai.llm.outputLanguage | string | `""` | Language for AI suggestions (defaults to user's UI language) |
+| ai.llm.requestTimeout | int | `120` | Timeout in seconds for requests to the AI backend |
 | database | object | `{"enabled":false,"engine":"postgresql","host":"","name":"paperless","password":{"secretKeyRef":{"key":"","name":""},"value":"paperless"},"port":5432,"username":{"secretKeyRef":{"key":"","name":""},"value":"paperless"}}` | External database configuration |
 | database.enabled | bool | `false` | Enable external database (if false, uses SQLite) |
 | database.engine | string | `"postgresql"` | Database engine (postgresql, mysql, mariadb) |

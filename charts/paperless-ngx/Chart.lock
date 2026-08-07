@@ -1,7 +1,7 @@
 dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 21.2.14
+  version: 28.0.0
 - name: webdav
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.4
@@ -11,5 +11,5 @@ dependencies:
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.5
-digest: sha256:4650efe9d25fc1f2e650718c924da10e7098ab84dffd176ea873b17c4ef08758
-generated: "2026-07-26T17:00:25.671476028+02:00"
+digest: sha256:b1aae8a73b50f88b1c70c5e6add26c31f8773401579bcbd2f4731bac15d2444c
+generated: "2026-08-07T09:53:24.289780587Z"

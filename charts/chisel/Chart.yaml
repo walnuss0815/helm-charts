@@ -2,7 +2,7 @@ apiVersion: v2
 name: chisel
 description: A Helm chart for Chisel
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "1.11.3"
 maintainers:
   - name: walnuss0815

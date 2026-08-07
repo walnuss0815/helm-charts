@@ -1,6 +1,6 @@
 # chisel
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.11.3](https://img.shields.io/badge/AppVersion-1.11.3-informational?style=flat-square)
+![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.11.3](https://img.shields.io/badge/AppVersion-1.11.3-informational?style=flat-square)
 
 A Helm chart for Chisel
 
@@ -16,10 +16,10 @@ A Helm chart for Chisel
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod scheduling |
 | fullnameOverride | string | `""` | Overrides the full resource name |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"jpillora/chisel","tag":"1.11.5"}` | Container image configuration. See [Images docs](https://kubernetes.io/docs/concepts/containers/images/) |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"jpillora/chisel","tag":"1.11.8"}` | Container image configuration. See [Images docs](https://kubernetes.io/docs/concepts/containers/images/) |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"jpillora/chisel"` | Image repository for the Chisel container |
-| image.tag | string | `"1.11.5"` | Image tag. Defaults to the chart's `appVersion` if not set |
+| image.tag | string | `"1.11.8"` | Image tag. Defaults to the chart's `appVersion` if not set |
 | imagePullSecrets | list | `[]` | List of image pull secrets for pulling from private registries. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) |
 | livenessProbe | object | `{}` | Liveness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | nameOverride | string | `""` | Overrides the chart name used in resource names |

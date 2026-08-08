@@ -1,3 +1,23 @@
+---
+# OpenHands Issue Resolver
+#
+# Resolves GitHub issues using the OpenHands Software Agent SDK, and supports
+# iteratively improving the resulting pull request. When triggered, the workflow
+# checks out the repository, asks an OpenHands agent to implement the requested
+# change, and opens (or improves) a pull request that references the issue.
+#
+# Triggers:
+#   resolve-issue job (create a PR from an issue):
+#     1. Adding the configured trigger label (default: "resolve-issue") to an issue.
+#     2. Posting the custom command "/resolve-issue" as a new comment on an issue.
+#   improve-pr job (improve an existing OpenHands PR):
+#     3. Adding the configured trigger label (default: "resolve-issue") to a PR.
+#     4. Posting the custom command "/resolve-issue" as a new comment on a PR.
+#
+# Setup:
+#   1. Add the LLM API key to repository secrets (OPENROUTER_KEY).
+#   2. Allow GitHub Actions to create and approve pull requests
+#      (Settings -> Actions -> General -> Workflow permissions).
 name: OpenHands Issue Resolver
 
 on:
@@ -5,16 +25,207 @@ on:
     types: [labeled]
   issue_comment:
     types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
   resolve-issue:
-    if: >
-      github.event.label.name == 'fix-me' ||
-      contains(github.event.comment.body, '@openhands-agent')
-    uses: OpenHands/OpenHands/.github/workflows/openhands-resolver.yml@main
-    with:
-      LLM_MODEL: openrouter/deepseek/deepseek-v4-flash-latest
-    secrets:
-      LLM_API_KEY: ${{ secrets.OPENROUTER_KEY }}
-      PAT_TOKEN: ${{ secrets.GH_PAT }}
-      PAT_USERNAME: ${{ github.repository_owner }}
+    name: Resolve issue with OpenHands
+    runs-on: ubuntu-latest
+    concurrency:
+      group: openhands-resolve-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    # Only run when the configured label is added to an issue or the custom
+    # command is posted as a comment on an actual issue (not a pull request).
+    if: |
+      (github.event.action == 'labeled' &&
+       github.event_name == 'issues' &&
+       github.event.label.name == 'resolve-issue') ||
+      (github.event_name == 'issue_comment' &&
+       github.event.action == 'created' &&
+       github.event.issue.pull_request == null &&
+       startsWith(github.event.comment.body, '/resolve-issue'))
+    steps:
+      - name: Verify commenter permissions
+        # The "/resolve-issue" command can be posted by anyone who can comment on
+        # a public repo, so require at least "write" access before spending LLM
+        # compute. Label triggers are skipped here (adding a label already
+        # requires repository access).
+        if: github.event_name == 'issue_comment'
+        run: |
+          ACTOR="${{ github.event.comment.user.login }}"
+          PERM=$(gh api "repos/${{ github.repository }}/collaborators/$ACTOR/permission" \
+            --jq '.permission' 2>/dev/null || echo "none")
+          echo "Triggered by: $ACTOR (permission: $PERM)"
+          case "$PERM" in
+            admin|maintain|write)
+              echo "Authorized."
+              ;;
+            *)
+              echo "::error::User '$ACTOR' (permission '$PERM') is not authorized to trigger the OpenHands resolver (requires 'write' or higher)."
+              exit 1
+              ;;
+          esac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine issue number
+        id: issue
+        run: |
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          if [ -z "$ISSUE_NUMBER" ]; then
+            echo "::error::Could not determine the issue number."
+            exit 1
+          fi
+          echo "issue-number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install OpenHands SDK
+        run: |
+          # Install core SDK, built-in tools and PyGithub together so they stay aligned.
+          uv pip install --system "openhands-sdk" "openhands-tools" "pygithub"
+
+      - name: Resolve issue
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          LLM_MODEL: openrouter/openrouter/free
+          LLM_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.OPENROUTER_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "openhands-agent"
+          git config --global user.email "openhands-agent@users.noreply.github.com"
+
+          echo "Resolving issue #${{ steps.issue.outputs.issue-number }}"
+
+          if [ -z "$LLM_API_KEY" ]; then
+            echo "::error::OPENROUTER_KEY secret is not set. Add it in Settings -> Secrets."
+            exit 1
+          fi
+
+          uv run python .github/openhands-resolver/agent.py --issue "${{ steps.issue.outputs.issue-number }}"
+
+  improve-pr:
+    name: Improve PR with OpenHands
+    runs-on: ubuntu-latest
+    concurrency:
+      group: openhands-improve-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: false
+    # Only run when the configured label is added to a pull request or the custom
+    # command is posted as a comment (conversation or inline code-review) on a PR.
+    if: |
+      (github.event_name == 'pull_request' &&
+       github.event.action == 'labeled' &&
+       github.event.label.name == 'resolve-issue') ||
+      (github.event_name == 'issue_comment' &&
+       github.event.action == 'created' &&
+       github.event.issue.pull_request != null &&
+       startsWith(github.event.comment.body, '/resolve-issue')) ||
+      (github.event_name == 'pull_request_review_comment' &&
+       github.event.action == 'created' &&
+       startsWith(github.event.comment.body, '/resolve-issue'))
+    steps:
+      - name: Verify commenter permissions
+        # The "/resolve-issue" command can be posted by anyone who can comment on
+        # a public repo, so require at least "write" access before spending LLM
+        # compute. Label triggers are skipped here (adding a label already
+        # requires repository access).
+        if: github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
+        run: |
+          ACTOR="${{ github.event.comment.user.login }}"
+          PERM=$(gh api "repos/${{ github.repository }}/collaborators/$ACTOR/permission" \
+            --jq '.permission' 2>/dev/null || echo "none")
+          echo "Triggered by: $ACTOR (permission: $PERM)"
+          case "$PERM" in
+            admin|maintain|write)
+              echo "Authorized."
+              ;;
+            *)
+              echo "::error::User '$ACTOR' (permission '$PERM') is not authorized to trigger the OpenHands resolver (requires 'write' or higher)."
+              exit 1
+              ;;
+          esac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine PR number and head branch
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            PR_NUMBER="${{ github.event.issue.number }}"
+          else
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          fi
+          HEAD_REF=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
+          echo "pr-number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "head-ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Switch to PR branch
+        run: |
+          git checkout "${{ steps.pr.outputs.head-ref }}"
+          git pull origin "${{ steps.pr.outputs.head-ref }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install OpenHands SDK
+        run: |
+          # Install core SDK, built-in tools and PyGithub together so they stay aligned.
+          uv pip install --system "openhands-sdk" "openhands-tools" "pygithub"
+
+      - name: Improve PR
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          LLM_MODEL: openrouter/openrouter/free
+          LLM_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.OPENROUTER_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "openhands-agent"
+          git config --global user.email "openhands-agent@users.noreply.github.com"
+
+          echo "Improving PR #${{ steps.pr.outputs.pr-number }}"
+
+          if [ -z "$LLM_API_KEY" ]; then
+            echo "::error::OPENROUTER_KEY secret is not set. Add it in Settings -> Secrets."
+            exit 1
+          fi
+
+          uv run python .github/openhands-resolver/agent.py --pr "${{ steps.pr.outputs.pr-number }}"

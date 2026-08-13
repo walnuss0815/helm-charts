@@ -1,6 +1,6 @@
 # postgres
 
-![Version: 0.3.2](https://img.shields.io/badge/Version-0.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18.3](https://img.shields.io/badge/AppVersion-18.3-informational?style=flat-square)
+![Version: 0.3.3](https://img.shields.io/badge/Version-0.3.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18.3](https://img.shields.io/badge/AppVersion-18.3-informational?style=flat-square)
 
 A Helm chart for PostgreSQL
 
@@ -18,10 +18,10 @@ A Helm chart for PostgreSQL
 | database | string | `"app"` | PostgreSQL database name |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
 | fullnameOverride | string | `""` | Override the full chart name |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"postgres","tag":"18.4"}` | Container image configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/containers/images/) |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"postgres","tag":"18.6"}` | Container image configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/containers/images/) |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"postgres"` | Image repository |
-| image.tag | string | `"18.4"` | Image tag. Overrides the chart appVersion when set |
+| image.tag | string | `"18.6"` | Image tag. Overrides the chart appVersion when set |
 | imagePullSecrets | list | `[]` | Secrets for pulling images from a private registry. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) |
 | initdb | object | `{}` | InitDB scripts to run on first startup. See [PostgreSQL Docker docs](https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts) |
 | livenessProbe | object | `{"exec":{"command":["sh","-c","pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]},"periodSeconds":5}` | Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |

@@ -1,5 +1,18 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "baseBranchPatterns": [
     "main"
+  ],
+  "prStatusCheckName": "Check CI status",
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    }
   ]
 }

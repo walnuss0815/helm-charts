@@ -157,6 +157,14 @@ envFrom: {}
 # -- Extra Kubernetes manifests to deploy alongside the chart.
 extraManifests: []
 
+# The `immich.apiKey`, `password` and `weather.apiKey` secrets share the same
+# interface: configure either an inline `value` (written to a dedicated chart-managed
+# Secret at deploy time) or a `secretKeyRef` referencing an existing Secret. Secrets are
+# injected into the pod via the app's docker-secret / `*_FILE` environment variables
+# (`KIOSK_IMMICH_API_KEY_FILE`, `KIOSK_PASSWORD_FILE`, `KIOSK_WEATHER_API_KEY_FILE`)
+# and never end up in the ConfigMap.
+# ref: https://docs.immichkiosk.app/configuration/core/#secrets
+
 # -- Immich server connection configuration.
 immich:
   # -- URL of the Immich server (internal cluster URL).
@@ -186,6 +194,23 @@ password:
     # -- Key within the secret.
     key: ""
 
+# -- Weather configuration.
+# ref: https://docs.immichkiosk.app/configuration/weather/
+weather:
+  # -- OpenWeatherMap API key configuration.
+  # The key is injected into each configured weather location at startup via the
+  # app's `KIOSK_WEATHER_API_KEY_FILE` docker-secret mechanism; leave the `api`
+  # field of the locations in `config` empty.
+  apiKey:
+    # -- Weather API key value (plaintext). Use `secretKeyRef` instead for production.
+    value: ""
+    # -- Reference to a Kubernetes Secret containing the weather API key.
+    secretKeyRef:
+      # -- Name of the secret.
+      name: ""
+      # -- Key within the secret.
+      key: ""
+
 # -- Locale for Immich Kiosk display formatting.
 # ref: https://www.localeplanet.com/icu/
 lang: en_GB
@@ -204,6 +229,16 @@ config: {}
   # date_format: DDDD, DD. MMMM YYYY
   #
   # show_user: true
+  #
+  # ## Weather - leave `api` empty and supply the key via `weather.apiKey` instead.
+  # weather:
+  #   locations:
+  #     - name: london
+  #       lat: 51.5285262
+  #       lon: -0.2663999
+  #       api: ""
+  #       unit: metric
+  #       lang: en
 
 # -- Custom CSS injected into the kiosk UI.
 customCSS: ""

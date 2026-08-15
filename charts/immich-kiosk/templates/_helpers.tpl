@@ -74,3 +74,39 @@ valueFrom:
 value: {{ tpl .value . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Returns "true" when a secret entry is configured, i.e. an inline `value` is set
+or a fully populated `secretKeyRef` is provided.
+Usage: include "immich-kiosk.secretConfigured" .Values.password
+*/}}
+{{- define "immich-kiosk.secretConfigured" -}}
+{{- if or .value (and .secretKeyRef .secretKeyRef.name .secretKeyRef.key) -}}true{{- end -}}
+{{- end }}
+
+{{/*
+Resolve the name of the Kubernetes Secret backing a secret entry.
+A fully populated `secretKeyRef` wins; otherwise the chart-managed Secret
+named `<fullname>-<suffix>` is used.
+Usage: include "immich-kiosk.secretName" (dict "root" $ "config" .Values.password "suffix" "password")
+*/}}
+{{- define "immich-kiosk.secretName" -}}
+{{- if and .config.secretKeyRef.name .config.secretKeyRef.key -}}
+{{- .config.secretKeyRef.name -}}
+{{- else -}}
+{{- include "immich-kiosk.fullname" .root }}-{{ .suffix }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the key within a Secret backing a secret entry.
+Falls back to the chart-managed key given via `default`.
+Usage: include "immich-kiosk.secretKey" (dict "config" .Values.password "default" "password")
+*/}}
+{{- define "immich-kiosk.secretKey" -}}
+{{- if and .config.secretKeyRef.name .config.secretKeyRef.key -}}
+{{- .config.secretKeyRef.key -}}
+{{- else -}}
+{{- .default -}}
+{{- end -}}
+{{- end -}}

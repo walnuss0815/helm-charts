@@ -53,8 +53,18 @@ spec:
             {{- end }}
             - name: KIOSK_BEHIND_PROXY
               value: "true"
-            - name: KIOSK_PASSWORD
-              {{- include "immich-kiosk.secretEnvVar" .Values.password | indent 14 }}
+            {{- if include "immich-kiosk.secretConfigured" .Values.password }}
+            - name: KIOSK_PASSWORD_FILE
+              value: /etc/immich-kiosk/secrets/password
+            {{- end }}
+            {{- if include "immich-kiosk.secretConfigured" .Values.immich.apiKey }}
+            - name: KIOSK_IMMICH_API_KEY_FILE
+              value: /etc/immich-kiosk/secrets/immich-api-key
+            {{- end }}
+            {{- if include "immich-kiosk.secretConfigured" .Values.weather.apiKey }}
+            - name: KIOSK_WEATHER_API_KEY_FILE
+              value: /etc/immich-kiosk/secrets/weather-api-key
+            {{- end }}
             - name: LANG
               value: {{ .Values.lang }}
             - name: TZ
@@ -87,6 +97,24 @@ spec:
               subPath: custom.css
             - name: offline-assets
               mountPath: /offline-assets
+            {{- if include "immich-kiosk.secretConfigured" .Values.immich.apiKey }}
+            - name: secret-immich-api-key
+              mountPath: /etc/immich-kiosk/secrets/immich-api-key
+              subPath: {{ include "immich-kiosk.secretKey" (dict "config" .Values.immich.apiKey "default" "immich-api-key") }}
+              readOnly: true
+            {{- end }}
+            {{- if include "immich-kiosk.secretConfigured" .Values.password }}
+            - name: secret-password
+              mountPath: /etc/immich-kiosk/secrets/password
+              subPath: {{ include "immich-kiosk.secretKey" (dict "config" .Values.password "default" "password") }}
+              readOnly: true
+            {{- end }}
+            {{- if include "immich-kiosk.secretConfigured" .Values.weather.apiKey }}
+            - name: secret-weather-api-key
+              mountPath: /etc/immich-kiosk/secrets/weather-api-key
+              subPath: {{ include "immich-kiosk.secretKey" (dict "config" .Values.weather.apiKey "default" "weather-api-key") }}
+              readOnly: true
+            {{- end }}
       volumes:
         - name: config
           configMap:
@@ -97,6 +125,21 @@ spec:
         - name: offline-assets
           emptyDir:
             sizeLimit: 500Mi
+        {{- if include "immich-kiosk.secretConfigured" .Values.immich.apiKey }}
+        - name: secret-immich-api-key
+          secret:
+            secretName: {{ include "immich-kiosk.secretName" (dict "root" $ "config" .Values.immich.apiKey "suffix" "immich-api-key") }}
+        {{- end }}
+        {{- if include "immich-kiosk.secretConfigured" .Values.password }}
+        - name: secret-password
+          secret:
+            secretName: {{ include "immich-kiosk.secretName" (dict "root" $ "config" .Values.password "suffix" "password") }}
+        {{- end }}
+        {{- if include "immich-kiosk.secretConfigured" .Values.weather.apiKey }}
+        - name: secret-weather-api-key
+          secret:
+            secretName: {{ include "immich-kiosk.secretName" (dict "root" $ "config" .Values.weather.apiKey "suffix" "weather-api-key") }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

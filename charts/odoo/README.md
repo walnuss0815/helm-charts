@@ -1,6 +1,6 @@
 # odoo
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
 
 A Helm chart for Odoo
 
@@ -46,10 +46,10 @@ A Helm chart for Odoo
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames matching HTTP header |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Gateways this Route is attached to |
 | httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | List of routing rules and filters |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"odoo","tag":"19.0"}` | Odoo container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"odoo","tag":""}` | Odoo container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"odoo"` | Image repository |
-| image.tag | string | `"19.0"` | Image tag |
+| image.tag | string | `""` | Image tag. Defaults to the chart's `appVersion` if not set |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration for external HTTP access |
 | ingress.annotations | object | `{}` | Ingress annotations |

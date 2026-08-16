@@ -11,8 +11,8 @@ image:
   repository: odoo
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- Image tag
-  tag: "19.0"
+  # -- Image tag. Defaults to the chart's `appVersion` if not set
+  tag: ""
 
 # -- Image pull secrets for private registries
 imagePullSecrets: []

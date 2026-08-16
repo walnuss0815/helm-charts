@@ -2,6 +2,20 @@ apiVersion: v1
 entries:
   chisel:
   - apiVersion: v2
+    appVersion: 1.11.5
+    created: "2026-08-16T20:44:33.459847907Z"
+    description: A Helm chart for Chisel
+    digest: 52dbba24d51fffbfe51a7d94a6ff277f1be3f1be2b63bcac3fdcfc051f02f551
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: chisel
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/chisel-0.1.3/chisel-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
     appVersion: 1.11.3
     created: "2026-04-07T11:35:56.626153695Z"
     description: A Helm chart for Chisel
@@ -44,6 +58,20 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/chisel-0.1.0/chisel-0.1.0.tgz
     version: 0.1.0
   gotenberg:
+  - apiVersion: v2
+    appVersion: "8.34"
+    created: "2026-08-16T20:44:33.59895967Z"
+    description: A Helm chart for Kubernetes
+    digest: 1044dd216032ca8682588c470044f8c56a1591b6e0c206381962fbb11b7acf64
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: gotenberg
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/gotenberg-0.1.6/gotenberg-0.1.6.tgz
+    version: 0.1.6
   - apiVersion: v2
     appVersion: "8.23"
     created: "2026-07-10T16:53:40.034376316Z"
@@ -129,6 +157,20 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/gotenberg-0.1.0/gotenberg-0.1.0.tgz
     version: 0.1.0
   immich-kiosk:
+  - apiVersion: v2
+    appVersion: 0.41.0
+    created: "2026-08-16T20:44:33.676678593Z"
+    description: A Helm chart for Immich Kiosk
+    digest: b5968e0561049264983cfba22eb7b4814ba4de285ff77d823a80cc18489f7d86
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich-kiosk
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-kiosk-0.2.1/immich-kiosk-0.2.1.tgz
+    version: 0.2.1
   - apiVersion: v2
     appVersion: 0.33.2
     created: "2026-08-15T19:54:18.314147956Z"
@@ -299,6 +341,20 @@ entries:
     version: 0.1.1
   kavita:
   - apiVersion: v2
+    appVersion: 0.9.0
+    created: "2026-08-16T20:44:33.768529541Z"
+    description: A Helm chart for Kavita
+    digest: 6bc07590230f398cabba73ebdd37b7db996e2399d6819ac6db327e26591ec428
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: kavita
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/kavita-0.1.2/kavita-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
     appVersion: 0.8.9
     created: "2026-07-12T09:02:26.094642202Z"
     description: A Helm chart for Kavita
@@ -327,6 +383,25 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/kavita-0.1.0/kavita-0.1.0.tgz
     version: 0.1.0
   odoo:
+  - apiVersion: v2
+    appVersion: "19.0"
+    created: "2026-08-16T20:44:33.87419239Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.3.2
+    description: A Helm chart for Odoo
+    digest: 6978aba03640dea0e77288d5c953031b3e356fef9ca4d0960fe2cb038f18e4dc
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: odoo
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/odoo-1.0.2/odoo-1.0.2.tgz
+    version: 1.0.2
   - apiVersion: v2
     appVersion: "19.0"
     created: "2026-07-12T14:22:13.199555115Z"
@@ -425,6 +500,20 @@ entries:
   paperless-ai:
   - apiVersion: v2
     appVersion: 3.0.9
+    created: "2026-08-16T20:44:33.992604424Z"
+    description: A Helm chart for Kubernetes
+    digest: bcd2de4777076c0227fd84dc615d33951b2842a86c361a34693cb43e93b347c0
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: paperless-ai
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/paperless-ai-0.1.1/paperless-ai-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 3.0.9
     created: "2026-02-26T17:43:17.955832993Z"
     description: A Helm chart for Kubernetes
     digest: 692b3cd00e8cd299335fe2f3e00d3f95c09140079cba96b41e3f65a705c929fc
@@ -438,6 +527,37 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/paperless-ai-0.1.0/paperless-ai-0.1.0.tgz
     version: 0.1.0
   paperless-ngx:
+  - apiVersion: v2
+    appVersion: 3.0.3
+    created: "2026-08-16T20:44:34.114494318Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.11.0
+    - condition: webdav.enabled
+      name: webdav
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.4
+    - condition: tika.enabled
+      name: tika
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.2
+    - condition: gotenberg.enabled
+      name: gotenberg
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.5
+    description: A Helm chart for Kubernetes
+    digest: 33b9f3702a63ef68dbc432d88b06ff018f64e2a704d6fe69cd58a0d832250911
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: paperless-ngx
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/paperless-ngx-0.3.0/paperless-ngx-0.3.0.tgz
+    version: 0.3.0
   - apiVersion: v2
     appVersion: 2.20.8
     created: "2026-07-26T17:04:13.089435524Z"
@@ -1065,6 +1185,20 @@ entries:
     version: 0.1.0
   postgres:
   - apiVersion: v2
+    appVersion: "18.4"
+    created: "2026-08-16T20:44:34.194391262Z"
+    description: A Helm chart for PostgreSQL
+    digest: 2a49223508d06e9fa1bfd6eb8f10782aaaac6b89a6388a14a1f96ddba44ae874
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: postgres
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/postgres-0.3.3/postgres-0.3.3.tgz
+    version: 0.3.3
+  - apiVersion: v2
     appVersion: "18.3"
     created: "2026-07-12T09:21:44.455687749Z"
     description: A Helm chart for PostgreSQL
@@ -1136,6 +1270,20 @@ entries:
     version: 0.1.1
   tika:
   - apiVersion: v2
+    appVersion: 3.3.1.0-full
+    created: "2026-08-16T20:44:34.270510619Z"
+    description: A Helm chart for Kubernetes
+    digest: 6da3e3f488d7ef06538a0c3ad92c2e22f42311dc9522b57a75fa3560ed64d943
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: tika
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/tika-0.1.3/tika-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
     appVersion: 3.2.3.0-full
     created: "2026-07-10T17:50:32.876184243Z"
     description: A Helm chart for Kubernetes
@@ -1178,6 +1326,20 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/tika-0.1.0/tika-0.1.0.tgz
     version: 0.1.0
   webdav:
+  - apiVersion: v2
+    appVersion: v5.14.1
+    created: "2026-08-16T20:44:34.357440396Z"
+    description: A Helm chart for Kubernetes
+    digest: 63dce99b69bd2b2b5b356233d98a764d141e12ac1399497e47f1a0761a49d5d9
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: webdav
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.9/webdav-0.1.9.tgz
+    version: 0.1.9
   - apiVersion: v2
     appVersion: v5.8.0
     created: "2026-07-26T17:06:40.603749244Z"
@@ -1304,4 +1466,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-15T19:54:18.314306384Z"
+generated: "2026-08-16T20:44:34.357652583Z"

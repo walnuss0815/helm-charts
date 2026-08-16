@@ -26,7 +26,7 @@ jobs:
 
       - name: Add Helm repositories
         run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add valkey https://valkey.io/valkey-helm/
           helm repo add walnuss0815 https://walnuss0815.github.io/helm-charts
 
       - name: Run chart-releaser

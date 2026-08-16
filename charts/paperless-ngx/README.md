@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.20.8](https://img.shields.io/badge/AppVersion-2.20.8-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -14,7 +14,7 @@ A Helm chart for Kubernetes
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | redis | 21.2.14 |
+| https://valkey.io/valkey-helm/ | valkey | 0.11.0 |
 | https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.5 |
 | https://walnuss0815.github.io/helm-charts | tika | 0.1.2 |
 | https://walnuss0815.github.io/helm-charts | webdav | 0.1.4 |
@@ -118,21 +118,6 @@ A Helm chart for Kubernetes
 | readinessProbe.httpGet | object | `{"path":"/","port":"http"}` | HTTP GET configuration for readiness probe |
 | readinessProbe.initialDelaySeconds | int | `30` | Initial delay before starting probes |
 | readinessProbe.timeoutSeconds | int | `5` | Timeout in seconds for the probe |
-| redis | object | `{"architecture":"standalone","auth":{"enabled":false},"enabled":true,"global":{"security":{"allowInsecureImages":true}},"image":{"repository":"bitnamilegacy/redis"}}` | Redis subchart configuration (Bitnami Redis) |
-| redis.architecture | string | `"standalone"` | Redis deployment architecture |
-| redis.auth | object | `{"enabled":false}` | Redis authentication configuration |
-| redis.auth.enabled | bool | `false` | Enable Redis password authentication (TODO: Enable in production) |
-| redis.enabled | bool | `true` | Enable Redis as a subchart |
-| redis.global | object | `{"security":{"allowInsecureImages":true}}` | Global Redis configuration |
-| redis.global.security.allowInsecureImages | bool | `true` | Allow insecure container images |
-| redis.image | object | `{"repository":"bitnamilegacy/redis"}` | Redis image configuration |
-| redis.image.repository | string | `"bitnamilegacy/redis"` | Redis image repository (using legacy Bitnami images) |
-| redisKV | object | `{"url":{"secretKeyRef":{"key":"","name":""},"value":"redis://{{ include \"paperless-ngx.fullname\" $ }}-redis-headless:6379"}}` | Redis key-value store configuration |
-| redisKV.url | object | `{"secretKeyRef":{"key":"","name":""},"value":"redis://{{ include \"paperless-ngx.fullname\" $ }}-redis-headless:6379"}` | Redis connection URL configuration |
-| redisKV.url.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing Redis URL |
-| redisKV.url.secretKeyRef.key | string | `""` | Key within the secret |
-| redisKV.url.secretKeyRef.name | string | `""` | Name of the secret |
-| redisKV.url.value | string | `"redis://{{ include \"paperless-ngx.fullname\" $ }}-redis-headless:6379"` | Redis URL value |
 | replicaCount | int | `1` | Number of replicas for the paperless-ngx deployment |
 | resources | object | `{}` | Resource limits and requests for the paperless-ngx container |
 | secretKey | object | `{"secretKeyRef":{"key":"","name":""},"value":"FQdWQr5xKy8ZYTD4YB5rJAE9e2CbWb3E"}` | Secret key configuration for Django |
@@ -181,6 +166,17 @@ A Helm chart for Kubernetes
 | tika.enabled | bool | `true` | Enable Apache Tika service |
 | tolerations | list | `[]` | Tolerations for pod assignment |
 | url | string | `"https://{{ .Values.host }}"` | URL for the paperless-ngx instance |
+| valkey | object | `{"auth":{"enabled":false},"enabled":true,"resources":{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | Valkey subchart configuration (Redis-compatible key-value store) |
+| valkey.auth | object | `{"enabled":false}` | Valkey authentication configuration |
+| valkey.auth.enabled | bool | `false` | Enable Valkey password authentication (TODO: Enable in production) |
+| valkey.enabled | bool | `true` | Enable Valkey as a subchart |
+| valkey.resources | object | `{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource limits/requests for the Valkey container |
+| valkeyKV | object | `{"url":{"secretKeyRef":{"key":"","name":""},"value":"redis://{{ .Release.Name }}-valkey:6379"}}` | Valkey (Redis-compatible) key-value store configuration |
+| valkeyKV.url | object | `{"secretKeyRef":{"key":"","name":""},"value":"redis://{{ .Release.Name }}-valkey:6379"}` | Valkey connection URL configuration |
+| valkeyKV.url.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing Valkey URL |
+| valkeyKV.url.secretKeyRef.key | string | `""` | Key within the secret |
+| valkeyKV.url.secretKeyRef.name | string | `""` | Name of the secret |
+| valkeyKV.url.value | string | `"redis://{{ .Release.Name }}-valkey:6379"` | Valkey URL value (note: paperless-ngx expects the redis:// scheme even when connecting to Valkey) |
 | webdav | object | `{"enabled":false,"persistence":{"data":{"claimName":"{{ .Release.Name }}-consumption"}}}` | WebDAV configuration for document consumption |
 | webdav.enabled | bool | `false` | Enable WebDAV integration |
 | webdav.persistence | object | `{"data":{"claimName":"{{ .Release.Name }}-consumption"}}` | WebDAV persistence configuration |

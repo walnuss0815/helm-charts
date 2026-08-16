@@ -256,13 +256,13 @@ sso:
   # -- SSO provider configuration (OpenID Connect). See [django-allauth documentation](https://docs.allauth.org/en/latest/socialaccount/providers/openid_connect.html)
   config: {}
 
-# -- Redis key-value store configuration
-redisKV:
-  # -- Redis connection URL configuration
+# -- Valkey (Redis-compatible) key-value store configuration
+valkeyKV:
+  # -- Valkey connection URL configuration
   url:
-    # -- Redis URL value
-    value: 'redis://{{ include "paperless-ngx.fullname" $ }}-redis-headless:6379'
-    # -- Reference to existing secret containing Redis URL
+    # -- Valkey URL value (note: paperless-ngx expects the redis:// scheme even when connecting to Valkey)
+    value: 'redis://{{ .Release.Name }}-valkey:6379'
+    # -- Reference to existing secret containing Valkey URL
     secretKeyRef:
       # -- Name of the secret
       name: ""
@@ -337,25 +337,22 @@ smtp:
       # -- Key within the secret
       key: ""
 
-# -- Redis subchart configuration (Bitnami Redis)
-redis:
-  # -- Enable Redis as a subchart
+# -- Valkey subchart configuration (Redis-compatible key-value store)
+valkey:
+  # -- Enable Valkey as a subchart
   enabled: true
-  # -- Global Redis configuration
-  global:
-    security:
-      # -- Allow insecure container images
-      allowInsecureImages: true
-  # -- Redis image configuration
-  image:
-    # -- Redis image repository (using legacy Bitnami images)
-    repository: bitnamilegacy/redis
-  # -- Redis deployment architecture
-  architecture: standalone
-  # -- Redis authentication configuration
+  # -- Valkey authentication configuration
   auth:
-    # -- Enable Redis password authentication (TODO: Enable in production)
+    # -- Enable Valkey password authentication (TODO: Enable in production)
     enabled: false
+  # -- Resource limits/requests for the Valkey container
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
 
 # -- WebDAV configuration for document consumption
 webdav:

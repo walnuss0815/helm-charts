@@ -70,7 +70,7 @@ spec:
               {{- include "paperless-ngx.secretEnvVar" .Values.database.password | indent 14 }}
             {{- end }}
             - name: PAPERLESS_REDIS
-              {{- include "paperless-ngx.secretEnvVar" (merge .Values.redisKV.url $) | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (merge .Values.valkeyKV.url $) | indent 14 }}
             {{- if .Values.smtp.enabled }}
             - name: PAPERLESS_EMAIL_HOST
               value: {{ .Values.smtp.host }}

@@ -1,4 +1,4 @@
 github-groups: true
 chart-repos:
-  - bitnami=https://charts.bitnami.com/bitnami
+  - valkey=https://valkey.io/valkey-helm/
   - walnuss0815=https://walnuss0815.github.io/helm-charts

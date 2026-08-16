@@ -12,8 +12,8 @@ image:
   repository: hacdias/webdav
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- Overrides the image tag whose default is the chart appVersion
-  tag: "v5.14.1"
+  # -- Image tag. Defaults to the chart's `appVersion` if not set
+  tag: ""
 
 # -- Image pull secrets for private registries
 imagePullSecrets: []

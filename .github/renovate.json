@@ -1,9 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "customManagers:helmChartYamlAppVersions"
+  ],
   "baseBranchPatterns": [
     "main"
   ],
   "prStatusCheckName": "Check CI status",
+  "helm-values": {
+    "enabled": false
+  },
   "packageRules": [
     {
       "matchUpdateTypes": [

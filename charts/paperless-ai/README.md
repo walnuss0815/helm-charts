@@ -1,6 +1,6 @@
 # paperless-ai
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.9](https://img.shields.io/badge/AppVersion-3.0.9-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.9](https://img.shields.io/badge/AppVersion-3.0.9-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -22,10 +22,10 @@ A Helm chart for Kubernetes
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames for HTTP header matching |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Parent gateway references to attach this route to |
 | httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules and filters |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"clusterzx/paperless-ai","tag":"3.0.9"}` | Container image configuration |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"clusterzx/paperless-ai","tag":""}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"clusterzx/paperless-ai"` | Container image repository |
-| image.tag | string | `"3.0.9"` | Overrides the image tag whose default is the chart appVersion |
+| image.tag | string | `""` | Image tag. Defaults to the chart's `appVersion` if not set |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration |
 | ingress.annotations | object | `{}` | Ingress annotations |

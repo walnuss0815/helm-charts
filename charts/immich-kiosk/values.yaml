@@ -11,8 +11,8 @@ image:
   repository: ghcr.io/damongolding/immich-kiosk
   # -- Image pull policy.
   pullPolicy: IfNotPresent
-  # -- Image tag. Overrides the chart appVersion when set.
-  tag: "0.41.0"
+  # -- Image tag. Defaults to the chart's `appVersion` if not set.
+  tag: ""
 
 # -- Secrets for pulling images from a private registry.
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

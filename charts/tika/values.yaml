@@ -12,8 +12,8 @@ image:
   repository: apache/tika
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- Overrides the image tag whose default is the chart appVersion
-  tag: "3.3.1.0-full"
+  # -- Image tag. Defaults to the chart's `appVersion` if not set
+  tag: ""
 
 # -- Image pull secrets for private registries
 imagePullSecrets: []

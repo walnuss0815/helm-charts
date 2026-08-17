@@ -6,7 +6,6 @@
   "baseBranchPatterns": [
     "main"
   ],
-  "prStatusCheckName": "Check CI status",
   "helm-values": {
     "enabled": false
   },

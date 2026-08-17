@@ -1,6 +1,6 @@
 dependencies:
 - name: postgres
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.3.2
-digest: sha256:320ac56e2038b3bd855ef8da7a92d4b48f2009982e26bc92ad9e5c5b6a33b5d9
-generated: "2026-07-12T09:55:03.385042028Z"
+  version: 0.3.3
+digest: sha256:7c004129aa720997cec628c68826abd7f32de5b3054678de82f3aa281e7d02dd
+generated: "2026-08-17T09:31:45.73930542Z"

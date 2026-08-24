@@ -1,0 +1,94 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+### Required
+
+- A running [Immich](https://immich.app) server (the proxy forwards uploads to it).
+
+### Optional
+
+- An Ingress controller (e.g. [ingress-nginx](https://kubernetes.github.io/ingress-nginx/)) when exposing the proxy via `ingress`
+- [Gateway API](https://gateway-api.sigs.k8s.io/) when exposing the proxy via `httpRoute`
+- GPU device plugins when requesting an accelerator device in `resources`
+
+## Quick start
+
+`upstream` (the Immich server this proxy fronts) is required:
+
+```yaml
+upstream: "http://immich-server:2283"
+
+service:
+  port: 2283
+```
+
+This chart is a proxy: point the Immich client at this chart's Service and let it
+optimize images / transcode videos before they are stored on the Immich server.
+
+## Tasks configuration
+
+Immich Upload Optimizer maps file extensions to shell commands in a YAML tasks
+file. Configure it via `config.tasks` (rendered into a ConfigMap at
+`/config/tasks.yaml` and referenced by `IUO_TASKS_FILE`):
+
+```yaml
+config:
+  tasks:
+    - name: jpeg-xl
+      command: cjxl --lossless_jpeg=1 {{"{{"}}.folder{{"}}"}}/{{"{{"}}.name{{"}}"}}.{{"{{"}}.extension{{"}}"}} {{"{{"}}.folder{{"}}"}}/{{"{{"}}.name{{"}}"}}-new.jxl && rm {{"{{"}}.folder{{"}}"}}/{{"{{"}}.name{{"}}"}}.{{"{{"}}.extension{{"}}"}}
+      extensions: [jpeg, jpg, png]
+    - name: passthrough-videos
+      command: ""
+      extensions: [mp4, mov]
+```
+
+> `${TOKEN}`-style placeholders in a `command` are shell-expanded by the proxy at
+> runtime, so values from `extraEnv`/`extraEnvFrom` (e.g. Kubernetes Secrets) are
+> available directly. The base tasks ConfigMap stays plaintext - never put real
+> secrets in `command` itself; reference them via `extraEnv`/`extraEnvFrom`.
+
+## Hardware acceleration
+
+The bundled image (amd64: jlesage/handbrake; arm64: plain Ubuntu) includes
+HandBrakeCLI, FFmpeg, ImageMagick/libjxl, etc. Hardware video transcoding (NVIDIA
+NVENC, Intel QSV/VAAPI, AMD VAAPI) is achieved by giving the proxy pod access to
+the accelerator and driving it via task flags. Set the device resource directly in
+the root `resources` block and schedule the pod on the right node:
+
+```yaml
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+    nvidia.com/gpu: "1"
+  limits:
+    memory: 512Mi
+    nvidia.com/gpu: "1"
+
+nodeSelector:
+  nvidia.com/gpu.present: "true"
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+```
+
+The `nvidia.com/gpu` device resource lets the cluster device plugin inject the
+accelerator into the container. See the
+[immich-upload-optimizer docs](https://github.com/miguelangel-nubla/immich-upload-optimizer)
+for encoder flags to use inside task commands.
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

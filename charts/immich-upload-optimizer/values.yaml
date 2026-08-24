@@ -1,0 +1,227 @@
+# Default values for immich-upload-optimizer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## @section Global parameters
+
+# -- Number of proxy replicas
+replicaCount: 1
+
+# -- Container image configuration
+image:
+  # -- Image repository. The default ships a multi-arch manifest: the amd64
+  # variant is based on jlesage/handbrake (includes the HandBrake GUI + CLI and all
+  # codecs); the arm64 variant is a plain Ubuntu base with the CLI tools only. Pin a
+  # release tag (e.g. v0.5.5) for reproducibility.
+  repository: ghcr.io/miguelangel-nubla/immich-upload-optimizer
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag. Overrides the chart appVersion when set
+  tag: ""
+
+# -- Image pull secrets for pulling from a private registry. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
+imagePullSecrets: []
+
+# -- Override the chart name
+nameOverride: ""
+
+# -- Override the full chart name
+fullnameOverride: ""
+
+# -- Annotations to add to the pod
+podAnnotations: {}
+
+# -- Labels to add to the pod
+podLabels: {}
+
+## @section Service account
+
+# -- Service account configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/security/service-accounts/)
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials
+  automount: false
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- Name of the service account to use. If not set and `create` is true, a name is generated using the fullname template
+  name: ""
+
+## @section Common configuration
+
+# -- Address the proxy listens on inside the container. Maps to `IUO_LISTEN`
+listen: ":2283"
+
+# -- Upstream Immich server URL, e.g. `http://immich-server:2283`. Maps to `IUO_UPSTREAM`. Required. Must be set.
+# Rendered with Helm's `tpl`, so it may reference chart values (e.g. `{{ .Release.Namespace }}`).
+# A literal `{{`/`}}` in the URL (e.g. in an encoded query string) will be parsed as a Go template
+# and must be escaped (e.g. `{{ "{{" }}`) or it will fail to render.
+upstream: ""
+
+# -- Only process uploads to this backend path. Maps to `IUO_FILTER_PATH`
+filterPath: "/api/assets"
+
+# -- Only process uploads with this multipart form key. Maps to `IUO_FILTER_FORM_KEY`
+filterFormKey: "assetData"
+
+# -- Override the tasks file path mounted from the ConfigMap at `/config/tasks.yaml`. Maps to `IUO_TASKS_FILE`
+# This is mostly useful for the bundled ConfigMap `/config` mount path.
+tasksPath: ""
+
+## @section Application
+
+config:
+  # -- Task definitions (see TASKS.md / README), rendered under the `tasks` key
+  # of the generated `/config/tasks.yaml`. `${TOKEN}`-style placeholders in a
+  # task `command` are shell-expanded at runtime by `sh -c`, so values from
+  # `extraEnv`/`extraEnvFrom` (e.g. Kubernetes Secrets) are available directly.
+  tasks:
+    - name: jpeg-xl
+      command: >-
+        cjxl --lossless_jpeg=1 {{.folder}}/{{.name}}.{{.extension}}
+        {{.folder}}/{{.name}}-new.jxl && rm {{.folder}}/{{.name}}.{{.extension}}
+      extensions: [jpeg, jpg, png, pgx, pam, pnm, pgm, ppm, pfm, gif, exr]
+    - name: caesium
+      command: >-
+        caesiumclt --keep-dates --exif --quality=0 --output-dir={{.folder}}
+        {{.folder}}/{{.name}}.{{.extension}}
+      extensions: [jpeg, jpg, png, tiff, tif, webp, gif]
+    - name: passthrough-images
+      command: ""
+      extensions: [avif, bmp, heic, heif, insp, jxl, psd, raw, rw2, svg]
+    - name: passthrough-videos
+      command: ""
+      extensions: [3gp, 3gpp, avi, flv, m4v, mkv, mts, m2ts, m2t, mp4, insv, mpg, mpe, mpeg, mov, webm, wmv]
+
+## @section Proxy service
+
+# -- Kubernetes Service
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port
+  port: 2283
+
+# -- Ingress
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+  # -- Ingress hosts
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- Ingress TLS
+  tls: []
+
+# -- Expose via Gateway API HTTPRoute
+httpRoute:
+  # -- Enable HTTPRoute
+  enabled: false
+  # -- HTTPRoute annotations
+  annotations: {}
+  # -- Parent refs
+  parentRefs:
+    - name: gateway
+      sectionName: http
+  # -- Hostnames
+  hostnames:
+    - chart-example.local
+  # -- Rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+# -- Resource requests/limits for the proxy container.
+# For hardware video transcoding (NVIDIA NVENC, Intel QSV/VAAPI, AMD VAAPI),
+# request the accelerator device here (e.g. `nvidia.com/gpu: "1"`,
+# `gpu.intel.com/i915: "1"`, `amd.com/gpu: "1"`) and schedule the pod onto an
+# accelerator node via `nodeSelector`/`tolerations`; drive the encoder via task
+# flags. The bundled image variants (amd64: jlesage/handbrake; arm64: plain
+# Ubuntu) already include HandBrakeCLI, FFmpeg, ImageMagick/libjxl etc.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+    # nvidia.com/gpu: "1"
+  # The default limit suits image-only optimization. Video transcoding
+  # (HandBrakeCLI/FFmpeg) buffers large uploads and typically needs a higher
+  # limit, e.g. 1-2Gi.
+  limits:
+    memory: 512Mi
+    # nvidia.com/gpu: "1"
+
+# -- Liveness probe configuration. The proxy exposes no unauthenticated health
+# endpoint (the /_immich-upload-optimizer/* routes require job parameters), so a
+# TCP socket check against the listener is used.
+livenessProbe:
+  # -- TCP socket probe configuration
+  tcpSocket:
+    port: http
+  periodSeconds: 30
+
+# -- Readiness probe configuration. Gates the Service endpoints so traffic is
+# only routed to a proxy that is accepting connections.
+readinessProbe:
+  # -- TCP socket probe configuration
+  tcpSocket:
+    port: http
+  periodSeconds: 10
+
+# -- Startup probe
+startupProbe: {}
+
+# -- Pod security context
+podSecurityContext:
+  fsGroup: 1000
+
+# -- Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  # The chart mounts a writable emptyDir at /tmp for encoder temp files;
+  # the rest of the root filesystem stays read-only.
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Extra environment variables, rendered with `tpl`. Values must be strings (e.g. quote numbers) and
+# may reference chart values (e.g. `{{ .Release.Namespace }}`); a literal `{{`/`}}` in a value will be
+# parsed as a Go template and must be escaped (e.g. `{{ "{{" }}`) or it will fail to render.
+extraEnv: {}
+
+# -- Extra environment variables sourced from ConfigMaps/Secrets
+extraEnvFrom: {}
+
+# -- Node selector for pod scheduling
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling
+tolerations: []
+
+# -- Affinity rules for pod scheduling
+affinity: {}
+
+# -- Extra volumes
+extraVolumes: []
+# -- Extra volume mounts (for the extra volumes)
+extraVolumeMounts: []
+
+## @section Other
+
+# -- Extra Kubernetes manifests to deploy alongside the chart.
+# Each entry is rendered with the Helm template engine, so it can reference chart
+# values such as `.Release.Namespace`. Only trusted manifests should be used here.
+extraManifests: []

@@ -1,0 +1,13 @@
+{{- if not .Values.config.tasks }}
+{{- fail "config.tasks must define at least one task (name/command/extensions)" }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "immich-upload-optimizer.configName" . }}
+  labels:
+    {{- include "immich-upload-optimizer.labels" . | nindent 4 }}
+data:
+  {{ include "immich-upload-optimizer.configFilename" . }}: |
+    tasks:
+      {{- toYaml .Values.config.tasks | nindent 6 }}

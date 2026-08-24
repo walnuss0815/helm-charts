@@ -1,0 +1,115 @@
+{{- if not .Values.upstream }}
+{{- fail "upstream must be set to the Immich server URL (e.g. http://immich-server:2283)" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "immich-upload-optimizer.fullname" . }}
+  labels:
+    {{- include "immich-upload-optimizer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "immich-upload-optimizer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/immich-upload-optimizer-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "immich-upload-optimizer.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "immich-upload-optimizer.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: upload-optimizer
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ include "immich-upload-optimizer.image" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: IUO_LISTEN
+              value: {{ .Values.listen | quote }}
+            - name: IUO_UPSTREAM
+              value: {{ tpl .Values.upstream . | quote }}
+            - name: IUO_TASKS_FILE
+              value: {{ default "/config/tasks.yaml" .Values.tasksPath | quote }}
+            - name: IUO_FILTER_PATH
+              value: {{ .Values.filterPath | quote }}
+            - name: IUO_FILTER_FORM_KEY
+              value: {{ .Values.filterFormKey | quote }}
+            {{- range $key, $value := .Values.extraEnv }}
+            - name: {{ $key | quote }}
+              value: {{ (tpl $value $) | quote }}
+            {{- end }}
+            {{- range $key, $valueFrom := .Values.extraEnvFrom }}
+            - name: {{ $key | quote }}
+              valueFrom:
+                {{- toYaml $valueFrom | nindent 16 }}
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "immich-upload-optimizer.configName" . }}
+        - name: tmp
+          emptyDir: {}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

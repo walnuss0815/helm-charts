@@ -1,0 +1,32 @@
+Immich Upload Optimizer has been installed. It proxies uploads to your Immich
+server and optimizes/transcodes them on the fly.
+
+Get the application URL:
+{{- if and .Values.httpRoute.enabled .Values.httpRoute.hostnames }}
+  export APP_HOSTNAME={{ .Values.httpRoute.hostnames | first }}
+  echo "Visit http://$APP_HOSTNAME to use your application"
+{{- else if .Values.ingress.enabled }}
+  {{- range $host := .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
+  {{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "immich-upload-optimizer.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "immich-upload-optimizer.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "immich-upload-optimizer.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.service.port }}
+{{- end }}
+
+Notes:
+- Point `upstream` at your Immich server (required) and route incoming uploads
+  through this Service.
+- The optimization/transcoding rules live in the tasks ConfigMap
+  (`config.tasks`). You can reference `${TOKEN}` placeholders in a task `command`
+  and resolve them via `extraEnv`/`extraEnvFrom` (e.g. Kubernetes Secrets).
+- For hardware-accelerated video transcoding, request the accelerator device in
+  `resources`, and add the matching `nodeSelector`/`tolerations` so the pod is
+  scheduled onto an accelerator node.

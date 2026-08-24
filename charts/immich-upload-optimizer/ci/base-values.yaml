@@ -1,0 +1,51 @@
+# Base CI values for the Immich Upload Optimizer chart.
+#
+# Exercises the tasks ConfigMap, `extraEnv`/`extraEnvFrom` value sources (a plain
+# value, an existing Secret via secretKeyRef, and a ConfigMap via configMapRef),
+# the hardware accelerator resource in the root `resources` block, and node
+# scheduling values.
+
+upstream: "http://immich-server:2283"
+
+config:
+  tasks:
+    - name: jpeg-xl
+      command: cjxl --lossless_jpeg=1 {{.folder}}/{{.name}}.{{.extension}} {{.folder}}/{{.name}}-new.jxl && rm {{.folder}}/{{.name}}.{{.extension}}
+      extensions: [jpeg, jpg, png]
+
+extraEnv:
+  API_TOKEN: "test-api-token"
+
+extraEnvFrom:
+  TRANSCODE_PASSWORD:
+    secretKeyRef:
+      name: transcode-secret
+      key: password
+  FFMPEG_EXTRA_ARGS:
+    configMapKeyRef:
+      name: ffmpeg-extra-args-cm
+      key: args
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: transcode-secret
+    type: Opaque
+    stringData:
+      password: test-transcode-pw
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ffmpeg-extra-args-cm
+    data:
+      args: "-preset slow -crf 23"

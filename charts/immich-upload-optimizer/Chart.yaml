@@ -1,0 +1,11 @@
+apiVersion: v2
+name: immich-upload-optimizer
+description: A Helm chart for Immich Upload Optimizer, the smart upload proxy that optimizes images losslessly and transcodes videos with hardware acceleration before they reach Immich.
+type: application
+version: 0.1.0
+# renovate: image=ghcr.io/miguelangel-nubla/immich-upload-optimizer
+appVersion: "v0.5.5"
+maintainers:
+  - name: walnuss0815
+    email: walnuss0815@gmail.com
+    url: https://github.com/walnuss0815

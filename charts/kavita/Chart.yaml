@@ -4,7 +4,7 @@ description: A Helm chart for Kavita
 type: application
 version: 0.1.2
 # renovate: image=jvmilazz0/kavita
-appVersion: "0.9.0"
+appVersion: "0.9.1"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

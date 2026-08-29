@@ -4,7 +4,7 @@ description: A Helm chart for Kubernetes
 type: application
 version: 0.1.6
 # renovate: image=gotenberg/gotenberg
-appVersion: "8.34"
+appVersion: "8.36"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

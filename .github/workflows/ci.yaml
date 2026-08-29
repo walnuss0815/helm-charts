@@ -76,6 +76,8 @@ jobs:
         uses: losisin/helm-docs-github-action@v2
         with:
           git-push: true
+          git-push-user-name: "github-actions[bot]"
+          git-push-user-email: "41898282+github-actions[bot]@users.noreply.github.com"
           chart-search-root: charts/${{ matrix.chart }}
           git-commit-message: "chore(${{ matrix.chart }}): update Helm documentation"
 

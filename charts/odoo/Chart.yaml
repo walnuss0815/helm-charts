@@ -2,7 +2,7 @@ apiVersion: v2
 name: odoo
 description: A Helm chart for Odoo
 type: application
-version: 1.0.3
+version: 1.0.4
 # renovate: image=odoo
 appVersion: "19.0"
 maintainers:
@@ -12,6 +12,6 @@ maintainers:
 
 dependencies:
   - name: postgres
-    version: "0.3.3"
+    version: "0.3.4"
     repository: https://walnuss0815.github.io/helm-charts
     condition: postgres.enabled

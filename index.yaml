@@ -1305,6 +1305,20 @@ entries:
     version: 0.1.0
   postgres:
   - apiVersion: v2
+    appVersion: "18.6"
+    created: "2026-08-30T02:36:36.120028532Z"
+    description: A Helm chart for PostgreSQL
+    digest: 9b6a2f10020c367b24f3bc28fb77a04bb6d58045601fa5cf75669d96416b7542
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: postgres
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/postgres-0.3.4/postgres-0.3.4.tgz
+    version: 0.3.4
+  - apiVersion: v2
     appVersion: "18.4"
     created: "2026-08-16T20:44:34.194391262Z"
     description: A Helm chart for PostgreSQL
@@ -1614,4 +1628,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-29T23:46:46.961491782Z"
+generated: "2026-08-30T02:36:36.120159864Z"

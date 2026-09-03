@@ -64,9 +64,9 @@ spec:
               {{- include "linkwarden.secretEnvVar" .Values.database.password | indent 14 }}
             {{- end }}
             - name: UID
-              value: "1000"
+              value: {{ .Values.securityContext.runAsUser | default 1000 | quote }}
             - name: GID
-              value: "1000"
+              value: {{ .Values.securityContext.runAsGroup | default 1000 | quote }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
               value: {{ (tpl $value $) | quote }}

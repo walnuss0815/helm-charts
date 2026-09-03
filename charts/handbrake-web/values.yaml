@@ -230,4 +230,11 @@ webdav:
 
   persistence:
     data:
-      claimName: '{{ .Release.Name }}-video'
+      # Note: this string is rendered by the webdav subchart's own `tpl` call,
+      # in the webdav subchart's own template context - it cannot see this
+      # (parent) chart's `.Chart.Name`/`.Values.nameOverride`/`.Values.fullnameOverride`.
+      # Only `.Release.Name` is guaranteed to be identical in both contexts, so
+      # the handbrake-web.fullname logic is replicated here using the release
+      # name and this chart's literal name instead of calling that helper
+      # directly. If `fullnameOverride` is set above, update this to match.
+      claimName: '{{ if contains "handbrake-web" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-handbrake-web{{ end }}-video'

@@ -2,9 +2,9 @@ apiVersion: v2
 name: chisel
 description: A Helm chart for Chisel
 type: application
-version: 0.1.5
+version: 0.1.6
 # renovate: image=jpillora/chisel
-appVersion: "1.12.0"
+appVersion: "1.12.1"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

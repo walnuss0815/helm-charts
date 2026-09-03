@@ -4,7 +4,7 @@ description: A Helm chart for HandBrake Web
 type: application
 version: 0.1.0
 # renovate: image=ghcr.io/thenickoftime/handbrake-web-server
-appVersion: "0.7.3"
+appVersion: "0.8.1"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

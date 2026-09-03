@@ -200,6 +200,25 @@ entries:
     version: 0.1.0
   handbrake-web:
   - apiVersion: v2
+    appVersion: 0.8.1
+    created: "2026-09-03T18:19:59.295630693Z"
+    dependencies:
+    - condition: webdav.enabled
+      name: webdav
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.11
+    description: A Helm chart for HandBrake Web
+    digest: 1188af7d8b43d46319b10d9d2ae96acc9391eb07efbf1569f0b25da5b20ee2ca
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: handbrake-web
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/handbrake-web-0.1.1/handbrake-web-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: 0.7.3
     created: "2026-09-03T17:45:17.74284451Z"
     dependencies:
@@ -1873,4 +1892,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-03T17:51:44.413038624Z"
+generated: "2026-09-03T18:19:59.295759155Z"

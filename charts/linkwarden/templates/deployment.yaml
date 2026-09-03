@@ -79,9 +79,12 @@ spec:
             # `uri` secret key - that key is broken there (an int port value
             # formatted with `%s`, producing an invalid connection string).
             # Composing it here from the vars above (already correct) avoids
-            # that bug entirely.
+            # that bug entirely. Also intentionally not reusing
+            # .Values.database.url.value - that field is documented as "only
+            # used if postgres.enabled is false" and customizing it shouldn't
+            # silently affect this branch too.
             - name: DATABASE_URL
-              value: {{ .Values.database.url.value }}
+              value: "postgresql://$(DATABASE_USER):$(DATABASE_PASSWORD)@$(DATABASE_HOST):$(DATABASE_PORT)/$(DATABASE_NAME)"
             {{- else if .Values.database.enabled }}
             - name: DATABASE_HOST
               value: {{ .Values.database.host }}

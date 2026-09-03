@@ -198,6 +198,12 @@ worker:
   # -- Number of replicas for the worker deployment
   replicaCount: 1
 
+  # -- Grace period (in seconds) given to the worker to finish an
+  # in-progress transcode before it is forcibly killed on termination
+  # (rolling updates, node drains, etc.). The Kubernetes default of 30s is
+  # very likely too short for a video transcode to finish or checkpoint.
+  terminationGracePeriodSeconds: 300
+
   # -- Container image configuration
   image:
     # -- Container image repository

@@ -1,0 +1,12 @@
+nextauth:
+  secret:
+    # NEXTAUTH_SECRET has no default and the app needs a non-empty value to
+    # boot; this is a throwaway value for CI only.
+    value: "ci-test-secret"
+
+# The app runs `prisma migrate deploy` at container startup and hard-requires
+# DATABASE_URL to be set regardless of the `database.enabled` toggle - it
+# cannot boot without a reachable database. Use the bundled postgres
+# dependency to give it one.
+postgres:
+  enabled: true

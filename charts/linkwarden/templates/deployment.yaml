@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "linkwarden.fullname" . }}
+  labels:
+    {{- include "linkwarden.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "linkwarden.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "linkwarden.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "linkwarden.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: NEXTAUTH_URL
+              value: {{ .Values.nextauth.url }}
+            - name: NEXTAUTH_SECRET
+              {{- include "linkwarden.secretEnvVar" .Values.nextauth.secret | indent 14 }}
+            - name: NEXT_PUBLIC_DISABLE_REGISTRATION
+              value: {{ .Values.auth.disableRegistration | quote }}
+            {{- if .Values.postgres.enabled }}
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: host
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: port
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: database
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: password
+            # Note: intentionally not sourced from the postgres subchart's own
+            # `uri` secret key - that key is broken there (an int port value
+            # formatted with `%s`, producing an invalid connection string).
+            # Composing it here from the vars above (already correct) avoids
+            # that bug entirely. Also intentionally not reusing
+            # .Values.database.url.value - that field is documented as "only
+            # used if postgres.enabled is false" and customizing it shouldn't
+            # silently affect this branch too.
+            - name: DATABASE_URL
+              value: "postgresql://$(DATABASE_USER):$(DATABASE_PASSWORD)@$(DATABASE_HOST):$(DATABASE_PORT)/$(DATABASE_NAME)"
+            {{- else if .Values.database.enabled }}
+            - name: DATABASE_HOST
+              value: {{ .Values.database.host }}
+            - name: DATABASE_PORT
+              value: {{ .Values.database.port | quote }}
+            - name: DATABASE_NAME
+              value: {{ .Values.database.name }}
+            - name: DATABASE_USER
+              {{- include "linkwarden.secretEnvVar" .Values.database.username | indent 14 }}
+            - name: DATABASE_PASSWORD
+              {{- include "linkwarden.secretEnvVar" .Values.database.password | indent 14 }}
+            # Note: DATABASE_URL must come after the vars it references via
+            # $(...) - Kubernetes only resolves $(VAR) references to
+            # variables defined earlier in the same env list.
+            - name: DATABASE_URL
+              {{- include "linkwarden.secretEnvVar" .Values.database.url | indent 14 }}
+            {{- end }}
+            - name: UID
+              value: {{ .Values.securityContext.runAsUser | default 1000 | quote }}
+            - name: GID
+              value: {{ .Values.securityContext.runAsGroup | default 1000 | quote }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key | quote }}
+              value: {{ (tpl $value $) | quote }}
+            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            # /data/data (not /data) is intentional - it matches linkwarden's
+            # own expected data directory layout inside the container.
+            - name: data
+              mountPath: /data/data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          persistentVolumeClaim:
+            claimName: '{{ include "linkwarden.fullname" $ }}-data'
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

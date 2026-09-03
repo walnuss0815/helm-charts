@@ -4,7 +4,7 @@ description: A Helm chart for Linkwarden
 type: application
 version: 0.1.0
 # renovate: image=ghcr.io/linkwarden/linkwarden
-appVersion: "2.13.1"
+appVersion: "2.16.2"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

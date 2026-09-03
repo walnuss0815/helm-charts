@@ -2,46 +2,50 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+# -- Number of replicas for the linkwarden deployment
 replicaCount: 1
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+# -- Container image configuration
 image:
+  # -- Container image repository
   repository: ghcr.io/linkwarden/linkwarden
-  # This sets the pull policy for images.
+  # -- Image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Image tag. Defaults to `v<Chart.AppVersion>` if not set
   tag: ""
 
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+# -- Image pull secrets for private registries
 imagePullSecrets: []
-# This is to override the chart name.
+
+# -- Override the name of the chart
 nameOverride: ""
+
+# -- Override the fullname of the chart
 fullnameOverride: ""
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+# -- Service account configuration
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Automatically mount a ServiceAccount's API credentials?
+  # -- Automatically mount a ServiceAccount's API credentials
   automount: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
   name: ""
 
-# This is for setting Kubernetes Annotations to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+# -- Annotations to add to the pod
 podAnnotations: {}
-# This is for setting Kubernetes Labels to a Pod.
-# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+
+# -- Labels to add to the pod
 podLabels: {}
 
+# -- Pod security context configuration
 podSecurityContext:
   fsGroup: 1000
   fsGroupChangePolicy: OnRootMismatch
 
+# -- Container security context configuration
 securityContext:
   capabilities:
     drop:
@@ -54,25 +58,30 @@ securityContext:
     type: RuntimeDefault
   allowPrivilegeEscalation: false
 
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# -- Service configuration
 service:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  # -- Service type (ClusterIP, NodePort, LoadBalancer)
   type: ClusterIP
-  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+  # -- Service port
   port: 3000
 
-# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+# -- Ingress configuration
 ingress:
+  # -- Enable ingress
   enabled: false
+  # -- Ingress class name
   className: ""
+  # -- Ingress annotations
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  # -- Ingress hosts configuration
   hosts:
     - host: chart-example.local
       paths:
         - path: /
           pathType: ImplementationSpecific
+  # -- TLS configuration
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -82,19 +91,19 @@ ingress:
 # Requires Gateway API resources and suitable controller installed within the cluster
 # (see: https://gateway-api.sigs.k8s.io/guides/)
 httpRoute:
-  # HTTPRoute enabled.
+  # -- HTTPRoute enabled
   enabled: false
-  # HTTPRoute annotations.
+  # -- HTTPRoute annotations
   annotations: {}
-  # Which Gateways this Route is attached to.
+  # -- Which Gateways this Route is attached to
   parentRefs:
   - name: gateway
     sectionName: http
     # namespace: default
-  # Hostnames matching HTTP header.
+  # -- Hostnames matching HTTP header
   hostnames:
   - chart-example.local
-  # List of rules and filters applied.
+  # -- List of rules and filters applied
   rules:
   - matches:
     - path:
@@ -116,6 +125,7 @@ httpRoute:
   #     - name: version
   #       value: v2
 
+# -- Resource limits and requests for the linkwarden container
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -128,24 +138,30 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# -- Liveness probe configuration
 livenessProbe:
   httpGet:
     path: /
     port: http
   initialDelaySeconds: 10
+
+# -- Readiness probe configuration
 readinessProbe:
   httpGet:
     path: /
     port: http
   initialDelaySeconds: 10
 
+# -- Node selector for pod assignment
 nodeSelector: {}
 
+# -- Tolerations for pod assignment
 tolerations: []
 
+# -- Affinity rules for pod assignment
 affinity: {}
 
+# -- Extra environment variables (templated), keyed by variable name
 env: {}
 
 # -- Populate environment variables in bulk from existing ConfigMaps and/or Secrets.
@@ -157,42 +173,76 @@ envFrom: []
 # - secretRef:
 #     name: my-secret
 
+# -- Persistence configuration for the linkwarden data directory
 persistence:
   data:
+    # -- Annotations for the data PVC
     annotations: {}
+    # -- Storage class for the data PVC
     storageClass: "-"
+    # -- Size of the data PVC
     size: "2Gi"
+    # -- Access modes for the data PVC
     accessModes:
       - ReadWriteOnce
 
+# -- NextAuth configuration
 nextauth:
+  # -- Public URL of the NextAuth API endpoint
   url: "http://localhost:3000/api/v1/auth"
+  # -- NextAuth session-signing secret configuration. Must be set via `.value` or `.secretKeyRef` - there is no default
   secret:
+    # -- Plain-text secret value. Ignored if `secretKeyRef.name` is set
     value: ""
+    # -- Reference to an existing secret containing the NextAuth secret
     secretKeyRef:
+      # -- Name of the secret
       name: ""
+      # -- Key within the secret
       key: ""
 
+# -- Authentication configuration
 auth:
+  # -- Disable new user registration
   disableRegistration: false
 
+# -- External database connection configuration
 database:
+  # -- Enable configuring an external database connection
   enabled: false
+  # -- Full database connection URL configuration. Defaults to composing the URL from the individual host/port/name/username/password fields below via Kubernetes env var interpolation
   url:
+    # -- Plain-text URL value. Ignored if `secretKeyRef.name` is set
     value: "postgresql://$(DATABASE_USER):$(DATABASE_PASSWORD)@$(DATABASE_HOST):$(DATABASE_PORT)/$(DATABASE_NAME)"
+    # -- Reference to an existing secret containing the full database URL
     secretKeyRef:
+      # -- Name of the secret
       name: ""
+      # -- Key within the secret
       key: ""
+  # -- Database hostname
   host: ""
+  # -- Database port
   port: 5432
+  # -- Database name
   name: linkwarden
+  # -- Database username configuration. Must be set via `.value` or `.secretKeyRef` - there is no default
   username:
+    # -- Plain-text username value. Ignored if `secretKeyRef.name` is set
     value: ""
+    # -- Reference to an existing secret containing the database username
     secretKeyRef:
+      # -- Name of the secret
       name: ""
+      # -- Key within the secret
       key: ""
+  # -- Database password configuration. Must be set via `.value` or `.secretKeyRef` - there is no default
   password:
+    # -- Plain-text password value. Ignored if `secretKeyRef.name` is set
     value: ""
+    # -- Reference to an existing secret containing the database password
     secretKeyRef:
+      # -- Name of the secret
       name: ""
+      # -- Key within the secret
       key: ""

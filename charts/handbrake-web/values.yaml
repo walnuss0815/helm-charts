@@ -95,6 +95,8 @@ persistence:
     storageClass: "-"
     # -- Size of the data PVC
     size: "1Gi"
+    # -- Mount path for this volume within the server/worker containers
+    mountPath: /data
     # -- Access modes for the data PVC
     accessModes:
       - ReadWriteOnce
@@ -106,6 +108,8 @@ persistence:
     storageClass: "-"
     # -- Size of the video PVC
     size: "16Gi"
+    # -- Mount path for this volume within the server/worker containers
+    mountPath: /video
     # -- Access modes for the video PVC.
     # Defaults to `ReadWriteMany` because the server, worker, and the
     # optional webdav subchart all mount this PVC concurrently. Most

@@ -82,7 +82,7 @@ spec:
               mountPath: /tmp
           {{- range $key, $value := .Values.persistence }}
             - name: {{ $key }}
-              mountPath: /{{ $key }}
+              mountPath: {{ $value.mountPath | default (printf "/%s" $key) }}
           {{- end }}
       volumes:
         - name: tmp

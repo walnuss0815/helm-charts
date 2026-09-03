@@ -472,6 +472,26 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/kavita-0.1.0/kavita-0.1.0.tgz
     version: 0.1.0
+  linkwarden:
+  - apiVersion: v2
+    appVersion: 2.13.1
+    created: "2026-09-03T17:51:44.412887673Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.3.4
+    description: A Helm chart for Linkwarden
+    digest: f1fc06fbdd9a41b603ecc5e787bbfde672c823ea62adf6dc3da4f81f4be9bfbf
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: linkwarden
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/linkwarden-0.1.0/linkwarden-0.1.0.tgz
+    version: 0.1.0
   odoo:
   - apiVersion: v2
     appVersion: "19.0"
@@ -1853,4 +1873,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-03T17:45:17.743072746Z"
+generated: "2026-09-03T17:51:44.413038624Z"

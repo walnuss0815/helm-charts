@@ -103,7 +103,13 @@ persistence:
     storageClass: "-"
     # -- Size of the video PVC
     size: "16Gi"
-    # -- Access modes for the video PVC
+    # -- Access modes for the video PVC.
+    # Defaults to `ReadWriteMany` because the server, worker, and the
+    # optional webdav subchart all mount this PVC concurrently. Most
+    # default/local-path StorageClasses (including `kind`'s) only support
+    # `ReadWriteOnce` - make sure your StorageClass actually supports RWX
+    # before relying on this default, or override it if server/worker/webdav
+    # never run on different nodes at once.
     accessModes:
       - ReadWriteMany
 

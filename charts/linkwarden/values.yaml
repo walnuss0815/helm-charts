@@ -148,7 +148,14 @@ affinity: {}
 
 env: {}
 
-envFrom: {}
+# -- Populate environment variables in bulk from existing ConfigMaps and/or Secrets.
+# Follows the standard Kubernetes envFrom schema:
+# https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#configure-all-key-value-pairs-in-a-secret-as-container-environment-variables
+envFrom: []
+# - configMapRef:
+#     name: my-configmap
+# - secretRef:
+#     name: my-secret
 
 persistence:
   data:

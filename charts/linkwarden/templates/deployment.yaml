@@ -71,10 +71,10 @@ spec:
             - name: {{ $key | quote }}
               value: {{ (tpl $value $) | quote }}
             {{- end }}
-            {{- range $key, $value := .Values.envFrom }}
-            - name: {{ $key | quote }}
-              valueFrom: {{ toYaml $value | nindent 16 }}
-            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

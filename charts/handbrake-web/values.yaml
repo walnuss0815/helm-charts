@@ -82,6 +82,9 @@ httpRoute:
   #     - name: version
   #       value: v2
 
+# -- Extra Kubernetes manifests to deploy
+extraManifests: []
+
 # -- Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart)
 persistence:
   # -- Config/data directory persistence configuration

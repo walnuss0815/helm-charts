@@ -1,0 +1,25 @@
+{{- include "handbrake-web.validateWebdavClaimName" . }}
+{{- range $key, $value := .Values.persistence }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "handbrake-web.fullname" $ }}-{{ $key }}
+  labels:
+    {{- include "handbrake-web.labels" $ | nindent 4 }}
+  {{- with $value.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range $value.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $value.size | quote }}
+  {{- if not (eq $value.storageClass "-") }}
+  storageClassName: {{ $value.storageClass }}
+  {{- end }}
+---
+{{- end }}

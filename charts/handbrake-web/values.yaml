@@ -1,0 +1,294 @@
+# Default values for handbrake-web.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the fullname of the chart
+fullnameOverride: ""
+
+# -- Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
+  name: ""
+
+# -- Ingress configuration for the server component
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  # -- Ingress hosts configuration
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- TLS configuration
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# -- Expose the server component via gateway-api HTTPRoute
+# Requires Gateway API resources and suitable controller installed within the cluster
+# (see: https://gateway-api.sigs.k8s.io/guides/)
+httpRoute:
+  # -- HTTPRoute enabled
+  enabled: false
+  # -- HTTPRoute annotations
+  annotations: {}
+  # -- Which Gateways this Route is attached to
+  parentRefs:
+  - name: gateway
+    sectionName: http
+    # namespace: default
+  # -- Hostnames matching HTTP header
+  hostnames:
+  - chart-example.local
+  # -- List of rules and filters applied
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /headers
+  #   filters:
+  #   - type: RequestHeaderModifier
+  #     requestHeaderModifier:
+  #       set:
+  #       - name: My-Overwrite-Header
+  #         value: this-is-the-only-value
+  #       remove:
+  #       - User-Agent
+  # - matches:
+  #   - path:
+  #       type: PathPrefix
+  #       value: /echo
+  #     headers:
+  #     - name: version
+  #       value: v2
+
+# -- Extra Kubernetes manifests to deploy
+extraManifests: []
+
+# -- Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart)
+persistence:
+  # -- Config/data directory persistence configuration
+  data:
+    # -- Annotations for the data PVC
+    annotations: {}
+    # -- Storage class for the data PVC
+    storageClass: "-"
+    # -- Size of the data PVC
+    size: "1Gi"
+    # -- Mount path for this volume within the server/worker containers
+    mountPath: /data
+    # -- Access modes for the data PVC
+    accessModes:
+      - ReadWriteOnce
+  # -- Video library persistence configuration
+  video:
+    # -- Annotations for the video PVC
+    annotations: {}
+    # -- Storage class for the video PVC
+    storageClass: "-"
+    # -- Size of the video PVC
+    size: "16Gi"
+    # -- Mount path for this volume within the server/worker containers
+    mountPath: /video
+    # -- Access modes for the video PVC.
+    # Defaults to `ReadWriteMany` because the server, worker, and the
+    # optional webdav subchart all mount this PVC concurrently. Most
+    # default/local-path StorageClasses (including `kind`'s) only support
+    # `ReadWriteOnce` - make sure your StorageClass actually supports RWX
+    # before relying on this default, or override it if server/worker/webdav
+    # never run on different nodes at once.
+    accessModes:
+      - ReadWriteMany
+
+# -- Server workload configuration
+server:
+  # -- Number of replicas for the server deployment
+  replicaCount: 1
+
+  # -- Container image configuration
+  image:
+    # -- Container image repository
+    repository: ghcr.io/thenickoftime/handbrake-web-server
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+    # -- Image tag. Defaults to the chart's `appVersion` if not set
+    tag: ""
+
+  # -- Annotations to add to the server pod
+  podAnnotations: {}
+  # -- Labels to add to the server pod
+  podLabels: {}
+
+  # -- Pod security context configuration
+  podSecurityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+
+  # -- Container security context configuration
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+    allowPrivilegeEscalation: false
+
+  # -- Service configuration
+  service:
+    # -- Service type (ClusterIP, NodePort, LoadBalancer)
+    type: ClusterIP
+    # -- Service port
+    port: 9999
+
+  # -- Resource limits and requests for the server container
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 10
+  # -- Readiness probe configuration
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 10
+
+  # -- Node selector for server pod assignment
+  nodeSelector: {}
+
+  # -- Tolerations for server pod assignment
+  tolerations: []
+
+  # -- Affinity rules for server pod assignment
+  affinity: {}
+
+# -- Worker workload configuration
+worker:
+  # -- Number of replicas for the worker deployment
+  replicaCount: 1
+
+  # -- Grace period (in seconds) given to the worker to finish an
+  # in-progress transcode before it is forcibly killed on termination
+  # (rolling updates, node drains, etc.). The Kubernetes default of 30s is
+  # very likely too short for a video transcode to finish or checkpoint.
+  terminationGracePeriodSeconds: 300
+
+  # -- Container image configuration
+  image:
+    # -- Container image repository
+    repository: ghcr.io/thenickoftime/handbrake-web-worker
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+    # -- Image tag. Defaults to the chart's `appVersion` if not set
+    tag: ""
+
+  # -- Annotations to add to the worker pod
+  podAnnotations: {}
+  # -- Labels to add to the worker pod
+  podLabels: {}
+
+  # -- Pod security context configuration
+  podSecurityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+
+  # -- Container security context configuration
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+    allowPrivilegeEscalation: false
+
+  # -- Resource limits and requests for the worker container
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # -- Liveness probe configuration (disabled by default)
+  livenessProbe: {}
+    # httpGet:
+    #   path: /
+    #   port: http
+  # -- Readiness probe configuration (disabled by default)
+  readinessProbe: {}
+    # httpGet:
+    #   path: /
+    #   port: http
+
+  # -- Node selector for worker pod assignment
+  nodeSelector: {}
+
+  # -- Tolerations for worker pod assignment
+  tolerations: []
+
+  # -- Affinity rules for worker pod assignment
+  affinity: {}
+
+# -- webdav subchart configuration, exposing the shared video library over WebDAV. See [webdav chart](../webdav) for all available options
+webdav:
+  # -- Enable the bundled webdav subchart
+  enabled: true
+
+  # -- Persistence configuration passed to the webdav subchart
+  persistence:
+    data:
+      # Note: this string is rendered by the webdav subchart's own `tpl` call,
+      # in the webdav subchart's own template context - it cannot see this
+      # (parent) chart's `.Chart.Name`/`.Values.nameOverride`/`.Values.fullnameOverride`.
+      # Only `.Release.Name` is guaranteed to be identical in both contexts, so
+      # the handbrake-web.fullname logic is replicated here using the release
+      # name and this chart's literal name instead of calling that helper
+      # directly. If `fullnameOverride` is set above, update this to match.
+      # -- Name of the existing `video` PVC (created by this chart) to mount into webdav
+      claimName: '{{ if contains "handbrake-web" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-handbrake-web{{ end }}-video'

@@ -129,6 +129,8 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            # /data/data (not /data) is intentional - it matches linkwarden's
+            # own expected data directory layout inside the container.
             - name: data
               mountPath: /data/data
       volumes:

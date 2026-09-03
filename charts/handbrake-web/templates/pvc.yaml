@@ -11,12 +11,8 @@ metadata:
   {{- end }}
 spec:
   accessModes:
-  {{- if not (empty $value.accessModes) }}
   {{- range $value.accessModes }}
     - {{ . | quote }}
-  {{- end }}
-  {{- else }}
-    - {{ $value.accessMode | quote }}
   {{- end }}
   resources:
     requests:

@@ -1,0 +1,11 @@
+nextauth:
+  secret:
+    value: "ci-test-secret"
+
+# The app hard-requires a reachable database at boot regardless of the
+# `database.enabled` toggle - use the bundled postgres dependency.
+postgres:
+  enabled: true
+
+auth:
+  disableRegistration: true

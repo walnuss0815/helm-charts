@@ -36,29 +36,31 @@ A Helm chart for HandBrake Web
 | ingress.hosts | list | `[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Ingress hosts configuration |
 | ingress.tls | list | `[]` | TLS configuration |
 | nameOverride | string | `""` | Override the name of the chart |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"size":"16Gi","storageClass":"-"}}` | Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart) |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}` | Config/data directory persistence configuration |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":"-"},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":"-"}}` | Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart) |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":"-"}` | Config/data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
+| persistence.data.mountPath | string | `"/data"` | Mount path for this volume within the server/worker containers |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `"-"` | Storage class for the data PVC |
-| persistence.video | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"size":"16Gi","storageClass":"-"}` | Video library persistence configuration |
+| persistence.video | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":"-"}` | Video library persistence configuration |
 | persistence.video.accessModes | list | `["ReadWriteMany"]` | Access modes for the video PVC. Defaults to `ReadWriteMany` because the server, worker, and the optional webdav subchart all mount this PVC concurrently. Most default/local-path StorageClasses (including `kind`'s) only support `ReadWriteOnce` - make sure your StorageClass actually supports RWX before relying on this default, or override it if server/worker/webdav never run on different nodes at once. |
 | persistence.video.annotations | object | `{}` | Annotations for the video PVC |
+| persistence.video.mountPath | string | `"/video"` | Mount path for this volume within the server/worker containers |
 | persistence.video.size | string | `"16Gi"` | Size of the video PVC |
 | persistence.video.storageClass | string | `"-"` | Storage class for the video PVC |
-| server | object | `{"affinity":{},"image":{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-server","tag":""},"livenessProbe":{"httpGet":{"path":"/","port":"http"}},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"readinessProbe":{"httpGet":{"path":"/","port":"http"}},"replicaCount":1,"resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}},"service":{"port":9999,"type":"ClusterIP"},"tolerations":[]}` | Server workload configuration |
+| server | object | `{"affinity":{},"image":{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-server","tag":""},"livenessProbe":{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"readinessProbe":{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10},"replicaCount":1,"resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}},"service":{"port":9999,"type":"ClusterIP"},"tolerations":[]}` | Server workload configuration |
 | server.affinity | object | `{}` | Affinity rules for server pod assignment |
 | server.image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-server","tag":""}` | Container image configuration |
 | server.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | server.image.repository | string | `"ghcr.io/thenickoftime/handbrake-web-server"` | Container image repository |
 | server.image.tag | string | `""` | Image tag. Defaults to the chart's `appVersion` if not set |
-| server.livenessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Liveness probe configuration |
+| server.livenessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10}` | Liveness probe configuration |
 | server.nodeSelector | object | `{}` | Node selector for server pod assignment |
 | server.podAnnotations | object | `{}` | Annotations to add to the server pod |
 | server.podLabels | object | `{}` | Labels to add to the server pod |
 | server.podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod security context configuration |
-| server.readinessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Readiness probe configuration |
+| server.readinessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10}` | Readiness probe configuration |
 | server.replicaCount | int | `1` | Number of replicas for the server deployment |
 | server.resources | object | `{}` | Resource limits and requests for the server container |
 | server.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context configuration |
@@ -75,7 +77,7 @@ A Helm chart for HandBrake Web
 | webdav.enabled | bool | `true` | Enable the bundled webdav subchart |
 | webdav.persistence | object | `{"data":{"claimName":"{{ if contains \"handbrake-web\" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-handbrake-web{{ end }}-video"}}` | Persistence configuration passed to the webdav subchart |
 | webdav.persistence.data.claimName | string | `"{{ if contains \"handbrake-web\" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-handbrake-web{{ end }}-video"` | Name of the existing `video` PVC (created by this chart) to mount into webdav |
-| worker | object | `{"affinity":{},"image":{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-worker","tag":""},"livenessProbe":{},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"readinessProbe":{},"replicaCount":1,"resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}},"tolerations":[]}` | Worker workload configuration |
+| worker | object | `{"affinity":{},"image":{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-worker","tag":""},"livenessProbe":{},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"readinessProbe":{},"replicaCount":1,"resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}},"terminationGracePeriodSeconds":300,"tolerations":[]}` | Worker workload configuration |
 | worker.affinity | object | `{}` | Affinity rules for worker pod assignment |
 | worker.image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-worker","tag":""}` | Container image configuration |
 | worker.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
@@ -90,6 +92,7 @@ A Helm chart for HandBrake Web
 | worker.replicaCount | int | `1` | Number of replicas for the worker deployment |
 | worker.resources | object | `{}` | Resource limits and requests for the worker container |
 | worker.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context configuration |
+| worker.terminationGracePeriodSeconds | int | `300` | Grace period (in seconds) given to the worker to finish an in-progress transcode before it is forcibly killed on termination (rolling updates, node drains, etc.). The Kubernetes default of 30s is very likely too short for a video transcode to finish or checkpoint. |
 | worker.tolerations | list | `[]` | Tolerations for worker pod assignment |
 
 ----------------------------------------------

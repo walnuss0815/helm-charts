@@ -10,12 +10,8 @@ metadata:
   {{- end }}
 spec:
   accessModes:
-  {{- if not (empty .Values.persistence.data.accessModes) }}
   {{- range .Values.persistence.data.accessModes }}
     - {{ . | quote }}
-  {{- end }}
-  {{- else }}
-    - {{ .Values.persistence.data.accessMode | quote }}
   {{- end }}
   resources:
     requests:

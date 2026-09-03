@@ -102,3 +102,18 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Validate that webdav.persistence.data.claimName accounts for fullnameOverride.
+That value is rendered via `tpl` inside the webdav subchart's own template
+context, which cannot see this (parent) chart's .Values.fullnameOverride, so
+it cannot auto-adjust. If fullnameOverride is set and this value still equals
+its untouched default expression, fail loudly rather than let webdav silently
+mount a PVC that doesn't exist.
+*/}}
+{{- define "handbrake-web.validateWebdavClaimName" -}}
+{{- $defaultClaimName := `{{ if contains "handbrake-web" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-handbrake-web{{ end }}-video` -}}
+{{- if and .Values.fullnameOverride .Values.webdav.enabled (eq .Values.webdav.persistence.data.claimName $defaultClaimName) }}
+{{- fail (printf "fullnameOverride is set to %q, but webdav.persistence.data.claimName still uses its default expression, which does not account for fullnameOverride. Update webdav.persistence.data.claimName in your values to reference '%s-video' instead." .Values.fullnameOverride .Values.fullnameOverride) }}
+{{- end }}
+{{- end }}

@@ -1,3 +1,4 @@
+{{- include "handbrake-web.validateWebdavClaimName" . }}
 {{- range $key, $value := .Values.persistence }}
 kind: PersistentVolumeClaim
 apiVersion: v1

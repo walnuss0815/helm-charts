@@ -1,0 +1,6 @@
+nextauth:
+  secret:
+    value: "ci-test-secret"
+
+postgres:
+  enabled: true

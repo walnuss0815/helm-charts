@@ -1,0 +1,5 @@
+nextauth:
+  secret:
+    # NEXTAUTH_SECRET has no default and the app needs a non-empty value to
+    # boot; this is a throwaway value for CI only.
+    value: "ci-test-secret"

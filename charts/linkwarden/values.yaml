@@ -191,7 +191,11 @@ persistence:
 
 # -- NextAuth configuration
 nextauth:
-  # -- Public URL of the NextAuth API endpoint
+  # -- Public URL of the NextAuth API endpoint. Must be set to the real,
+  # externally-reachable URL in any non-local deployment - NextAuth uses
+  # this for redirect/callback validation, so a stale/incorrect value here
+  # is a functional and security concern (e.g. behind an Ingress, this must
+  # match the Ingress host, not localhost)
   url: "http://localhost:3000/api/v1/auth"
   # -- NextAuth session-signing secret configuration. Must be set via `.value` or `.secretKeyRef` - there is no default
   secret:

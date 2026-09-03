@@ -72,7 +72,7 @@ A Helm chart for Linkwarden
 | nextauth.secret.secretKeyRef.key | string | `""` | Key within the secret |
 | nextauth.secret.secretKeyRef.name | string | `""` | Name of the secret |
 | nextauth.secret.value | string | `""` | Plain-text secret value. Ignored if `secretKeyRef.name` is set |
-| nextauth.url | string | `"http://localhost:3000/api/v1/auth"` | Public URL of the NextAuth API endpoint |
+| nextauth.url | string | `"http://localhost:3000/api/v1/auth"` | Public URL of the NextAuth API endpoint. Must be set to the real, externally-reachable URL in any non-local deployment - NextAuth uses this for redirect/callback validation, so a stale/incorrect value here is a functional and security concern (e.g. behind an Ingress, this must match the Ingress host, not localhost) |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"2Gi","storageClass":"-"}}` | Persistence configuration for the linkwarden data directory |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the data PVC |

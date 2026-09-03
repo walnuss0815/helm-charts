@@ -161,7 +161,7 @@ persistence:
 nextauth:
   url: "http://localhost:3000/api/v1/auth"
   secret:
-    value: "r4nD0m53cRet"
+    value: ""
     secretKeyRef:
       name: ""
       key: ""
@@ -180,12 +180,12 @@ database:
   port: 5432
   name: linkwarden
   username:
-    value: "linkwarden"
+    value: ""
     secretKeyRef:
       name: ""
       key: ""
   password:
-    value: "linkwarden"
+    value: ""
     secretKeyRef:
       name: ""
       key: ""

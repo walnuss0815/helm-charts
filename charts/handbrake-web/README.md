@@ -63,7 +63,7 @@ A Helm chart for Kubernetes
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` |  |
 | webdav.enabled | bool | `true` |  |
-| webdav.persistence.data.claimName | string | `"{{ .Release.Name }}-video"` |  |
+| webdav.persistence.data.claimName | string | `"{{ if contains \"handbrake-web\" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-handbrake-web{{ end }}-video"` |  |
 | worker.affinity | object | `{}` |  |
 | worker.image.pullPolicy | string | `"IfNotPresent"` |  |
 | worker.image.repository | string | `"ghcr.io/thenickoftime/handbrake-web-worker"` |  |

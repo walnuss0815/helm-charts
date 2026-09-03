@@ -198,6 +198,26 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/gotenberg-0.1.0/gotenberg-0.1.0.tgz
     version: 0.1.0
+  handbrake-web:
+  - apiVersion: v2
+    appVersion: 0.7.3
+    created: "2026-09-03T17:45:17.74284451Z"
+    dependencies:
+    - condition: webdav.enabled
+      name: webdav
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.11
+    description: A Helm chart for HandBrake Web
+    digest: 9fec47ab2b17d32ec5b06d539badb47067b6c5dab552c1ca1a492a43b9622526
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: handbrake-web
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/handbrake-web-0.1.0/handbrake-web-0.1.0.tgz
+    version: 0.1.0
   immich-kiosk:
   - apiVersion: v2
     appVersion: 0.43.1
@@ -1833,4 +1853,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-02T17:04:13.974237304Z"
+generated: "2026-09-03T17:45:17.743072746Z"

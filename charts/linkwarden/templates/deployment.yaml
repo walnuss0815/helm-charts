@@ -49,7 +49,38 @@ spec:
               {{- include "linkwarden.secretEnvVar" .Values.nextauth.secret | indent 14 }}
             - name: NEXT_PUBLIC_DISABLE_REGISTRATION
               value: {{ .Values.auth.disableRegistration | quote }}
-            {{- if .Values.database.enabled }}
+            {{- if .Values.postgres.enabled }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: uri
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: host
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: port
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: database
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postgres.secret.name . }}
+                  key: password
+            {{- else if .Values.database.enabled }}
             - name: DATABASE_URL
               {{- include "linkwarden.secretEnvVar" .Values.database.url | indent 14 }}
             - name: DATABASE_HOST

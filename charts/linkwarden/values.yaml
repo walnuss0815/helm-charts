@@ -209,7 +209,21 @@ auth:
   # -- Disable new user registration
   disableRegistration: false
 
-# -- External database connection configuration
+# -- Bundled PostgreSQL subchart configuration (disabled by default; mainly intended for
+# testing/CI - see [postgres chart](../postgres) for all available options). When enabled,
+# this takes precedence over `database.*` for wiring the DATABASE_* env vars.
+postgres:
+  # -- Enable the bundled PostgreSQL subchart instead of an external database via `database.*`
+  enabled: false
+  # -- Secret configuration for database credentials, also used by this chart to know which
+  # secret to read DATABASE_* env vars from
+  secret:
+    # -- Create a new secret for database credentials
+    create: true
+    # -- Name of the secret (supports Helm templating)
+    name: '{{ .Release.Name }}-db'
+
+# -- External database connection configuration. Only used if `postgres.enabled` is `false`
 database:
   # -- Enable configuring an external database connection
   enabled: false

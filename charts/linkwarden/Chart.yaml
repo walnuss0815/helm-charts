@@ -9,3 +9,9 @@ maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com
     url: https://github.com/walnuss0815
+
+dependencies:
+  - name: postgres
+    version: "0.3.4"
+    repository: https://walnuss0815.github.io/helm-charts
+    condition: postgres.enabled

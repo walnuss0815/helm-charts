@@ -2,7 +2,7 @@ apiVersion: v2
 name: linkwarden
 description: A Helm chart for Linkwarden
 type: application
-version: 0.1.0
+version: 0.1.1
 # renovate: image=ghcr.io/linkwarden/linkwarden
 appVersion: "2.16.2"
 maintainers:

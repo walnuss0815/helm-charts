@@ -161,6 +161,9 @@ tolerations: []
 # -- Affinity rules for pod assignment
 affinity: {}
 
+# -- Extra Kubernetes manifests to deploy
+extraManifests: []
+
 # -- Extra environment variables (templated), keyed by variable name
 env: {}
 

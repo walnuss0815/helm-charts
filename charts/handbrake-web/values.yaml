@@ -178,11 +178,13 @@ server:
     httpGet:
       path: /
       port: http
+    initialDelaySeconds: 10
   # -- Readiness probe configuration
   readinessProbe:
     httpGet:
       path: /
       port: http
+    initialDelaySeconds: 10
 
   # -- Node selector for server pod assignment
   nodeSelector: {}

@@ -2,7 +2,7 @@ apiVersion: v2
 name: webdav
 description: A Helm chart for Kubernetes
 type: application
-version: 0.1.11
+version: 0.1.12
 # renovate: image=hacdias/webdav
 appVersion: "v5.15.1"
 maintainers:

@@ -12,6 +12,6 @@ maintainers:
 
 dependencies:
   - name: webdav
-    version: "0.1.11"
+    version: "0.1.12"
     repository: https://walnuss0815.github.io/helm-charts
     condition: webdav.enabled

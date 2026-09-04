@@ -2,7 +2,7 @@ apiVersion: v2
 name: handbrake-web
 description: A Helm chart for HandBrake Web
 type: application
-version: 0.1.1
+version: 0.1.2
 # renovate: image=ghcr.io/thenickoftime/handbrake-web-server
 appVersion: "0.8.1"
 maintainers:
@@ -12,6 +12,6 @@ maintainers:
 
 dependencies:
   - name: webdav
-    version: "0.1.11"
+    version: "0.1.12"
     repository: https://walnuss0815.github.io/helm-charts
     condition: webdav.enabled

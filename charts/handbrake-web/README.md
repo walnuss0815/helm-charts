@@ -1,6 +1,6 @@
 # handbrake-web
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.1](https://img.shields.io/badge/AppVersion-0.8.1-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.1](https://img.shields.io/badge/AppVersion-0.8.1-informational?style=flat-square)
 
 A Helm chart for HandBrake Web
 
@@ -14,7 +14,7 @@ A Helm chart for HandBrake Web
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://walnuss0815.github.io/helm-charts | webdav | 0.1.11 |
+| https://walnuss0815.github.io/helm-charts | webdav | 0.1.12 |
 
 ## Values
 

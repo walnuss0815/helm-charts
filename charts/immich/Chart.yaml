@@ -2,7 +2,7 @@ apiVersion: v2
 name: immich
 description: A Helm chart for Immich, the high performance self-hosted photo and video management solution.
 type: application
-version: 0.1.0
+version: 0.1.1
 # renovate: image=ghcr.io/immich-app/immich-server
 appVersion: "v3.1.0"
 maintainers:

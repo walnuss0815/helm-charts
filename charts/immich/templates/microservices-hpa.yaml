@@ -1,0 +1,37 @@
+{{- if .Values.microservices.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "immich.fullname" . }}-microservices
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: microservices
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "immich.fullname" . }}-microservices
+  minReplicas: {{ .Values.microservices.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.microservices.autoscaling.maxReplicas }}
+  {{- with .Values.microservices.autoscaling.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  metrics:
+    {{- if .Values.microservices.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.microservices.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.microservices.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.microservices.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

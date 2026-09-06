@@ -1,0 +1,699 @@
+# Default values for immich.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## @section Global parameters
+
+# -- Container image configuration shared by the server and microservices workloads.
+image:
+  # -- Image repository
+  repository: ghcr.io/immich-app/immich-server
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag. Overrides the chart appVersion when set
+  tag: ""
+
+# -- Secrets for pulling images from a private registry. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
+imagePullSecrets: []
+
+# -- Override the chart name
+nameOverride: ""
+
+# -- Override the full chart name
+fullnameOverride: ""
+
+## @section Service account
+
+# -- Service account configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/security/service-accounts/)
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials
+  automount: false
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- Name of the service account to use. If not set and `create` is `true`, a name is generated using the fullname template
+  name: ""
+
+## @section Common configuration
+
+# -- Timezone used by all Immich workers. See [tz database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+timezone: "UTC"
+
+# -- Immich log level. One of `verbose`, `debug`, `log`, `warn`, `error`
+logLevel: "log"
+
+# -- Redis/Valkey connection configuration used by the server and microservices workloads.
+redis:
+  # -- Redis/Valkey host. Uses the bundled valkey subchart when empty
+  host: ""
+  # -- Redis/Valkey port
+  port: 6379
+  # -- Redis/Valkey database index
+  dbindex: 0
+  # -- Redis/Valkey password injected into the server and microservices workloads.
+  # Only needed when authentication is enabled on Valkey. Accepts either an
+  # inline `value` (stored in a chart-managed Secret named `<fullname>-redis-password`)
+  # or a `secretKeyRef` referencing an existing Secret
+  password:
+    # -- Inline password value. Stored in a chart-managed Secret when set
+    value: ""
+    # -- Reference to an existing Secret containing the password
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+
+## @section Application
+
+# -- JWT secret used to sign session tokens. Accepts either an inline `value`
+# (stored in a chart-managed Secret named `<fullname>-jwt-secret`) or a
+# `secretKeyRef` referencing an existing Secret.
+# Strongly recommended: when unset, Immich falls back to a temporary secret and
+# existing sessions are invalidated whenever the workload restarts.
+jwtSecret:
+  # -- Inline secret value. Stored in a chart-managed Secret when set
+  value: ""
+  # -- Reference to an existing Secret containing the secret
+  secretKeyRef:
+    # -- Name of the secret
+    name: ""
+    # -- Key within the secret
+    key: ""
+
+## @section Server
+
+# The `server` workload serves the web UI and the REST API. It runs the `api`
+# Immich worker and is the only workload that is exposed externally.
+server:
+  # -- Number of server replicas
+  replicaCount: 1
+  image:
+    # -- Image repository. Defaults to the global `image.repository`
+    repository: ""
+    # -- Image tag. Defaults to the global `image.tag` or the chart `appVersion`
+    tag: ""
+  # -- Kubernetes Service configuration for the server.
+  service:
+    # -- Service type. See [service types](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)
+    type: ClusterIP
+    # -- Service port
+    port: 2283
+    # -- Service annotations
+    annotations: {}
+  # -- Ingress configuration for the server.
+  ingress:
+    # -- Enable ingress
+    enabled: false
+    # -- Ingress class name
+    className: ""
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hosts configuration
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    # -- Ingress TLS configuration
+    tls: []
+  # -- Expose the server via a Gateway API HTTPRoute.
+  httpRoute:
+    # -- Enable HTTPRoute
+    enabled: false
+    # -- HTTPRoute annotations
+    annotations: {}
+    # -- Gateways this route is attached to
+    parentRefs:
+      - name: gateway
+        sectionName: http
+    # -- Hostnames matching the HTTP host header
+    hostnames:
+      - chart-example.local
+    # -- List of routing rules applied to matched requests
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+  # -- Resource requests and limits for the server container.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  # -- Liveness probe configuration for the server container.
+  livenessProbe:
+    httpGet:
+      path: /api/server/ping
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  # -- Readiness probe configuration for the server container.
+  readinessProbe:
+    httpGet:
+      path: /api/server/ping
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  # -- Startup probe configuration for the server container.
+  startupProbe:
+    httpGet:
+      path: /api/server/ping
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+  # -- Pod-level security context for the server pods
+  podSecurityContext:
+    fsGroup: 1000
+  # -- Container-level security context for the server container.
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+  # -- Extra annotations to add to the server pods
+  podAnnotations: {}
+  # -- Extra labels to add to the server pods
+  podLabels: {}
+  # -- Node selector for server pod scheduling
+  nodeSelector: {}
+  # -- Tolerations for server pod scheduling
+  tolerations: []
+  # -- Affinity rules for server pod scheduling
+  affinity: {}
+  # -- Hardware device used for transcoding. Maps to `IMMICH_TRANSCODING_HW_DEVICE`,
+  # which is injected via the shared ConfigMap into both the server and
+  # microservices workloads (the microservices worker executes the actual
+  # transcoding jobs). Set to `null` (default) to disable hardware transcoding.
+  # Supported values: `nvenc` (NVIDIA), `qsv` (Intel), `vaapi` (AMD/NVIDIA/Intel),
+  # `rkmpp` (Rockchip). If the same variable is also set in `extraEnv`, the
+  # `extraEnv` value takes precedence (container `env` overrides `envFrom`).
+  transcodingDevice: null
+  # -- Additional environment variables for the server container
+  extraEnv: {}
+  # -- Additional environment variables sourced from ConfigMaps or Secrets for the server container.
+  # Mapping of variable names to Kubernetes `valueFrom` objects, e.g.
+  # `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
+  extraEnvFrom: {}
+
+## @section Microservices
+
+# The `microservices` workload handles background jobs (thumbnail generation,
+# metadata extraction, transcoding, ...). Scale it up to increase job throughput.
+microservices:
+  # -- Number of microservices replicas
+  replicaCount: 1
+  image:
+    # -- Image repository. Defaults to the global `image.repository`
+    repository: ""
+    # -- Image tag. Defaults to the global `image.tag` or the chart `appVersion`
+    tag: ""
+  service:
+    # -- Enable the microservices Service. Only required for scraping its metrics.
+    # The Service only exposes a metrics port.
+    enabled: false
+    # -- Service annotations
+    annotations: {}
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  # -- Liveness probe configuration for the microservices container.
+  livenessProbe: {}
+  # -- Readiness probe configuration for the microservices container.
+  readinessProbe: {}
+  # -- Startup probe configuration for the microservices container.
+  startupProbe: {}
+  # -- Pod-level security context for the microservices pods
+  podSecurityContext:
+    fsGroup: 1000
+  # -- Container-level security context for the microservices container.
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+  # -- Extra annotations to add to the microservices pods
+  podAnnotations: {}
+  # -- Extra labels to add to the microservices pods
+  podLabels: {}
+  # -- Node selector for microservices pod scheduling
+  nodeSelector: {}
+  # -- Tolerations for microservices pod scheduling
+  tolerations: []
+  # -- Affinity rules for microservices pod scheduling
+  affinity: {}
+  # -- Topology spread constraints for the microservices pods.
+  # See [Kubernetes docs](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
+  topologySpreadConstraints: []
+  # -- Horizontal Pod Autoscaler for the microservices workload.
+  # Every scaled-up replica must be connected to the same Postgres and Redis
+  # instances and mount the same media volume, so make sure
+  # `persistence.media` is backed by storage that supports multi-pod access
+  # (`ReadWriteMany`). See [Immich docs](https://docs.immich.app/guides/scaling-immich)
+  autoscaling:
+    # -- Enable autoscaling of the microservices deployment
+    enabled: false
+    # -- Lower limit for the number of microservices replicas
+    minReplicas: 1
+    # -- Upper limit for the number of microservices replicas
+    maxReplicas: 5
+    # -- Target CPU utilization percentage to scale on
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage to scale on. Disabled when empty
+    targetMemoryUtilizationPercentage: ""
+    # -- Scale-up/down behavior. See [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configurable-scaling-behavior)
+    behavior: {}
+  # -- Additional environment variables for the microservices container
+  extraEnv: {}
+  # -- Additional environment variables sourced from ConfigMaps or Secrets for the microservices container.
+  # Mapping of variable names to Kubernetes `valueFrom` objects, e.g.
+  # `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
+  extraEnvFrom: {}
+
+## @section Machine learning
+
+# The `machine-learning` workload runs the machine learning models (smart search,
+# face recognition, object detection, ...). It can be disabled, moved to a
+# GPU-enabled node or even a separate cluster.
+machineLearning:
+  # -- Enable the machine-learning workload
+  enabled: true
+  # -- Number of machine-learning replicas
+  replicaCount: 1
+  image:
+    # -- Image repository
+    repository: ghcr.io/immich-app/immich-machine-learning
+    # -- Image tag. Defaults to the chart `appVersion`
+    tag: ""
+    # -- Hardware-acceleration tag suffix appended to the image tag,
+    # e.g. `-cuda`, `-rocm`, `-openvino`, `-armnn` or `-rknn`
+    tagSuffix: ""
+  service:
+    # -- Service port
+    port: 3003
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      memory: 3Gi
+  # -- Liveness probe configuration for the machine-learning container.
+  livenessProbe:
+    httpGet:
+      path: /ping
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  # -- Readiness probe configuration for the machine-learning container.
+  readinessProbe:
+    httpGet:
+      path: /ping
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  # -- Startup probe configuration for the machine-learning container.
+  startupProbe:
+    httpGet:
+      path: /ping
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+  # -- Pod-level security context for the machine-learning pods
+  podSecurityContext:
+    fsGroup: 1000
+  # -- Container-level security context for the machine-learning container.
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+  # -- Extra annotations to add to the machine-learning pods
+  podAnnotations: {}
+  # -- Extra labels to add to the machine-learning pods
+  podLabels: {}
+  # -- Node selector for machine-learning pod scheduling
+  nodeSelector: {}
+  # -- Tolerations for machine-learning pod scheduling
+  tolerations: []
+  # -- Affinity rules for machine-learning pod scheduling
+  affinity: {}
+  # -- Horizontal Pod Autoscaler for the machine-learning workload.
+  # Every scaled-up replica mounts the same model cache volume (models are
+  # downloaded once and reused). Enable autoscaling only when
+  # `persistence.modelCache` is backed by storage that supports multi-pod
+  # access (`ReadWriteMany`), otherwise replicas cannot be scheduled on other
+  # nodes. See [Immich docs](https://docs.immich.app/guides/scaling-immich)
+  autoscaling:
+    # -- Enable autoscaling of the machine-learning deployment
+    enabled: false
+    # -- Lower limit for the number of machine-learning replicas
+    minReplicas: 1
+    # -- Upper limit for the number of machine-learning replicas
+    maxReplicas: 5
+    # -- Target CPU utilization percentage to scale on
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage to scale on. Models are loaded into
+    # memory, so scaling on memory is usually more reactive than on CPU
+    targetMemoryUtilizationPercentage: 80
+    # -- Scale-up/down behavior. See [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configurable-scaling-behavior)
+    behavior: {}
+  # -- Additional environment variables for the machine-learning container.
+  # Machine learning device overrides like `MACHINE_LEARNING_DEVICES` belong here.
+  extraEnv: {}
+  # -- Additional environment variables sourced from ConfigMaps or Secrets for the machine-learning container.
+  # Mapping of variable names to Kubernetes `valueFrom` objects, e.g.
+  # `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
+  extraEnvFrom: {}
+
+## @section Configuration file
+
+# Immich can be configured through a YAML/JSON config file referenced by the
+# `IMMICH_CONFIG_FILE` environment variable (see
+# [Immich docs](https://docs.immich.app/install/config-file)). This is the way to
+# configure features that are not exposed as dedicated values in this chart, such
+# as `ffmpeg`, `job` concurrency, `machineLearning` tuning, `notifications.smtp`,
+# `oauth`, `theme`, `trash` retention, ...
+#
+# The base config is stored in a plaintext ConfigMap, but any sensitive values
+# (e.g. `oauth.clientSecret`, `notifications.smtp.transport.password`) are
+# written as `${UPPER_CASE}` placeholders and resolved at pod start: an
+# `initContainer` substitutes each placeholder and writes the final file to an
+# ephemeral in-memory volume that the server reads. The ConfigMap therefore never
+# holds secrets. The substitution values come from `config.env`, which accepts a
+# plain `value`, an existing `secretKeyRef` or a `configMapRef` per entry.
+#
+# Enabling this wires up an init step on the server workload and sets
+# `IMMICH_CONFIG_FILE` to the fixed path `/config/immich.yaml`. The init step and
+# the ConfigMap are always rendered (even when `content`/`env` are empty), so the
+# feature can be turned on purely by supplying `content`. Placeholders must occupy
+# an entire YAML scalar, e.g. `clientSecret: ${OAUTH_CLIENT_SECRET}` (the value is
+# YAML-quoted on substitution, so unquoted syntax is expected). Placeholders not
+# listed in `config.env` are left untouched.
+config:
+  # -- Base config file content as a YAML map (mirrors the default Immich config,
+  # see the [Immich docs](https://docs.immich.app/install/config-file)). Sensitive
+  # values must NOT be hardcoded here; use `${UPPER_SNAKE_CASE}` placeholders and
+  # provide the matching values under `config.env`. The file is rendered to the
+  # fixed container path `/config/immich.yaml`. Example:
+  # ```
+  # content:
+  #   oauth:
+  #     enabled: true
+  #     clientId: "<id>"
+  #     clientSecret: ${OAUTH_CLIENT_SECRET}
+  #     issuerUrl: "https://..."
+  #   notifications:
+  #     smtp:
+  #       enabled: true
+  #       from: "immich@example.com"
+  #       transport:
+  #         host: "smtp.example.com"
+  #         password: ${SMTP_PASSWORD}
+  #   trash:
+  #     enabled: true
+  #     days: 30
+  # ```
+  content: {}
+  # -- Values injected into the config file at runtime. Each placeholder
+  # `${TOKEN}` in `content` is matched to the entry with the same `TOKEN` key,
+  # so the map keys are the placeholder names. Each entry provides its value via
+  # either a plain `value` (simplest, fine for testing), an existing `secretKeyRef`
+  # or a `configMapRef`.
+  # > Do not use `value` for production secrets: it is stored in plaintext in the
+  # > chart values / GitOps repository. Prefer `secretKeyRef` (or `configMapRef`)
+  # > so the value never lands in the chart's rendered manifests.
+  # Example:
+  # ```
+  # env:
+  #   OAUTH_CLIENT_SECRET:
+  #     value: "<client-secret>"
+  #   SMTP_PASSWORD:
+  #     secretKeyRef:
+  #       name: smtp-secret
+  #       key: password
+  #   THEME_CSS:
+  #     configMapRef:
+  #       name: theme-cm
+  #       key: brand
+  # ```
+  env: {}
+
+## @section Persistence
+
+persistence:
+  # -- Shared library media volume mounted by the server and microservices workloads
+  # at the fixed container path `/data` (the Immich `IMMICH_MEDIA_LOCATION` default).
+  # The volume must support sharing across pods (`ReadWriteMany`).
+  media:
+    # -- Enable dynamic provisioning of the media volume. Set to `false` when using an `existingClaim`
+    enabled: true
+    # -- Name of an existing PVC to use instead of creating a new one
+    existingClaim: ""
+    # -- Annotations for the media volume PVC
+    annotations: {}
+    # -- Storage class for the media volume. Use `"-"` to disable dynamic provisioning
+    storageClass: ""
+    # -- Access modes for the media volume
+    accessModes:
+      - ReadWriteMany
+    # -- Size of the media volume
+    size: 100Gi
+  # -- Machine learning model cache volume, mounted at `/cache` inside the
+  # container (`MACHINE_LEARNING_CACHE_FOLDER` default). Downloaded models are
+  # shared across all machine-learning replicas. Use `ReadWriteMany` access modes
+  # when scaling the machine-learning workload horizontally (`autoscaling`)
+  modelCache:
+    # -- Enable dynamic provisioning of the model cache volume. Set to `false` when using an `existingClaim`
+    enabled: true
+    # -- Name of an existing PVC to use instead of creating a new one
+    existingClaim: ""
+    # -- Annotations for the model cache volume PVC
+    annotations: {}
+    # -- Storage class for the model cache volume
+    storageClass: ""
+    # -- Access modes for the model cache volume
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of the model cache volume
+    size: 5Gi
+
+## @section Monitoring
+
+# Immich serves Prometheus metrics on the `/metrics` endpoint. The server exposes
+# API metrics (`IMMICH_API_METRICS_PORT`, default 8081) and the microservices
+# workload exposes microservice metrics (`IMMICH_MICROSERVICES_METRICS_PORT`, default 8082).
+# See [Immich docs](https://docs.immich.app/features/monitoring/)
+monitoring:
+  # -- Enable metrics scraping. Sets `IMMICH_TELEMETRY_INCLUDE=all` on the workloads
+  enabled: false
+  # -- Create ServiceMonitors for the server and microservices services.
+  # Enable this only when a Prometheus Operator (CRDs) is installed in the cluster
+  serviceMonitors:
+    enabled: false
+  # -- Scrape interval for the ServiceMonitors
+  interval: 30s
+  # -- Scrape timeout for the ServiceMonitors
+  scrapeTimeout: 10s
+  # -- Annotations to add to the ServiceMonitors
+  annotations: {}
+  # -- Extra labels to add to the ServiceMonitors
+  labels: {}
+  # -- NamespaceSelector for the ServiceMonitors.
+  # Empty selects the namespace the ServiceMonitors are deployed in.
+  namespaceSelector: {}
+  # -- HonorLabels for the ServiceMonitors. Keeps exported labels of the workload over server-generated names
+  honorLabels: true
+  # -- Port the server exposes API metrics on. Also sets `IMMICH_API_METRICS_PORT`
+  apiMetricsPort: 8081
+  # -- Port the microservices workload exposes metrics on. Also sets `IMMICH_MICROSERVICES_METRICS_PORT`
+  microservicesMetricsPort: 8082
+
+## @section PostgreSQL
+
+# Immich requires PostgreSQL `>= 14, < 20` with the `vchord` and `earthdistance`
+# extensions. The bundled cluster uses the official CloudNativePG standard image,
+# which ships `pgvector`, `cube` and `earthdistance`; the `vchord` extension is
+# injected at runtime through the CNPG ImageVolume extension mechanism (see
+# `extensions` below). This requires CloudNativePG `1.30`+ and Kubernetes
+# `1.35`+ (with containerd `2.1`+).
+# See [Immich docs](https://docs.immich.app/administration/postgres-standalone/)
+postgres:
+  # -- Enable CNPG Cluster creation. Set to `false` to use an external database
+  enabled: true
+  # -- Annotations to add to the CNPG Cluster
+  annotations: {}
+  # -- List of SQL statements executed after the database bootstrap.
+  # Creates the required extensions inside the Immich database
+  postInitApplicationSQL:
+    - CREATE EXTENSION IF NOT EXISTS vector
+    - CREATE EXTENSION IF NOT EXISTS vchord
+    - CREATE EXTENSION IF NOT EXISTS cube
+    - CREATE EXTENSION IF NOT EXISTS earthdistance
+  # -- Host of an external database. Only used when `enabled` is `false`
+  host: ""
+  # -- Port of an external database. Only used when `enabled` is `false`
+  port: 5432
+  # -- Name of the role that owns the Immich database (also used as `DB_USERNAME`)
+  user: immich
+  # -- Name of the Immich database
+  database: immich
+  #   -- PostgreSQL password: the database user password for Immich.
+  #   Accepts either an inline `value` (stored in a chart-managed Secret named
+  #   `<fullname>-postgresql-credentials` together with the `username`) or a
+  #   `secretKeyRef` referencing an existing Secret containing the password
+  #   (plus the `username` when the CNPG cluster is enabled). When none of these
+  #   is set and the chart-managed CNPG cluster is enabled, CloudNativePG
+  #   generates a random password itself (stored in `<fullname>-postgresql-app`).
+  #   An external database (`postgres.enabled: false`) always requires a password
+  #   source.
+  password:
+    # -- Inline password value. Stored in a chart-managed Secret when set
+    value: ""
+    # -- Reference to an existing Secret containing the password
+    secretKeyRef:
+      # -- Name of the secret
+      name: ""
+      # -- Key within the secret
+      key: ""
+  # -- Name of an existing Secret containing `username` and `password` keys used to
+  # bootstrap the CNPG cluster. Defaults to the chart-managed or referenced db password
+  bootstrapSecretOverride: ""
+  image:
+    # -- Image repository for the CNPG cluster instances. Empty by default so the
+    # CloudNativePG operator applies its own default image. `imageName` is only
+    # rendered in the Cluster CR when this is set. Use a standard image with the
+    # `-trixie` tag (PostgreSQL 18) for `vchord` support via ImageVolume extensions
+    repository: ""
+    # -- Image tag for the CNPG cluster instances. Only rendered together with `repository`
+    tag: ""
+  # -- Number of PostgreSQL instances in the CNPG cluster
+  instances: 1
+  # -- Resource requests and limits for the PostgreSQL instances
+  resources: {}
+  # -- Pod-level security context for the PostgreSQL instances.
+  # Empty by default so CloudNativePG applies its hardened defaults (the official
+  # images run the `postgres` user as UID/GID `26`)
+  podSecurityContext: {}
+  # -- Container-level security context for the PostgreSQL instance container.
+  # Merged with CloudNativePG's hardened defaults; no overrides by default
+  securityContext: {}
+  # -- Shared preload libraries loaded at PostgreSQL server start.
+  # `vchord` must be preloaded for the extension to work
+  sharedPreloadLibraries:
+    - vchord.so
+  # -- PostgreSQL extensions injected via the CNPG ImageVolume extension mechanism.
+  # See [CNPG docs](https://cloudnative-pg.io/documentation/current/imagevolume_extensions/).
+  # Set to `[]` to disable ImageVolume extensions (e.g. when using a prebuilt image)
+  extensions:
+    # -- Extension name
+    - name: vchord
+      image:
+        # -- Image reference containing the extension files
+        # renovate: image=ghcr.io/tensorchord/vchord-scratch
+        reference: ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1
+      # -- Directories to search for the extension libraries
+      dynamic_library_path:
+        - /usr/lib/postgresql/18/lib
+      # -- Directories to search for the extension control files
+      extension_control_path:
+        - /usr/share/postgresql/18/
+  # -- Node selector for PostgreSQL instance scheduling
+  nodeSelector: {}
+  # -- Tolerations for PostgreSQL instance scheduling
+  tolerations: []
+  # -- Affinity rules for PostgreSQL instance scheduling
+  affinity: {}
+  storage:
+    # -- Storage class for the PostgreSQL PVCs
+    storageClass: ""
+    # -- Size of the PostgreSQL PVC
+    size: 100Gi
+  # -- CNPG backup configuration.
+  backup:
+    # -- Enable backups. Requires a Barman object store for `barmanObjectStore`
+    enabled: false
+    # -- Backup retention policy (e.g. `30d`)
+    retentionPolicy: 30d
+    # -- Barman object store configuration. See [CNPG docs](https://cloudnative-pg.io/documentation/current/backup/)
+    barmanObjectStore: {}
+  monitoring:
+    # -- Enable CNPG PodMonitor for PostgreSQL
+    enablePodMonitor: false
+
+## @section Valkey
+
+# Authentication is disabled by default. For classic mode with a password, enable
+# authentication and provide the same password via `redis.password`.
+# See the [Valkey chart docs](https://github.com/valkey-io/valkey-helm/blob/main/valkey/README.md)
+valkey:
+  # -- Deploy the bundled Valkey sub-chart (official Valkey Helm Chart)
+  enabled: true
+  # -- Valkey ACL authentication.
+  auth:
+    # -- Enable ACL-based authentication. Requires `aclUsers` and the password in `redis.password`
+    enabled: false
+  # -- Number of Valkey replicas (master-replica mode). Requires `replica.persistence.size` and `auth.aclUsers` when authentication is enabled
+  replica:
+    enabled: false
+
+## @section Upload optimizer
+
+# Immich Upload Optimizer is a smart upload proxy that losslessly recompresses images
+# and transcodes videos (optionally hardware accelerated) before they reach Immich.
+# Enabling it deploys the bundled `immich-upload-optimizer` sub-chart (aliased as
+# `upload-optimizer` below for brevity). See that chart's values for the full set of
+# options (`config.tasks`, `resources`, `ingress`, `httpRoute`, ...) - only the values
+# needed to wire it up to this chart are set here.
+#
+# This is NOT wired into `server.ingress`/`server.httpRoute` automatically: point
+# clients at the proxy instead of the server directly by configuring the sub-chart's
+# own `upload-optimizer.ingress`/`upload-optimizer.httpRoute` (left disabled by default,
+# same as `server.ingress`/`server.httpRoute`).
+upload-optimizer:
+  # -- Deploy the bundled immich-upload-optimizer sub-chart in front of the server
+  enabled: false
+  # -- Upstream Immich server URL the proxy forwards optimized uploads to. Defaults to
+  # the bundled server Service, assuming the top-level `nameOverride`/`fullnameOverride`
+  # are left unset (the sub-chart cannot see those values directly, only its own).
+  # If you set either of those, override this to match the server Service name.
+  upstream: 'http://{{ if contains "immich" .Release.Name }}{{ .Release.Name }}{{ else }}{{ printf "%s-immich" .Release.Name }}{{ end }}:2283'
+
+## @section Other
+
+# -- Extra Kubernetes manifests to deploy alongside the chart.
+# Each entry is rendered with the Helm template engine, so it can reference chart
+# values such as `.Release.Namespace`. Only trusted manifests should be used here.
+extraManifests: []

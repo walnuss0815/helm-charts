@@ -1,0 +1,39 @@
+# Install test using pre-provisioned PVCs for the media and model cache volumes.
+# The PVCs themselves are created via extraManifests in the test cluster.
+# Uses the bundled CNPG Cluster (chart default) for the database.
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: immich-ci-media
+  modelCache:
+    existingClaim: immich-ci-model-cache
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: immich-ci-media
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: immich-ci-model-cache
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "immich.configName" . }}
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+data:
+  TZ: {{ .Values.timezone }}
+  IMMICH_LOG_LEVEL: {{ .Values.logLevel }}
+  DB_HOSTNAME: {{ include "immich.databaseHost" . }}
+  DB_PORT: {{ include "immich.databasePort" . | quote }}
+  DB_USERNAME: {{ include "immich.databaseUser" . }}
+  DB_DATABASE_NAME: {{ include "immich.databaseName" . }}
+  REDIS_HOSTNAME: {{ include "immich.redisHost" . }}
+  REDIS_PORT: {{ include "immich.redisPort" . | quote }}
+  REDIS_DBINDEX: {{ .Values.redis.dbindex | toString | quote }}
+  {{- if .Values.machineLearning.enabled }}
+  IMMICH_MACHINE_LEARNING_URL: http://{{ include "immich.fullname" . }}-machine-learning:{{ .Values.machineLearning.service.port }}
+  {{- end }}
+  {{- if .Values.server.transcodingDevice }}
+  IMMICH_TRANSCODING_HW_DEVICE: {{ .Values.server.transcodingDevice | quote }}
+  {{- end }}
+  {{- if .Values.monitoring.enabled }}
+  IMMICH_TELEMETRY_INCLUDE: all
+  {{- end }}
+  {{ include "immich.configFilename" . }}: |
+    {{- toYaml .Values.config.content | nindent 4 }}

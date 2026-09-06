@@ -1,0 +1,17 @@
+# Install test with the bundled immich-upload-optimizer sub-chart enabled.
+# Exercises the dependency wiring and the auto-computed `upload-optimizer.upstream`
+# default, which resolves correctly here because the chart-testing release name
+# contains "immich".
+# Uses the bundled CNPG Cluster (chart default) for the database.
+
+upload-optimizer:
+  enabled: true
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce

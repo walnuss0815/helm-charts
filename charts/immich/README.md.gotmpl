@@ -1,0 +1,304 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+### Required
+
+None
+
+### Optional
+
+- [CloudNativePG](https://cloudnative-pg.io/) operator (1.30+) when using the bundled PostgreSQL cluster (`postgres.enabled: true`, the default). The chart relies on the operator to provision and manage the database. The bundled cluster injects the `vchord` extension through the CNPG ImageVolume extension mechanism, which additionally requires Kubernetes 1.35+ with containerd 2.1+
+- [Prometheus Operator](https://prometheus-operator.dev/) (CRDs) when enabling `monitoring.serviceMonitors`
+- [metrics-server](https://github.com/kubernetes-sigs/metrics-server) or similar when using Horizontal Pod Autoscaling (`autoscaling`)
+- An Ingress controller (e.g. [ingress-nginx](https://kubernetes.github.io/ingress-nginx/)) when exposing the server via `server.ingress`
+- [Gateway API](https://gateway-api.sigs.k8s.io/) when exposing the server via `server.httpRoute`
+- An external PostgreSQL instance when disabling the bundled cluster (`postgres.enabled: false`)
+- Storage supporting `ReadWriteMany` access modes when scaling the workloads horizontally
+- GPU device plugins when running the machine-learning workload with hardware acceleration
+
+## Quick start
+
+Prerequisites: The CloudNativePG operator and an Ingress controller.
+
+The chart works out of the box with sensible defaults. The bundled CloudNativePG
+cluster generates a random database password itself, which the workloads resolve
+from the operator-managed `<fullname>-postgresql-app` Secret, so no credentials
+need to be supplied. The only values you typically need to set are a JWT secret
+and the ingress for external access:
+
+```yaml
+jwtSecret:
+  value: "<generate-a-long-random-string>"
+
+server:
+  ingress:
+    enabled: true
+    hosts:
+      - host: immich.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+```
+
+## Hardware acceleration
+
+Both the machine-learning workload (smart search, face recognition) and the
+server/microservices workloads (video transcoding is executed by the
+microservices worker) can be hardware accelerated. Each manufacturer uses
+a dedicated image tag suffix for machine learning and a matching backend for
+transcoding, as summarized below:
+
+| Manufacturer | ML image suffix | ML backend | Transcoding backend |
+|--------------|-----------------|------------|---------------------|
+| NVIDIA       | `-cuda`         | CUDA       | `nvenc`             |
+| AMD          | `-rocm`         | ROCm       | `vaapi`             |
+| Intel        | `-openvino`     | OpenVINO   | `qsv` (or `vaapi`)  |
+| Rockchip     | `-rknn`         | RKNN       | `rkmpp`             |
+| ARM Mali     | `-armnn`        | ARM NN     | `vaapi`             |
+
+### Machine learning per manufacturer
+
+Single out the accelerator, request its device resource, pin the pods to GPU
+nodes and tolerate node taints.
+
+> The device resource names below are vendor-specific examples. `nvidia.com/gpu`
+> is the standard NVIDIA resource; `amd.com/gpu`, `gpu.intel.com/i915`,
+> `rockchip.com/rknpu` and `mali.com/gpu` are only available if the matching
+> device plugin/operator is installed in your cluster. If no plugin advertises a
+> resource, omit `resources` entirely — selecting a node via `nodeSelector` and
+> `tolerations` is then sufficient:
+
+```yaml
+# NVIDIA
+machineLearning:
+  image:
+    tagSuffix: "-cuda" # requires compute capability >= 5.2
+  resources:
+    requests:
+      nvidia.com/gpu: "1"
+    limits:
+      nvidia.com/gpu: "1"
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+```
+
+```yaml
+# AMD (ROCm)
+machineLearning:
+  image:
+    tagSuffix: "-rocm" # requires an AMDGPU driver and ~35GiB free disk space
+  resources:
+    requests:
+      amd.com/gpu: "1"
+    limits:
+      amd.com/gpu: "1"
+  nodeSelector:
+    feature.gpu.availability: "amd-roc"
+  tolerations:
+    - key: "amd.com/gpu"
+      operator: "Exists"
+```
+
+```yaml
+# Intel (OpenVINO)
+machineLearning:
+  image:
+    tagSuffix: "-openvino" # for Iris Xe, Arc and iGPUs
+  resources:
+    requests:
+      gpu.intel.com/i915: "1"
+    limits:
+      gpu.intel.com/i915: "1"
+  nodeSelector:
+    hardware-type: "intel"
+  tolerations:
+    - key: "intel-gpu"
+      operator: "Exists"
+```
+
+```yaml
+# Rockchip (RKNN)
+machineLearning:
+  image:
+    tagSuffix: "-rknn" # RK3566, RK3568, RK3576 or RK3588 (RKNPU driver >= 0.9.8)
+  resources:
+    requests:
+      rockchip.com/rknpu: "1"
+    limits:
+      rockchip.com/rknpu: "1"
+  extraEnv:
+    MACHINE_LEARNING_RKNN_THREADS: "3"
+```
+
+```yaml
+# ARM Mali (ARM NN)
+machineLearning:
+  image:
+    tagSuffix: "-armnn" # /dev/mali0 required on the host
+  resources:
+    requests:
+      mali.com/gpu: "1"
+    limits:
+      mali.com/gpu: "1"
+  extraEnv:
+    MACHINE_LEARNING_ANN_FP16_TURBO: "true"
+```
+
+For multiple GPUs, pin device IDs and spawn a worker per device via
+`MACHINE_LEARNING_DEVICE_IDS` and `MACHINE_LEARNING_WORKERS`:
+
+```yaml
+machineLearning:
+  image:
+    tagSuffix: "-cuda"
+  extraEnv:
+    MACHINE_LEARNING_DEVICE_IDS: "0,1"
+    MACHINE_LEARNING_WORKERS: "2"
+```
+
+### Transcoding per manufacturer
+
+Enable hardware transcoding by setting `server.transcodingDevice` (defaults to
+`null`, i.e. no hardware transcoding). The value maps to
+`IMMICH_TRANSCODING_HW_DEVICE` and is injected via the shared ConfigMap into
+both the server and the microservices workload — the latter actually executes
+the transcoding jobs, so both containers see the same configuration.
+
+Note that actual hardware access usually
+requires exposing host devices (e.g. `/dev/dri`, `/dev/mali0`) to the pod. The
+chart does not provide dedicated device-mount values yet, so use a custom
+device plugin / vendor driver where available, or extend the chart:
+
+```yaml
+# NVIDIA (NVENC)
+server:
+  transcodingDevice: "nvenc"
+```
+
+```yaml
+# AMD (VAAPI)
+server:
+  transcodingDevice: "vaapi"
+```
+
+```yaml
+# Intel (Quick Sync)
+server:
+  transcodingDevice: "qsv"
+```
+
+```yaml
+# Rockchip (RKMPP)
+server:
+  transcodingDevice: "rkmpp"
+```
+
+For prerequisites, vendor-specific setup (e.g. `/dev/dri` access, NVIDIA
+Container Toolkit, libmali firmware) and supported codecs, see the
+[Immich hardware transcoding docs](https://immich.app/docs/features/hardware-transcoding).
+
+## Upload optimizer
+
+[Immich Upload Optimizer](https://github.com/miguelangel-nubla/immich-upload-optimizer)
+is a smart upload proxy that losslessly recompresses images and transcodes videos
+(optionally hardware accelerated) before they reach Immich. Enable the bundled
+sub-chart with:
+
+```yaml
+upload-optimizer:
+  enabled: true
+```
+
+`upstream` defaults to the bundled server Service, computed from `.Release.Name`
+(matching this chart's own default naming). If you set the top-level `nameOverride`
+or `fullnameOverride`, override `upload-optimizer.upstream` to match the server
+Service name.
+
+Enabling `upload-optimizer` does **not** change `server.ingress`/`server.httpRoute`.
+Point clients at the proxy instead of the server directly by configuring the
+sub-chart's own `upload-optimizer.ingress`/`upload-optimizer.httpRoute` (disabled by
+default, same as `server.ingress`/`server.httpRoute`):
+
+```yaml
+upload-optimizer:
+  enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - host: immich.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+```
+
+See the [immich-upload-optimizer chart](https://github.com/RocketPadPlatforms/helm-charts/tree/main/charts/immich-upload-optimizer)
+for the full set of values (`config.tasks`, `resources`, hardware acceleration, ...).
+
+## Configuration file
+
+Immich features that are not exposed as dedicated values (e.g. `oauth`, `ffmpeg`,
+`job` concurrency, `notifications.smtp`, `machineLearning` tuning, `theme`,
+`trash`, ...) can be provided through the [Immich config file](https://docs.immich.app/install/config-file).
+Configure the base settings in `config.content` as a YAML map. The base config is
+stored in a plaintext ConfigMap, so any sensitive values must NOT be hardcoded
+there - write them as `${UPPER_SNAKE_CASE}` placeholders and provide the matching
+values under `config.env`:
+
+```yaml
+config:
+  content:
+    oauth:
+      enabled: true
+      clientId: "<client-id>"
+      clientSecret: ${OAUTH_CLIENT_SECRET}      # placeholder, not the value
+      issuerUrl: "https://idp.example.com"
+    notifications:
+      smtp:
+        enabled: true
+        from: "immich@example.com"
+        transport:
+          host: "smtp.example.com"
+          password: ${SMTP_PASSWORD}            # placeholder, not the value
+  env:
+    OAUTH_CLIENT_SECRET:
+      value: "<client-secret>"                  # plain value
+    SMTP_PASSWORD:
+      secretKeyRef:                             # existing Kubernetes Secret
+        name: smtp-secret
+        key: password
+    THEME_CSS:
+      configMapRef:                             # existing ConfigMap
+        name: theme-cm
+        key: brand
+```
+
+At pod start an init step replaces every `${TOKEN}` placeholder with the value of
+the matching environment variable set on the init container
+(`config.env` provides those variables) and writes the final file to an ephemeral
+in-memory volume that the server reads via `IMMICH_CONFIG_FILE` at the fixed path
+`/config/immich.yaml`. The ConfigMap therefore never contains secrets.
+Placeholders must occupy an entire YAML scalar (e.g. `clientSecret: ${OAUTH_CLIENT_SECRET}`);
+the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
+`config.env` entry (i.e. no matching environment variable) is left unresolved.
+
+> Prefer `secretKeyRef`/`configMapRef` for real secrets. A plain `value` ends up
+> in your chart values / GitOps repository and is only recommended for testing.
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

@@ -1,0 +1,32 @@
+# Default CI install values.
+#
+# The chart default `postgres.enabled: true` is kept: the install test cluster
+# gets the CloudNativePG operator (see .github/workflows/ci.yaml), so the bundled
+# CNPG Cluster is exercised end-to-end. CloudNativePG generates a random
+# password itself, which the workloads resolve from the operator-managed
+# `<fullname>-postgresql-app` Secret.
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+# Exercise the microservices HPA in the install test. It never scales above
+# `minReplicas` because the test cluster has no metrics-server.
+microservices:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+
+# Same for the machine-learning HPA. The model cache volume is `ReadWriteOnce`
+# in the test cluster, but replicas never exceed `minReplicas` there.
+machineLearning:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce

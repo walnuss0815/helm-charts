@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "immich.fullname" . }}-microservices
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: microservices
+spec:
+  {{- if not .Values.microservices.autoscaling.enabled }}
+  replicas: {{ .Values.microservices.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "microservices") | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/immich-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/immich-secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.microservices.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "microservices") | nindent 8 }}
+        {{- with .Values.microservices.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "immich.serviceAccountName" . }}
+      {{- with .Values.microservices.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      containers:
+        - name: microservices
+          {{- with .Values.microservices.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ include "immich.image" (dict "root" $ "workload" .Values.microservices) }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            {{- if or .Values.monitoring.enabled .Values.microservices.service.enabled }}
+            - name: metrics-ms
+              containerPort: {{ .Values.monitoring.microservicesMetricsPort }}
+              protocol: TCP
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "immich.configName" . }}
+          env:
+            - name: IMMICH_WORKERS_EXCLUDE
+              value: "api"
+            {{- if .Values.monitoring.enabled }}
+            - name: IMMICH_MICROSERVICES_METRICS_PORT
+              value: {{ .Values.monitoring.microservicesMetricsPort | toString | quote }}
+            {{- end }}
+            {{- if or .Values.postgres.enabled (include "immich.databasePasswordProvided" .) }}
+            - name: DB_PASSWORD
+              {{- include "immich.databasePasswordEnv" . | nindent 14 }}
+            {{- end }}
+            {{- if include "immich.secretConfigured" .Values.redis.password }}
+            - name: REDIS_PASSWORD
+              {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.redis.password "secret" (include "immich.redisPasswordName" .) "key" "password") | nindent 14 }}
+            {{- end }}
+            {{- if include "immich.secretConfigured" .Values.jwtSecret }}
+            - name: JWT_SECRET
+              {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.jwtSecret "secret" (include "immich.jwtSecretName" .) "key" "jwt-secret") | nindent 14 }}
+            {{- end }}
+            {{- range $key, $value := .Values.microservices.extraEnv }}
+            - name: {{ $key | quote }}
+              value: {{ (tpl $value $) | quote }}
+            {{- end }}
+            {{- range $key, $valueFrom := .Values.microservices.extraEnvFrom }}
+            - name: {{ $key | quote }}
+              valueFrom: {{ toYaml $valueFrom | nindent 16 }}
+            {{- end }}
+          {{- with .Values.microservices.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.microservices.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.microservices.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.microservices.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: media
+              mountPath: /data
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: {{ include "immich.mediaVolumeName" . }}
+      {{- with .Values.microservices.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.microservices.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.microservices.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.microservices.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

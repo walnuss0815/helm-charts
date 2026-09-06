@@ -1,0 +1,24 @@
+{{- if and .Values.persistence.media.enabled (not .Values.persistence.media.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "immich.fullname" . }}-media
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: media
+  {{- with .Values.persistence.media.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.persistence.media.accessModes }}
+    - {{ . }}
+    {{- end }}
+  {{- with .Values.persistence.media.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.media.size | quote }}
+{{- end }}

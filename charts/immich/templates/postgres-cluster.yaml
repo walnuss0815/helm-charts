@@ -1,0 +1,83 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "immich.fullname" . }}-postgresql
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+  {{- with .Values.postgres.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  description: Immich PostgreSQL cluster
+  {{- with include "immich.databaseImage" . }}
+  imageName: {{ . }}
+  {{- end }}
+  instances: {{ .Values.postgres.instances }}
+  {{- with .Values.postgres.podSecurityContext }}
+  podSecurityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.postgres.securityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.postgres.sharedPreloadLibraries .Values.postgres.extensions }}
+  postgresql:
+    {{- with .Values.postgres.sharedPreloadLibraries }}
+    shared_preload_libraries:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.postgres.extensions }}
+    extensions:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.postgres.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.postgres.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.postgres.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.postgres.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  storage:
+    {{- with .Values.postgres.storage.storageClass }}
+    storageClass: {{ . }}
+    {{- end }}
+    size: {{ .Values.postgres.storage.size | quote }}
+  bootstrap:
+    initdb:
+      database: {{ include "immich.databaseName" . }}
+      owner: {{ include "immich.databaseUser" . }}
+      {{- if include "immich.databasePasswordProvided" . }}
+      secret:
+        name: {{ include "immich.bootstrapSecretName" . }}
+      {{- end }}
+      {{- if .Values.postgres.postInitApplicationSQL }}
+      postInitApplicationSQL:
+        {{- toYaml .Values.postgres.postInitApplicationSQL | nindent 8 }}
+      {{- end }}
+  {{- if .Values.postgres.backup.enabled }}
+  backup:
+    retentionPolicy: {{ .Values.postgres.backup.retentionPolicy | toString | quote }}
+    {{- if .Values.postgres.backup.barmanObjectStore }}
+    barmanObjectStore:
+      {{- toYaml .Values.postgres.backup.barmanObjectStore | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.postgres.monitoring.enablePodMonitor }}
+  monitoring:
+    enablePodMonitor: true
+  {{- end }}
+{{- end }}

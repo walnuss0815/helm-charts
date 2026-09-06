@@ -256,6 +256,32 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/handbrake-web-0.1.0/handbrake-web-0.1.0.tgz
     version: 0.1.0
+  immich:
+  - apiVersion: v2
+    appVersion: v3.1.0
+    created: "2026-09-06T20:03:16.604797453Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.11.0
+    - alias: upload-optimizer
+      condition: upload-optimizer.enabled
+      name: immich-upload-optimizer
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.0
+    description: A Helm chart for Immich, the high performance self-hosted photo and
+      video management solution.
+    digest: 9203ea8bedf7209e749f03de28aea862113ebbfd453742f8b1b601cf72dc255f
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-0.1.0/immich-0.1.0.tgz
+    version: 0.1.0
   immich-kiosk:
   - apiVersion: v2
     appVersion: 0.43.1
@@ -2023,4 +2049,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-06T15:17:52.621115861Z"
+generated: "2026-09-06T20:03:16.605016871Z"

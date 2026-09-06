@@ -1,0 +1,54 @@
+# Install test rendering the Immich config file.
+#
+# The base config (with `${TOKEN}` placeholders) goes into a ConfigMap; the
+# substitution values are supplied via `config.env` and injected at pod start.
+# This exercises all three value sources: a plain `value`, an existing
+# `secretKeyRef` and a `configMapRef`.
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+config:
+  content:
+    newVersionCheck:
+      enabled: true
+    oauth:
+      enabled: false
+      clientId: "immich-ci-client"
+      clientSecret: ${OAUTH_CLIENT_SECRET}
+    trash:
+      enabled: true
+      days: 30
+  env:
+    OAUTH_CLIENT_SECRET:
+      value: "immich-ci-oauth-secret"
+    SMTP_PASSWORD:
+      secretKeyRef:
+        name: immich-ci-smtp
+        key: password
+    THEME_CSS:
+      configMapRef:
+        name: immich-ci-theme
+        key: brand
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: immich-ci-smtp
+    stringData:
+      password: immich-ci-smtp-password
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: immich-ci-theme
+    data:
+      brand: "immich-ci-brand"

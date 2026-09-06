@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "immich.fullname" . }}
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+  {{- with .Values.server.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.server.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.server.service.port }}
+      targetPort: http
+      protocol: TCP
+    {{- if .Values.monitoring.enabled }}
+    - name: metrics-api
+      port: {{ .Values.monitoring.apiMetricsPort }}
+      targetPort: metrics-api
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "server") | nindent 4 }}

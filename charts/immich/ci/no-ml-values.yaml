@@ -1,0 +1,14 @@
+# Install test with the machine-learning workload disabled.
+# Uses the bundled CNPG Cluster (chart default) for the database.
+
+machineLearning:
+  enabled: false
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce

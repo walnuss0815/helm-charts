@@ -1,0 +1,169 @@
+{{- if and (not .Values.postgres.enabled) (not (include "immich.databasePasswordProvided" .)) }}
+{{- fail "postgres.password (value or secretKeyRef) is required when postgres.enabled is false" }}
+{{- end }}
+{{- range $token, $entry := .Values.config.env -}}
+{{- if not (include "immich.configEnvConfigured" (dict "entry" $entry)) }}
+{{- fail (printf "config.env.%s must set either value, secretKeyRef or configMapRef" $token) }}
+{{- end -}}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "immich.fullname" . }}
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "server") | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/immich-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/immich-config-scripts: {{ include (print $.Template.BasePath "/config-scripts.yaml") . | sha256sum }}
+        checksum/immich-secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.server.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "server") | nindent 8 }}
+        {{- with .Values.server.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "immich.serviceAccountName" . }}
+      {{- with .Values.server.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: false
+      initContainers:
+        - name: config-init
+          {{- with .Values.server.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ include "immich.image" (dict "root" $ "workload" .Values.server) }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          command:
+            - node
+            - /config.template/scripts/substitute-config.js
+            - /config.template/immich.yaml
+            - /config/immich.yaml
+          env:
+            {{- range $token, $entry := .Values.config.env }}
+            - name: {{ $token | quote }}
+              {{- include "immich.configEnvVar" (dict "root" $ "entry" $entry) | nindent 14 }}
+            {{- end }}
+          volumeMounts:
+            - name: config-template
+              mountPath: /config.template
+              readOnly: true
+            - name: config-scripts
+              mountPath: /config.template/scripts
+              readOnly: true
+            - name: config
+              mountPath: /config
+      containers:
+        - name: server
+          {{- with .Values.server.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ include "immich.image" (dict "root" $ "workload" .Values.server) }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.server.service.port }}
+              protocol: TCP
+            {{- if .Values.monitoring.enabled }}
+            - name: metrics-api
+              containerPort: {{ .Values.monitoring.apiMetricsPort }}
+              protocol: TCP
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "immich.configName" . }}
+          env:
+            - name: IMMICH_WORKERS_INCLUDE
+              value: "api"
+            - name: IMMICH_PORT
+              value: {{ .Values.server.service.port | toString | quote }}
+            {{- if .Values.monitoring.enabled }}
+            - name: IMMICH_API_METRICS_PORT
+              value: {{ .Values.monitoring.apiMetricsPort | toString | quote }}
+            {{- end }}
+            {{- if or .Values.postgres.enabled (include "immich.databasePasswordProvided" .) }}
+            - name: DB_PASSWORD
+              {{- include "immich.databasePasswordEnv" . | nindent 14 }}
+            {{- end }}
+            {{- if include "immich.secretConfigured" .Values.redis.password }}
+            - name: REDIS_PASSWORD
+              {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.redis.password "secret" (include "immich.redisPasswordName" .) "key" "password") | nindent 14 }}
+            {{- end }}
+            {{- if include "immich.secretConfigured" .Values.jwtSecret }}
+            - name: JWT_SECRET
+              {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.jwtSecret "secret" (include "immich.jwtSecretName" .) "key" "jwt-secret") | nindent 14 }}
+            {{- end }}
+            - name: IMMICH_CONFIG_FILE
+              value: {{ include "immich.configFilePath" . }}
+            {{- range $key, $value := .Values.server.extraEnv }}
+            - name: {{ $key | quote }}
+              value: {{ (tpl $value $) | quote }}
+            {{- end }}
+            {{- range $key, $valueFrom := .Values.server.extraEnvFrom }}
+            - name: {{ $key | quote }}
+              valueFrom: {{ toYaml $valueFrom | nindent 16 }}
+            {{- end }}
+          {{- with .Values.server.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.server.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.server.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.server.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: media
+              mountPath: /data
+            - name: config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: {{ include "immich.mediaVolumeName" . }}
+        - name: config-template
+          configMap:
+            name: {{ include "immich.configName" . }}
+        - name: config-scripts
+          configMap:
+            name: {{ include "immich.configScriptsName" . }}
+        - name: config
+          emptyDir: {}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

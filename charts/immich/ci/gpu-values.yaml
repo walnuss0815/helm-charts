@@ -1,0 +1,25 @@
+# Install test exercising the hardware-acceleration values. No GPU/accelerator
+# is present in the test cluster, so only the values plumbing (image tag suffix,
+# tolerations and transcoding environment) is exercised, not actual devices.
+# Uses the bundled CNPG Cluster (chart default) for the database.
+
+machineLearning:
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+  # tagSuffix: -cuda
+  # resources:
+  #   limits:
+  #     nvidia.com/gpu: "1"
+
+server:
+  transcodingDevice: "vaapi"
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce

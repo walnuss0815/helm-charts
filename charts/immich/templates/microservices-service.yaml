@@ -1,0 +1,22 @@
+{{- if or .Values.monitoring.enabled .Values.microservices.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "immich.fullname" . }}-microservices
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: microservices
+  {{- with .Values.microservices.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics-ms
+      port: {{ .Values.monitoring.microservicesMetricsPort }}
+      targetPort: metrics-ms
+      protocol: TCP
+  selector:
+    {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "microservices") | nindent 4 }}
+{{- end }}

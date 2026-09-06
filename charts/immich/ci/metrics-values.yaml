@@ -1,0 +1,19 @@
+# Install test with Prometheus metrics enabled. The server and microservices
+# workloads get `IMMICH_TELEMETRY_INCLUDE=all` and expose metrics ports.
+# ServiceMonitors are opt-in (`monitoring.serviceMonitors.enabled`) and are not
+# created here: the chart-testing kind cluster has no Prometheus Operator CRDs.
+# Uses the bundled CNPG Cluster (chart default) for the database.
+
+monitoring:
+  enabled: true
+  serviceMonitors:
+    enabled: false
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce

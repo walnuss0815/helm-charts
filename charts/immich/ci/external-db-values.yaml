@@ -1,0 +1,125 @@
+# Install test referencing the database password through a secretKeyRef instead
+# of an inline value (ExternalSecret-style). PostgreSQL is external, i.e. the
+# chart does not create a CNPG Cluster.
+# Throw-away PostgreSQL used by the install test. Bootstrapped with the
+# credentials Immich expects so the Immich server becomes healthy and
+# `helm install --wait` succeeds.
+postgres:
+  enabled: false
+  host: immich-postgres
+  port: 5432
+  password:
+    secretKeyRef:
+      name: immich-ci-db
+      key: POSTGRES_PASSWORD
+
+jwtSecret:
+  value: "immich-ci-jwt-secret"
+
+persistence:
+  media:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: immich-ci-db-init
+      namespace: {{ .Release.Namespace }}
+    data:
+      init.sql: |
+        CREATE EXTENSION IF NOT EXISTS vector;
+        CREATE EXTENSION IF NOT EXISTS vchord;
+        CREATE EXTENSION IF NOT EXISTS earthdistance;
+        CREATE EXTENSION IF NOT EXISTS pg_trgm;
+  - |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: immich-ci-db
+    stringData:
+      POSTGRES_PASSWORD: immich-ci-password
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: immich-ci-db-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+  - |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: immich-ci-db
+      namespace: {{ .Release.Namespace }}
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: immich-ci-db
+      template:
+        metadata:
+          labels:
+            app: immich-ci-db
+        spec:
+          containers:
+            - name: postgres
+              image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: immich-ci-db
+                      key: POSTGRES_PASSWORD
+                - name: POSTGRES_USER
+                  value: immich
+                - name: POSTGRES_DB
+                  value: immich
+                - name: POSTGRES_INITDB_ARGS
+                  value: "--data-checksums"
+              ports:
+                - name: postgres
+                  containerPort: 5432
+              volumeMounts:
+                - name: data
+                  mountPath: /var/lib/postgresql/data
+                - name: init-scripts
+                  mountPath: /docker-entrypoint-initdb.d
+              readinessProbe:
+                exec:
+                  command: ["pg_isready", "-U", "immich"]
+                initialDelaySeconds: 5
+                periodSeconds: 5
+              livenessProbe:
+                exec:
+                  command: ["pg_isready", "-U", "immich"]
+                initialDelaySeconds: 10
+                periodSeconds: 10
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: immich-ci-db-data
+            - name: init-scripts
+              configMap:
+                name: immich-ci-db-init
+  - |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: immich-postgres
+      namespace: {{ .Release.Namespace }}
+    spec:
+      selector:
+        app: immich-ci-db
+      ports:
+        - name: postgres
+          port: 5432
+          targetPort: postgres

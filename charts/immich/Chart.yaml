@@ -1,0 +1,22 @@
+apiVersion: v2
+name: immich
+description: A Helm chart for Immich, the high performance self-hosted photo and video management solution.
+type: application
+version: 0.1.0
+# renovate: image=ghcr.io/immich-app/immich-server
+appVersion: "v3.1.0"
+maintainers:
+  - name: walnuss0815
+    email: walnuss0815@gmail.com
+    url: https://github.com/walnuss0815
+
+dependencies:
+  - name: valkey
+    version: "0.11.0"
+    repository: https://valkey.io/valkey-helm/
+    condition: valkey.enabled
+  - name: immich-upload-optimizer
+    version: "0.1.0"
+    repository: https://walnuss0815.github.io/helm-charts
+    alias: upload-optimizer
+    condition: upload-optimizer.enabled

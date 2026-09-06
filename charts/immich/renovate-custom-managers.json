@@ -1,0 +1,16 @@
+{
+  "description": "Renovate custom manager for the Immich chart (CNPG ImageVolume extension images in values.yaml).",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update CNPG ImageVolume extension image references in values.yaml",
+      "fileMatch": [
+        "(^|/)values\\.yaml$"
+      ],
+      "matchStrings": [
+        "# renovate: image=(?<depName>[^\\s:]+)[\\s\\r\\n]+\\s*reference: \\S+:(?<currentValue>[\\w+.\\-]+)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}

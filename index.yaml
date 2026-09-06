@@ -453,6 +453,23 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/immich-kiosk-0.1.1/immich-kiosk-0.1.1.tgz
     version: 0.1.1
+  immich-upload-optimizer:
+  - apiVersion: v2
+    appVersion: v0.5.5
+    created: "2026-09-06T15:17:52.620869962Z"
+    description: A Helm chart for Immich Upload Optimizer, the smart upload proxy
+      that optimizes images losslessly and transcodes videos with hardware acceleration
+      before they reach Immich.
+    digest: 1edbd590d54aa8b6923d109301961b2893399a66deda2d6f94696e99ddc8361e
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich-upload-optimizer
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-upload-optimizer-0.1.0/immich-upload-optimizer-0.1.0.tgz
+    version: 0.1.0
   kavita:
   - apiVersion: v2
     appVersion: 0.9.1
@@ -2006,4 +2023,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-04T19:20:56.532297053Z"
+generated: "2026-09-06T15:17:52.621115861Z"

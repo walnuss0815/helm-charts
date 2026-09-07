@@ -4,7 +4,7 @@ description: A Helm chart for Immich Kiosk
 type: application
 version: 0.2.2
 # renovate: image=ghcr.io/damongolding/immich-kiosk
-appVersion: "0.43.1"
+appVersion: "0.43.2"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

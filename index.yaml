@@ -594,6 +594,25 @@ entries:
     version: 0.1.0
   linkwarden:
   - apiVersion: v2
+    appVersion: 2.16.3
+    created: "2026-09-09T23:46:07.264761702Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.3.4
+    description: A Helm chart for Linkwarden
+    digest: 00a196a3008ed562f675fefbb00641410d1a8f327a99d859d0db9a08392a708f
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: linkwarden
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/linkwarden-0.1.2/linkwarden-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
     appVersion: 2.16.2
     created: "2026-09-03T23:47:17.643639799Z"
     dependencies:
@@ -2088,4 +2107,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-07T13:13:22.958505663Z"
+generated: "2026-09-09T23:46:07.264872285Z"

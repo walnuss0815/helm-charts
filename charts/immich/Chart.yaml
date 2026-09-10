@@ -4,7 +4,7 @@ description: A Helm chart for Immich, the high performance self-hosted photo and
 type: application
 version: 0.1.1
 # renovate: image=ghcr.io/immich-app/immich-server
-appVersion: "v3.1.0"
+appVersion: "v3.2.0"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

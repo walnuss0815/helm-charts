@@ -87,6 +87,20 @@ entries:
     version: 0.1.0
   gotenberg:
   - apiVersion: v2
+    appVersion: "8.37"
+    created: "2026-09-11T18:03:58.658653759Z"
+    description: A Helm chart for Kubernetes
+    digest: f2da7abda89028444fd1cdf8876a335df3b4eae31355dd44084cfc4bbd1daf71
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: gotenberg
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/gotenberg-0.1.8/gotenberg-0.1.8.tgz
+    version: 0.1.8
+  - apiVersion: v2
     appVersion: "8.36"
     created: "2026-08-29T23:46:46.961309717Z"
     description: A Helm chart for Kubernetes
@@ -2132,4 +2146,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-10T16:57:28.491581445Z"
+generated: "2026-09-11T18:03:58.658828715Z"

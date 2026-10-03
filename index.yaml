@@ -2261,6 +2261,20 @@ entries:
     version: 0.1.0
   webdav:
   - apiVersion: v2
+    appVersion: v5.17.0
+    created: "2026-10-03T09:52:00.099403503Z"
+    description: A Helm chart for Kubernetes
+    digest: b1054bee90e7da6522fc4844f3457477cdb86c14d26954dbc95bfe689697a1d8
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: webdav
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.15/webdav-0.1.15.tgz
+    version: 0.1.15
+  - apiVersion: v2
     appVersion: v5.16.1
     created: "2026-09-29T12:40:25.182731665Z"
     description: A Helm chart for Kubernetes
@@ -2470,4 +2484,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-29T20:41:30.882208711Z"
+generated: "2026-10-03T09:52:00.099736099Z"

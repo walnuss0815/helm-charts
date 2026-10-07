@@ -182,10 +182,12 @@ host: chart-example.local
 # -- URL for the paperless-ngx instance
 url: "https://{{ .Values.host }}"
 
-# -- Secret key configuration for Django
+# -- Django secret key (`PAPERLESS_SECRET_KEY`) used to sign sessions and tokens. Required: set
+# `value` or `secretKeyRef`, otherwise rendering fails. Use a long random string and keep it stable,
+# changing it signs out all users
 secretKey:
-  # -- Secret key value (use secretKeyRef in production)
-  value: "FQdWQr5xKy8ZYTD4YB5rJAE9e2CbWb3E"
+  # -- Plain-text secret key. Ignored if `secretKeyRef.name` and `secretKeyRef.key` are set. Prefer `secretKeyRef`
+  value: ""
   # -- Reference to existing secret containing the secret key
   secretKeyRef:
     # -- Name of the secret

@@ -11,3 +11,6 @@ webdav:
       value: "my-user"
     password:
       value: "my-password"
+
+secretKey:
+  value: "ci-only-secret-key-not-for-production"

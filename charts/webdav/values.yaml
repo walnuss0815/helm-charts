@@ -150,19 +150,17 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# -- Liveness probe configuration (disabled by default)
-# livenessProbe:
-#   httpGet:
-#     path: /
-#     port: http
+# -- Liveness probe configuration. Empty disables the probe
 livenessProbe: {}
+  # httpGet:
+  #   path: /
+  #   port: http
 
-# -- Readiness probe configuration (disabled by default)
-# readinessProbe:
-#   httpGet:
-#     path: /
-#     port: http
+# -- Readiness probe configuration. Empty disables the probe
 readinessProbe: {}
+  # httpGet:
+  #   path: /
+  #   port: http
 
 # -- Node selector for pod assignment
 nodeSelector: {}

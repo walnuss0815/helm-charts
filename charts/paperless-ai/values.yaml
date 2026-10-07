@@ -163,8 +163,8 @@ persistence:
   data:
     # -- Annotations for the data PVC
     annotations: {}
-    # -- Storage class for data PVC
-    storageClass: "-"
+    # -- Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the data PVC
     size: "1Gi"
     # -- Access modes for data PVC

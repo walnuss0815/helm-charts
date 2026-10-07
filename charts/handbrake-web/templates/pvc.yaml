@@ -18,8 +18,12 @@ spec:
   resources:
     requests:
       storage: {{ $value.size | quote }}
-  {{- if not (eq $value.storageClass "-") }}
-  storageClassName: {{ $value.storageClass }}
+  {{- with $value.storageClass }}
+  {{- if eq "-" . }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
   {{- end }}
 ---
 {{- end }}

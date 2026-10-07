@@ -1030,6 +1030,26 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/odoo-0.1.0/odoo-0.1.0.tgz
     version: 0.1.0
+  openchamber:
+  - apiVersion: v2
+    appVersion: v2.1.1
+    created: "2026-10-07T20:19:30.054633283Z"
+    description: A Helm chart for OpenChamber, a web workspace for running and reviewing
+      AI coding work with OpenCode
+    digest: b13c352a77c30414bd10b4f421ae751355e050963240579f2a6962578f022066
+    home: https://openchamber.dev
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: openchamber
+    sources:
+    - https://github.com/openchamber/openchamber
+    - https://github.com/coyotle/openchamber
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/openchamber-0.1.0/openchamber-0.1.0.tgz
+    version: 0.1.0
   paperless-ai:
   - apiVersion: v2
     appVersion: 3.0.9
@@ -2593,4 +2613,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-06T05:11:50.945315148Z"
+generated: "2026-10-07T20:19:30.054834237Z"

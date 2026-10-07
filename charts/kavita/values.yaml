@@ -167,8 +167,8 @@ persistence:
   config:
     # -- Annotations for the config PVC
     annotations: {}
-    # -- Storage class for the config PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used
-    storageClass: "-"
+    # -- Storage class for config PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the config PVC
     size: "1Gi"
     # -- Access modes for the config PVC
@@ -178,8 +178,8 @@ persistence:
   library:
     # -- Annotations for the library PVC
     annotations: {}
-    # -- Storage class for the library PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used
-    storageClass: "-"
+    # -- Storage class for library PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the library PVC
     size: "1Gi"
     # -- Access modes for the library PVC

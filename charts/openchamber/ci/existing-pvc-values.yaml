@@ -1,0 +1,32 @@
+# Pre-created PVCs referenced via existingClaim.
+auth:
+  uiPassword:
+    value: "ci-password"
+persistence:
+  data:
+    enabled: true
+    existingClaim: openchamber-ci-data
+  workspaces:
+    enabled: true
+    existingClaim: openchamber-ci-workspaces
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: openchamber-ci-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: openchamber-ci-workspaces
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

@@ -1,0 +1,62 @@
+OpenChamber {{ .Chart.AppVersion }} has been deployed.
+
+1. Get the application URL:
+{{- if .Values.httpRoute.enabled }}
+{{- range .Values.httpRoute.hostnames }}
+  http(s)://{{ . }}/
+{{- end }}
+{{- else if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "openchamber.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "openchamber.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "openchamber.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "openchamber.fullname" . }} 3000:{{ .Values.service.port }}
+  echo "Visit http://127.0.0.1:3000 to use OpenChamber"
+{{- end }}
+
+2. Sign in:
+{{- if .Values.auth.uiPassword.enabled }}
+{{- if include "openchamber.hasSecretRef" .Values.auth.uiPassword }}
+  Use the password stored in Secret "{{ include "openchamber.secretRefName" (dict "ref" .Values.auth.uiPassword.secretKeyRef "ctx" $) }}" (key "{{ include "openchamber.secretRefKey" (dict "ref" .Values.auth.uiPassword.secretKeyRef "ctx" $) }}").
+{{- else }}
+  kubectl get secret --namespace {{ .Release.Namespace }} {{ include "openchamber.secretName" . }} -o jsonpath="{.data.ui-password}" | base64 -d
+{{- end }}
+{{- else }}
+
+  ##########################################################################
+  # WARNING: The UI password is DISABLED (auth.uiPassword.enabled=false).  #
+  # Anyone who can reach this service gets a shell in the pod and access  #
+  # to all code and credentials stored in it. Only use this behind an     #
+  # authenticating proxy or on a fully trusted network.                   #
+  ##########################################################################
+{{- if include "openchamber.hasSecret" .Values.auth.uiPassword }}
+
+  NOTE: auth.uiPassword.value/secretKeyRef is set but ignored because
+  auth.uiPassword.enabled=false.
+{{- end }}
+{{- end }}
+{{- if not .Values.persistence.data.enabled }}
+
+WARNING: persistence.data is disabled. Settings, provider logins, chat
+history and the generated SSH key are lost whenever the pod is replaced.
+{{- end }}
+{{- if not .Values.persistence.workspaces.enabled }}
+
+WARNING: persistence.workspaces is disabled. Repositories and unpushed work
+in ~/workspaces are lost whenever the pod is replaced.
+{{- end }}
+{{- if and (or .Values.httpRoute.enabled .Values.ingress.enabled) (not (include "openchamber.lanUrl" .)) }}
+
+NOTE: Set openchamber.lanUrl to the external URL so device pairing links work.
+{{- end }}

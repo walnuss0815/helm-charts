@@ -1,0 +1,152 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+> **Security:** OpenChamber runs AI agents that execute commands, and its UI
+> includes a terminal. Anyone who can sign in has a shell in the pod and can
+> read every credential stored in it. Keep the UI password enabled and expose
+> the service only over HTTPS.
+
+### Required
+
+- A UI password via `auth.uiPassword.value` or `auth.uiPassword.secretKeyRef`.
+  Rendering fails without one unless `auth.uiPassword.enabled` is explicitly
+  set to `false`.
+
+### Optional
+
+- An Ingress controller or [Gateway API](https://gateway-api.sigs.k8s.io/) implementation
+- A default StorageClass when enabling `persistence`
+
+## Container image
+
+OpenChamber does not publish an official container image. The chart defaults
+to [`ghcr.io/coyotle/openchamber`](https://github.com/coyotle/openchamber), a
+community image built daily from the unmodified upstream `Dockerfile` for every
+upstream release (`linux/amd64`, `linux/arm64`). Override `image.repository`
+to use your own build of the upstream `Dockerfile`.
+
+## Quick start
+
+```yaml
+auth:
+  uiPassword:
+    secretKeyRef:
+      name: openchamber-auth
+      key: ui-password
+  jwtSecret:
+    secretKeyRef:
+      name: openchamber-auth
+      key: jwt-secret
+
+# Model provider API keys, e.g. ANTHROPIC_API_KEY
+envFrom:
+  - secretRef:
+      name: openchamber-provider-keys
+
+persistence:
+  data:
+    enabled: true
+  workspaces:
+    enabled: true
+```
+
+## Persistence
+
+Two volumes are used. When a volume is disabled, an `emptyDir` takes its place
+and its content is lost whenever the pod is replaced.
+
+| Volume | Path in the container | Content |
+|--------|-----------------------|---------|
+| `data` | `~/.config/openchamber` | Settings, project settings, passkeys, paired devices, GitHub/Linear tokens, environment variables set in the UI, session goals, themes, extensions, speech models, chats without a project |
+| `data` | `~/.config/opencode` | OpenCode config, agents, commands, skills and plugins created in the UI |
+| `data` | `~/.local/share/opencode` | Provider credentials (`auth.json`), session and message history, logs, undo snapshots |
+| `data` | `~/.local/state/opencode` | Recently used models, prompt history |
+| `data` | `~/.ssh` | SSH key generated on first start (or provided via `ssh.privateKey`) |
+| `data` | `~/.cache/opencode` | Only with `persistence.cache.enabled`: downloaded provider SDKs and plugins |
+| `workspaces` | `~/workspaces` | Cloned repositories, worktrees, dependencies and build output |
+
+The `data` volume contains credentials; treat its backups accordingly.
+
+## Reverse proxy requirements
+
+OpenChamber uses WebSockets (`/api/event/ws`, `/api/global/event/ws`,
+`/api/terminal/ws`) and Server-Sent Events (`/api/event`, `/api/global/event`,
+`/api/notifications/stream`, `/api/openchamber/events`). The proxy in front of
+it must:
+
+- support WebSocket upgrades,
+- not buffer responses (SSE),
+- allow long read timeouts (e.g. 3600s),
+- accept request bodies of at least 50 MB,
+- compress responses in only one layer (see `openchamber.compressApi`).
+
+Example for ingress-nginx:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: openchamber.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: openchamber-tls
+      hosts:
+        - openchamber.example.com
+```
+
+With an Ingress, `OPENCHAMBER_LAN_URL` is derived from the first host so device
+pairing links point to it (wildcard hosts are skipped). With an HTTPRoute or a
+wildcard Ingress host, set `openchamber.lanUrl`.
+
+## Running without a UI password
+
+Only do this behind an authenticating proxy (e.g. oauth2-proxy) or on a fully
+trusted network:
+
+```yaml
+auth:
+  uiPassword:
+    enabled: false
+```
+
+The chart then sets `OPENCHAMBER_ALLOW_UNAUTHENTICATED_LAN=true`, without which
+OpenChamber refuses to listen on all interfaces without authentication.
+
+## SSH key
+
+The image generates an SSH key on first start; add its public key (printed in
+the container log) to your Git host. To use a key you manage, store it in a
+Secret and reference it:
+
+```yaml
+ssh:
+  privateKey:
+    secretKeyRef:
+      name: openchamber-ssh
+      key: id_ed25519
+```
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

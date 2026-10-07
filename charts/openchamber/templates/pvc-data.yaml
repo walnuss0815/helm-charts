@@ -1,0 +1,27 @@
+{{- with .Values.persistence.data }}
+{{- if and .enabled (not .existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "openchamber.dataClaimName" $ }}
+  labels:
+    {{- include "openchamber.labels" $ | nindent 4 }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .size | quote }}
+  {{- if .storageClass }}
+  {{- if eq "-" .storageClass }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .storageClass | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

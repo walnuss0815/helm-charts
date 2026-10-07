@@ -1,0 +1,13 @@
+# Chart-managed PVCs for data and workspaces, cache on the data volume.
+auth:
+  uiPassword:
+    value: "ci-password"
+persistence:
+  data:
+    enabled: true
+    size: 1Gi
+  workspaces:
+    enabled: true
+    size: 1Gi
+  cache:
+    enabled: true

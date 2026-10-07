@@ -25,7 +25,12 @@ This repository contains a collection of Helm charts for various containerized a
 
 ## 5. Documentation Standard (`helm-docs`)
 - **Format:** The `values.yaml` file **must** be documented using the [helm-docs](https://github.com/norwoodj/helm-docs) format.
-- **Comments:** Use standard `helm-docs` comment blocks (e.g., `## @param`, `## @extra`) above configuration blocks so that README files can be automatically generated.
+- **Comments:** Document each key with a `# -- <description>` comment directly above it. The description may continue over several `#` lines and may contain fenced YAML examples. Do not use `## @param`/`## @extra`; that is the syntax of Bitnami's readme-generator and is ignored by `helm-docs`.
+- **Annotations:** Use `# @default -- <text>` when the literal default would be misleading (e.g. `not set` for secret objects), `# @ignored` to hide internal keys, and `# @raw` for descriptions that must be rendered verbatim.
+- **Examples:** Keep commented-out example values on the lines *below* the key, not inside the `# --` block, so they do not become part of the description.
+- **Sections:** `## @section <name>` lines are optional, human-only headings; `helm-docs` ignores them.
+- **Key names:** Never use YAML 1.1 boolean words (`no`, `yes`, `on`, `off`, `y`, `n`) as keys. Helm parses them as booleans, so templates cannot look them up.
+- **README:** `README.md` is generated from `README.md.gotmpl` by `helm-docs` (CI regenerates it). Never edit `README.md` by hand; check it locally with `helm-docs --dry-run -c charts/<chart>`.
 - **Clarity:** Keep descriptions concise but highly informative, explaining what the value does and providing examples for complex objects.
 
 ## 6. Branch Naming and Commit Messages

@@ -1,0 +1,430 @@
+# Default values for openchamber.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## @section Image
+
+image:
+  # -- Container image repository. OpenChamber does not publish an official image;
+  # the default is a community build of the unmodified upstream Dockerfile.
+  repository: ghcr.io/coyotle/openchamber
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: ""
+
+# -- Secrets for pulling an image from a private registry
+imagePullSecrets: []
+# -- Override the chart name
+nameOverride: ""
+# -- Override the full resource name
+fullnameOverride: ""
+
+## @section Service Account
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount the ServiceAccount's API credentials. OpenChamber
+  # does not need access to the Kubernetes API.
+  automount: false
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+## @section Pod
+
+# -- Annotations to add to the pod
+podAnnotations: {}
+# -- Labels to add to the pod
+podLabels: {}
+
+# -- Pod security context. The image runs as user `openchamber` (UID/GID 1000).
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container security context. The root filesystem stays writable because
+# git, npm, bun and the agent's tools write to several locations in the home
+# directory and `/tmp`.
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+# -- Resource requests and limits. Agents, language servers and builds run
+# inside this container, so raise the memory limit for larger projects.
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    memory: 2Gi
+
+# -- Startup probe. `/health` answers without authentication. The first start
+# can be slow on small nodes, so up to 5 minutes are allowed.
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 60
+# -- Liveness probe
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+# -- Readiness probe
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# -- Node selector for the pod
+nodeSelector: {}
+# -- Tolerations for the pod
+tolerations: []
+# -- Affinity rules for the pod
+affinity: {}
+
+## @section Service
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port. Traffic is forwarded to the container port 3000.
+  port: 80
+
+## @section Ingress
+
+ingress:
+  # -- Enable an Ingress. OpenChamber gives shell access to the pod, so only
+  # expose it with `auth.uiPassword` enabled.
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations. OpenChamber needs WebSockets, unbuffered SSE, long
+  # read timeouts and large request bodies. Example for ingress-nginx:
+  # ```yaml
+  # nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  # nginx.ingress.kubernetes.io/proxy-buffering: "off"
+  # nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+  # nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+  # nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  # ```
+  annotations: {}
+  # -- Ingress hosts and paths
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- Ingress TLS configuration
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+## @section Gateway API
+
+# -- Expose the service via a Gateway API HTTPRoute.
+# Requires the Gateway API CRDs and a suitable controller in the cluster
+# (see: https://gateway-api.sigs.k8s.io/guides/)
+httpRoute:
+  # -- Enable an HTTPRoute
+  enabled: false
+  # -- HTTPRoute annotations
+  annotations: {}
+  # -- Gateways this route is attached to
+  parentRefs:
+    - name: gateway
+      sectionName: http
+      # namespace: default
+  # -- Hostnames matching the HTTP Host header
+  hostnames:
+    - chart-example.local
+  # -- Routing rules. Long-lived WebSocket and SSE connections need generous
+  # timeouts; with Gateway API v1.2+ add `timeouts: {request: "0s"}` to a rule.
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+## @section Authentication
+
+auth:
+  uiPassword:
+    # -- Protect the browser UI with a password (`OPENCHAMBER_UI_PASSWORD`).
+    # When `true`, either `value` or `secretKeyRef` must be set, otherwise
+    # rendering fails. Running without a password must be chosen explicitly
+    # by setting this to `false`; the chart then sets
+    # `OPENCHAMBER_ALLOW_UNAUTHENTICATED_LAN=true`, which OpenChamber requires
+    # to listen on all interfaces without authentication.
+    enabled: true
+    # -- Inline password. Stored in a chart-managed Secret. Prefer `secretKeyRef`.
+    value: ""
+    # -- Reference to an existing Secret holding the password
+    secretKeyRef:
+      name: ""
+      key: ""
+  # -- Secret used to sign UI login tokens (`OPENCODE_JWT_SECRET`). When not
+  # set, OpenChamber generates one in `~/.config/openchamber/jwt-secret`, which
+  # only survives restarts with `persistence.data` enabled. Accepts an inline
+  # `value` (stored in a chart-managed Secret) or a `secretKeyRef`.
+  # @default -- not set
+  jwtSecret:
+    value: ""
+    secretKeyRef:
+      name: ""
+      key: ""
+  # -- Browser sign-in lifetime in hours when "trust this device" is off
+  # (`OPENCHAMBER_UI_SESSION_TTL_HOURS`). Empty uses the app default (12).
+  sessionTtlHours: ""
+  # -- Sign-in lifetime in days on trusted devices
+  # (`OPENCHAMBER_UI_TRUSTED_SESSION_TTL_DAYS`). Empty uses the app default (7).
+  trustedSessionTtlDays: ""
+
+## @section OpenChamber
+
+openchamber:
+  # -- External origin other devices use to reach OpenChamber
+  # (`OPENCHAMBER_LAN_URL`), used in pairing links and QR codes, for example
+  # `https://openchamber.example.com`. When empty, it is derived from the first
+  # Ingress host if the Ingress is enabled and the host is not a wildcard.
+  lanUrl: ""
+  # -- Serve only the API, without the browser UI (`OPENCHAMBER_API_ONLY`)
+  apiOnly: false
+  # -- Origins allowed to embed OpenChamber in a frame, separated by spaces
+  # (`OPENCHAMBER_FRAME_ANCESTORS`)
+  frameAncestors: ""
+  # -- API response compression (`OPENCHAMBER_COMPRESS_API`): `"true"`,
+  # `"false"` or empty for the app default. Disable it if your proxy or CDN
+  # already compresses responses.
+  compressApi: ""
+  # -- Log every HTTP request (`OPENCHAMBER_VERBOSE_REQUEST_LOGS`)
+  verboseRequestLogs: false
+  # -- Shell for terminal sessions (`OPENCHAMBER_TERMINAL_SHELL`), e.g. `/bin/bash`
+  terminalShell: ""
+  # -- Proxy for OpenChamber's and OpenCode's outgoing requests
+  proxy:
+    # -- Proxy for plain HTTP requests (`HTTP_PROXY`)
+    httpProxy: ""
+    # -- Proxy for HTTPS requests (`HTTPS_PROXY`)
+    httpsProxy: ""
+    # -- Hosts that bypass the proxy (`NO_PROXY`), e.g.
+    # `localhost,127.0.0.1,.svc,.cluster.local`
+    noProxy: ""
+  # -- Additional arguments appended to the server command
+  # (`bun packages/web/bin/cli.js serve --foreground --port 3000`)
+  extraArgs: []
+
+## @section OpenCode
+
+opencode:
+  # -- OpenCode configuration rendered as `opencode.json` into a ConfigMap and
+  # loaded via `OPENCODE_CONFIG`. OpenCode merges it with the global config in
+  # `~/.config/opencode`, so settings changed in the UI keep working.
+  # Example:
+  # ```yaml
+  # config:
+  #   $schema: https://opencode.ai/config.json
+  #   model: anthropic/claude-sonnet-4-5
+  #   autoupdate: false
+  # ```
+  config: {}
+  external:
+    # -- Connect to an existing OpenCode server instead of starting one inside
+    # the container (`OPENCODE_HOST` and `OPENCODE_SKIP_START=true`)
+    enabled: false
+    # -- OpenCode server origin with an explicit port and no path, e.g.
+    # `http://opencode:4096`
+    host: ""
+
+## @section oh-my-opencode
+
+ohMyOpencode:
+  # -- Install and set up oh-my-opencode on first start (`OH_MY_OPENCODE=true`).
+  # Requires internet access. The setup marker is stored in
+  # `~/.config/opencode`, so enable `persistence.data` to avoid re-running it
+  # after every restart.
+  enabled: false
+
+## @section Tunnel
+
+tunnel:
+  # -- Start a tunnel together with OpenChamber
+  enabled: false
+  # -- Tunnel provider (`OPENCHAMBER_TUNNEL_PROVIDER`), e.g. `cloudflare`
+  provider: cloudflare
+  # -- Tunnel mode (`OPENCHAMBER_TUNNEL_MODE`): `quick`, `managed-remote` or
+  # `managed-local`
+  mode: quick
+  # -- Public hostname (`OPENCHAMBER_TUNNEL_HOSTNAME`), required for `managed-remote`
+  hostname: ""
+  # -- Tunnel token (`OPENCHAMBER_TUNNEL_TOKEN`), required for `managed-remote`.
+  # Accepts an inline `value` (stored in a chart-managed Secret) or a `secretKeyRef`.
+  # @default -- not set
+  token:
+    value: ""
+    secretKeyRef:
+      name: ""
+      key: ""
+  # -- Path to a cloudflared config file for `managed-local`
+  # (`OPENCHAMBER_TUNNEL_CONFIG`). Mount the file with `extraVolumes`.
+  configPath: ""
+  # -- ngrok auth token (`NGROK_AUTHTOKEN`). Accepts an inline `value` (stored
+  # in a chart-managed Secret) or a `secretKeyRef`.
+  # @default -- not set
+  ngrokAuthToken:
+    value: ""
+    secretKeyRef:
+      name: ""
+      key: ""
+
+## @section Enterprise mode
+
+enterprise:
+  # -- Enable enterprise mode (`OPENCHAMBER_ENTERPRISE_MODE=1`). Restricts model
+  # providers to the OpenCode config and turns off public tunnels, cloud
+  # speech and data-sending extensions unless allowed below.
+  enabled: false
+  # -- Allow connections from other machines (`OPENCHAMBER_ALLOW_NETWORK_ACCESS=1`).
+  # Must stay `true` in Kubernetes, otherwise OpenChamber refuses to listen
+  # beyond the container.
+  allowNetworkAccess: true
+  # -- Self-hosted relay URL (`OPENCHAMBER_RELAY_URL`), e.g. `wss://relay.example.com/ws`
+  relayUrl: ""
+  # -- Repository URLs extensions may be installed from
+  # (`OPENCHAMBER_ALLOWED_EXTENSIONS`), e.g. `["https://github.com/acme/"]`
+  allowedExtensions: []
+  # -- Allow installing extensions from a local folder
+  # (`OPENCHAMBER_ALLOW_LOCAL_EXTENSIONS=1`)
+  allowLocalExtensions: false
+  jev:
+    # -- Classification (Jev) endpoint (`OPENCHAMBER_JEV_URL`)
+    url: ""
+    # -- Classification model (`OPENCHAMBER_JEV_MODEL`)
+    model: ""
+    # -- API key for the classification endpoint (`OPENCHAMBER_JEV_API_KEY`).
+    # Accepts an inline `value` (stored in a chart-managed Secret) or a `secretKeyRef`.
+    # @default -- not set
+    apiKey:
+      value: ""
+      secretKeyRef:
+        name: ""
+        key: ""
+
+## @section Policy file
+
+policy:
+  # -- Mount a `policy.json` at `/etc/openchamber/policy.json`. The policy file
+  # works with or without enterprise mode (e.g. `opencodeBinary`,
+  # `hideBuiltinSkillCatalogs`). See https://github.com/openchamber/openchamber/blob/main/packages/docs/content/docs/security.mdx
+  enabled: false
+  # -- Policy content rendered as JSON into a chart-managed Secret, e.g.
+  # `{enterpriseMode: true, organization: Acme}`. Ignored when `existingSecret.name` is set.
+  content: {}
+  existingSecret:
+    # -- Name of an existing Secret holding the policy file
+    name: ""
+    # -- Key of the policy file in the existing Secret
+    key: policy.json
+
+## @section SSH
+
+ssh:
+  privateKey:
+    # -- Existing Secret holding an SSH private key (ed25519 recommended) to use
+    # for git over SSH. An init container copies it to `~/.ssh/id_ed25519` with
+    # mode 0600. When not set, the image generates a key on first start, which
+    # only survives restarts with `persistence.data` enabled. `name` and `key`
+    # are rendered with `tpl`, like all `secretKeyRef` values in this chart.
+    secretKeyRef:
+      name: ""
+      key: ""
+
+## @section Persistence
+
+persistence:
+  data:
+    # -- Persist application state: `~/.config/openchamber` (settings, logins,
+    # paired devices, GitHub/Linear tokens), `~/.config/opencode` (OpenCode
+    # config), `~/.local/share/opencode` (provider credentials, session
+    # history), `~/.local/state/opencode` and `~/.ssh`. When disabled, an
+    # `emptyDir` is used and everything is lost when the pod is replaced.
+    enabled: false
+    # -- Use an existing PVC instead of creating one
+    existingClaim: ""
+    # -- Annotations for the PVC
+    annotations: {}
+    # -- Storage class. Empty uses the cluster default; `-` sets `storageClassName: ""`.
+    storageClass: ""
+    # -- Access modes
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of the PVC
+    size: 5Gi
+  workspaces:
+    # -- Persist `~/workspaces`, where repositories, worktrees and build output
+    # live. When disabled, an `emptyDir` is used.
+    enabled: false
+    # -- Use an existing PVC instead of creating one
+    existingClaim: ""
+    # -- Annotations for the PVC
+    annotations: {}
+    # -- Storage class. Empty uses the cluster default; `-` sets `storageClassName: ""`.
+    storageClass: ""
+    # -- Access modes
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of the PVC
+    size: 20Gi
+  cache:
+    # -- Store `~/.cache/opencode` (downloaded provider SDKs and plugins) on the
+    # data volume to speed up restarts. When disabled, the cache lives in the
+    # container and is downloaded again after a restart.
+    enabled: false
+
+## @section Extra configuration
+
+# -- Additional environment variables, e.g. model provider settings
+env: []
+# - name: OPENCODE_DISABLE_AUTOUPDATE
+#   value: "true"
+
+# -- Additional environment variables from Secrets or ConfigMaps, e.g. model
+# provider API keys such as `ANTHROPIC_API_KEY`
+envFrom: []
+# - secretRef:
+#     name: openchamber-provider-keys
+
+# -- Additional volumes for the pod
+extraVolumes: []
+# -- Additional volume mounts for the OpenChamber container
+extraVolumeMounts: []
+# -- Additional init containers
+extraInitContainers: []
+
+# -- Additional Kubernetes manifests to deploy. Each entry is a string that is
+# rendered with `tpl`.
+extraManifests: []

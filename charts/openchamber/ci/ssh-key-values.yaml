@@ -1,0 +1,20 @@
+# SSH key from an existing Secret, copied into ~/.ssh by the init container.
+# The key is generated at render time so no private key is committed; this
+# is non-deterministic on purpose and only meant for CI.
+auth:
+  uiPassword:
+    value: "ci-password"
+ssh:
+  privateKey:
+    secretKeyRef:
+      name: "{{ .Release.Name }}-ci-ssh"
+      key: id_ed25519
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: {{ .Release.Name }}-ci-ssh
+    stringData:
+      id_ed25519: |
+        {{- genPrivateKey "ed25519" | nindent 8 }}

@@ -206,8 +206,8 @@ persistence:
   data:
     # -- Annotations for the data PVC
     annotations: {}
-    # -- Storage class for data PVC
-    storageClass: "-"
+    # -- Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the data PVC
     size: "1Gi"
     # -- Access modes for data PVC
@@ -217,8 +217,8 @@ persistence:
   media:
     # -- Annotations for the media PVC
     annotations: {}
-    # -- Storage class for media PVC
-    storageClass: "-"
+    # -- Storage class for media PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the media PVC
     size: "8Gi"
     # -- Access modes for media PVC
@@ -228,8 +228,8 @@ persistence:
   consumption:
     # -- Annotations for the consumption PVC
     annotations: {}
-    # -- Storage class for consumption PVC
-    storageClass: "-"
+    # -- Storage class for consumption PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the consumption PVC
     size: "512Mi"
     # -- Access modes for consumption PVC

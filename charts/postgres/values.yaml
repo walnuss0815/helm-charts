@@ -119,8 +119,8 @@ persistence:
   pgdata:
     # -- Annotations for the PostgreSQL data PVC
     annotations: {}
-    # -- Storage class for the PostgreSQL data PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used
-    storageClass: "-"
+    # -- Storage class for the PostgreSQL data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the PostgreSQL data PVC
     size: "1Gi"
     # -- Access modes for the PostgreSQL data PVC

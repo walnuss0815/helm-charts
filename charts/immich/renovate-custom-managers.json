@@ -8,7 +8,7 @@
         "(^|/)values\\.yaml$"
       ],
       "matchStrings": [
-        "# renovate: image=(?<depName>[^\\s:]+)[\\s\\r\\n]+\\s*reference: \\S+:(?<currentValue>[\\w+.\\-]+)"
+        "# renovate: image=(?<depName>[^\\s:]+)\\s*\\n(?:\\s*#.*\\n)*\\s*reference: \\S+:(?<currentValue>[\\w+.\\-]+)"
       ],
       "datasourceTemplate": "docker"
     }

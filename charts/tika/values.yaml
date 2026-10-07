@@ -98,7 +98,6 @@ autoscaling:
   maxReplicas: 100
   # -- Target CPU utilization percentage for autoscaling
   targetCPUUtilizationPercentage: 80
-  # -- Target memory utilization percentage for autoscaling (optional)
   # targetMemoryUtilizationPercentage: 80
 
 # -- Node selector for pod assignment

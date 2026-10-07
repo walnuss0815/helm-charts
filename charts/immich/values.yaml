@@ -486,7 +486,7 @@ persistence:
     existingClaim: ""
     # -- Annotations for the media volume PVC
     annotations: {}
-    # -- Storage class for the media volume. Empty uses the cluster's default StorageClass
+    # -- Storage class for the media volume. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
     storageClass: ""
     # -- Access modes for the media volume
     accessModes:
@@ -504,7 +504,7 @@ persistence:
     existingClaim: ""
     # -- Annotations for the model cache volume PVC
     annotations: {}
-    # -- Storage class for the model cache volume. Empty uses the cluster's default StorageClass
+    # -- Storage class for the model cache volume. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
     storageClass: ""
     # -- Access modes for the model cache volume
     accessModes:

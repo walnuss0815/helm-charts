@@ -16,7 +16,11 @@ spec:
     - {{ . }}
     {{- end }}
   {{- with .Values.persistence.media.storageClass }}
-  storageClassName: {{ . }}
+  {{- if eq "-" . }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
   {{- end }}
   resources:
     requests:

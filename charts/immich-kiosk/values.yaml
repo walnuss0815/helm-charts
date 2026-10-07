@@ -148,10 +148,11 @@ tolerations: []
 # -- Affinity rules for pod scheduling.
 affinity: {}
 
-# -- Additional environment variables to set on the container.
+# -- Additional environment variables as a map of variable name to value. Values are rendered with `tpl`.
 env: {}
 
-# -- Additional environment variables sourced from ConfigMaps or Secrets.
+# -- Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object,
+# e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`.
 envFrom: {}
 
 # -- Extra Kubernetes manifests to deploy alongside the chart.

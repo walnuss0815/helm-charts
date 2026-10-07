@@ -1,0 +1,11 @@
+{{- if .Values.opencode.config }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openchamber.fullname" . }}-opencode
+  labels:
+    {{- include "openchamber.labels" . | nindent 4 }}
+data:
+  opencode.json: |
+    {{- toPrettyJson .Values.opencode.config | nindent 4 }}
+{{- end }}

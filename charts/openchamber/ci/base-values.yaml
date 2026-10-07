@@ -1,0 +1,4 @@
+# Minimal install: inline UI password, no persistence.
+auth:
+  uiPassword:
+    value: "ci-password"

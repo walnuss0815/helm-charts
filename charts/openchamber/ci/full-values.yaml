@@ -1,0 +1,32 @@
+# OpenCode config and enterprise mode with a policy file. Ingress and
+# HTTPRoute stay disabled because the kind cluster has no controller for them.
+# The SSH key option is not covered here to avoid committing a private key.
+auth:
+  uiPassword:
+    value: "ci-password"
+  jwtSecret:
+    value: "ci-jwt-secret-with-enough-length-0123456789"
+  sessionTtlHours: "24"
+  trustedSessionTtlDays: "30"
+openchamber:
+  lanUrl: "https://openchamber.example.com"
+  compressApi: "false"
+opencode:
+  config:
+    $schema: https://opencode.ai/config.json
+    autoupdate: false
+    share: disabled
+enterprise:
+  enabled: true
+  allowedExtensions:
+    - https://github.com/openchamber/
+policy:
+  enabled: true
+  content:
+    enterpriseMode: true
+    organization: CI
+    allowNetworkAccess: true
+persistence:
+  data:
+    enabled: true
+    size: 1Gi

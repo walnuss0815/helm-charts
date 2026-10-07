@@ -1,0 +1,339 @@
+{{- include "openchamber.validate" . }}
+{{- $home := include "openchamber.home" . }}
+{{- $lanUrl := include "openchamber.lanUrl" . }}
+{{- $sshKey := .Values.ssh.privateKey }}
+{{- $sshKeyEnabled := include "openchamber.hasSecretRef" $sshKey }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openchamber.fullname" . }}
+  labels:
+    {{- include "openchamber.labels" . | nindent 4 }}
+spec:
+  # OpenChamber keeps its state on local disk and can only run as one replica.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "openchamber.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/opencode-config: {{ include (print $.Template.BasePath "/configmap-opencode.yaml") . | sha256sum }}
+        checksum/policy: {{ include (print $.Template.BasePath "/policy-secret.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "openchamber.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "openchamber.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or $sshKeyEnabled .Values.extraInitContainers }}
+      initContainers:
+        {{- if $sshKeyEnabled }}
+        - name: ssh-key
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              install -m 0600 /ssh-key/id_ed25519 {{ $home }}/.ssh/id_ed25519
+              ssh-keygen -y -f {{ $home }}/.ssh/id_ed25519 > {{ $home }}/.ssh/id_ed25519.pub
+              chmod 0644 {{ $home }}/.ssh/id_ed25519.pub
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: data
+              mountPath: {{ $home }}/.ssh
+              subPath: ssh
+            - name: ssh-key
+              mountPath: /ssh-key
+              readOnly: true
+        {{- end }}
+        {{- with .Values.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # The image entrypoint prepares SSH keys and oh-my-opencode, then
+          # executes these arguments. Running the server in the foreground makes
+          # it the main process, so it receives SIGTERM and crashes restart the pod.
+          args:
+            - bun
+            - packages/web/bin/cli.js
+            - serve
+            - --foreground
+            - --port
+            - "3000"
+            {{- range .Values.openchamber.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          env:
+            - name: OPENCHAMBER_HOST
+              value: "0.0.0.0"
+            {{- if not .Values.auth.uiPassword.enabled }}
+            - name: OPENCHAMBER_ALLOW_UNAUTHENTICATED_LAN
+              value: "true"
+            {{- end }}
+            {{- with include "openchamber.secretEnv" . | trim }}
+            {{- . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.auth.sessionTtlHours }}
+            - name: OPENCHAMBER_UI_SESSION_TTL_HOURS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.auth.trustedSessionTtlDays }}
+            - name: OPENCHAMBER_UI_TRUSTED_SESSION_TTL_DAYS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with $lanUrl }}
+            - name: OPENCHAMBER_LAN_URL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.openchamber.apiOnly }}
+            - name: OPENCHAMBER_API_ONLY
+              value: "true"
+            {{- end }}
+            {{- with .Values.openchamber.frameAncestors }}
+            - name: OPENCHAMBER_FRAME_ANCESTORS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.openchamber.compressApi }}
+            - name: OPENCHAMBER_COMPRESS_API
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.openchamber.verboseRequestLogs }}
+            - name: OPENCHAMBER_VERBOSE_REQUEST_LOGS
+              value: "true"
+            {{- end }}
+            {{- with .Values.openchamber.terminalShell }}
+            - name: OPENCHAMBER_TERMINAL_SHELL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.openchamber.proxy.httpProxy }}
+            - name: HTTP_PROXY
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.openchamber.proxy.httpsProxy }}
+            - name: HTTPS_PROXY
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.openchamber.proxy.noProxy }}
+            - name: NO_PROXY
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.opencode.config }}
+            - name: OPENCODE_CONFIG
+              value: /etc/opencode/opencode.json
+            {{- end }}
+            {{- if .Values.opencode.external.enabled }}
+            - name: OPENCODE_HOST
+              value: {{ .Values.opencode.external.host | quote }}
+            - name: OPENCODE_SKIP_START
+              value: "true"
+            {{- end }}
+            {{- if .Values.ohMyOpencode.enabled }}
+            - name: OH_MY_OPENCODE
+              value: "true"
+            {{- end }}
+            {{- if .Values.tunnel.enabled }}
+            - name: OPENCHAMBER_TUNNEL_PROVIDER
+              value: {{ .Values.tunnel.provider | quote }}
+            - name: OPENCHAMBER_TUNNEL_MODE
+              value: {{ .Values.tunnel.mode | quote }}
+            {{- with .Values.tunnel.hostname }}
+            - name: OPENCHAMBER_TUNNEL_HOSTNAME
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.tunnel.configPath }}
+            - name: OPENCHAMBER_TUNNEL_CONFIG
+              value: {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.enterprise.enabled }}
+            - name: OPENCHAMBER_ENTERPRISE_MODE
+              value: "1"
+            {{- if .Values.enterprise.allowNetworkAccess }}
+            - name: OPENCHAMBER_ALLOW_NETWORK_ACCESS
+              value: "1"
+            {{- end }}
+            {{- with .Values.enterprise.relayUrl }}
+            - name: OPENCHAMBER_RELAY_URL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.enterprise.allowedExtensions }}
+            - name: OPENCHAMBER_ALLOWED_EXTENSIONS
+              value: {{ join "," . | quote }}
+            {{- end }}
+            {{- if .Values.enterprise.allowLocalExtensions }}
+            - name: OPENCHAMBER_ALLOW_LOCAL_EXTENSIONS
+              value: "1"
+            {{- end }}
+            {{- with .Values.enterprise.jev.url }}
+            - name: OPENCHAMBER_JEV_URL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.enterprise.jev.model }}
+            - name: OPENCHAMBER_JEV_MODEL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ $home }}/.config/openchamber
+              subPath: openchamber
+            - name: data
+              mountPath: {{ $home }}/.config/opencode
+              subPath: opencode-config
+            - name: data
+              mountPath: {{ $home }}/.local/share/opencode
+              subPath: opencode-share
+            - name: data
+              mountPath: {{ $home }}/.local/state/opencode
+              subPath: opencode-state
+            - name: data
+              mountPath: {{ $home }}/.ssh
+              subPath: ssh
+            {{- if .Values.persistence.cache.enabled }}
+            - name: data
+              mountPath: {{ $home }}/.cache/opencode
+              subPath: opencode-cache
+            {{- end }}
+            - name: workspaces
+              mountPath: {{ $home }}/workspaces
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.opencode.config }}
+            - name: opencode-config
+              mountPath: /etc/opencode
+              readOnly: true
+            {{- end }}
+            {{- if .Values.policy.enabled }}
+            - name: policy
+              mountPath: /etc/openchamber
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.data.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "openchamber.dataClaimName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: workspaces
+          {{- if .Values.persistence.workspaces.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "openchamber.workspacesClaimName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.opencode.config }}
+        - name: opencode-config
+          configMap:
+            name: {{ include "openchamber.fullname" . }}-opencode
+        {{- end }}
+        {{- if .Values.policy.enabled }}
+        - name: policy
+          secret:
+            {{- with .Values.policy.existingSecret }}
+            {{- if .name }}
+            secretName: {{ tpl .name $ }}
+            items:
+              - key: {{ .key }}
+                path: policy.json
+            {{- else }}
+            secretName: {{ include "openchamber.fullname" $ }}-policy
+            items:
+              - key: policy.json
+                path: policy.json
+            {{- end }}
+            {{- end }}
+        {{- end }}
+        {{- if $sshKeyEnabled }}
+        - name: ssh-key
+          secret:
+            secretName: {{ include "openchamber.secretRefName" (dict "ref" $sshKey.secretKeyRef "ctx" $) }}
+            defaultMode: 0400
+            items:
+              - key: {{ include "openchamber.secretRefKey" (dict "ref" $sshKey.secretKeyRef "ctx" $) }}
+                path: id_ed25519
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

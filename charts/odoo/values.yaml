@@ -108,10 +108,11 @@ httpRoute:
 # -- Configuration of init containers
 initContainer: []
 
-# -- Additional environment variables to set
+# -- Additional environment variables as a map of variable name to value. Values are rendered with `tpl`
 env: {}
 
-# -- Additional environment variables from ConfigMaps or Secrets
+# -- Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object,
+# e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
 envFrom: {}
 
 # -- Resource requests and limits for the Odoo container
@@ -155,7 +156,7 @@ persistence:
   data:
     # -- Annotations for the Odoo data PVC
     annotations: {}
-    # -- Storage class for the Odoo data PVC. Use `"-"` to disable dynamic provisioning
+    # -- Storage class for the Odoo data PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used
     storageClass: "-"
     # -- Size of the Odoo data PVC
     size: "1Gi"
@@ -166,7 +167,7 @@ persistence:
   addons:
     # -- Annotations for the Odoo addons PVC
     annotations: {}
-    # -- Storage class for the Odoo addons PVC. Use `"-"` to disable dynamic provisioning
+    # -- Storage class for the Odoo addons PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used
     storageClass: "-"
     # -- Size of the Odoo addons PVC
     size: "1Gi"
@@ -207,7 +208,7 @@ database:
       # -- Key within the secret
       key: ""
 
-# -- Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/de/developer/reference/cli.html#cmdoption-odoo-bin-log-level)
+# -- Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/developer/reference/cli.html#cmdoption-odoo-bin-log-level)
 logLevel: info
 
 # -- Odoo configuration file content (supports Helm templating)

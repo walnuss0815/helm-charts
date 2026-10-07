@@ -21,7 +21,11 @@ spec:
   resources:
     requests:
       storage: {{ .size | quote }}
-  {{- if not (eq .storageClass "-") }}
-  storageClassName: {{ .storageClass }}
+  {{- with .storageClass }}
+  {{- if eq "-" . }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
   {{- end }}
 {{- end }}

@@ -156,8 +156,8 @@ persistence:
   data:
     # -- Annotations for the Odoo data PVC
     annotations: {}
-    # -- Storage class for the Odoo data PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used
-    storageClass: "-"
+    # -- Storage class for the Odoo data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the Odoo data PVC
     size: "1Gi"
     # -- Access modes for the Odoo data PVC
@@ -167,8 +167,8 @@ persistence:
   addons:
     # -- Annotations for the Odoo addons PVC
     annotations: {}
-    # -- Storage class for the Odoo addons PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used
-    storageClass: "-"
+    # -- Storage class for the Odoo addons PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the Odoo addons PVC
     size: "1Gi"
     # -- Access modes for the Odoo addons PVC

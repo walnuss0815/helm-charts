@@ -3,3 +3,6 @@ persistence:
     # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
     accessModes:
       - ReadWriteOnce
+
+secretKey:
+  value: "ci-only-secret-key-not-for-production"

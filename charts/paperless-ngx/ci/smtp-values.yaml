@@ -14,3 +14,6 @@ smtp:
     value: "my-smtp-user"
   password:
     value: "my-smtp-password"
+
+secretKey:
+  value: "ci-only-secret-key-not-for-production"

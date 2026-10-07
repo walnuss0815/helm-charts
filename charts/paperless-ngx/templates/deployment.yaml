@@ -48,6 +48,9 @@ spec:
             - name: PAPERLESS_URL
               value: {{ tpl .Values.url . }}
             - name: PAPERLESS_SECRET_KEY
+              {{- if not (or .Values.secretKey.value (and .Values.secretKey.secretKeyRef.name .Values.secretKey.secretKeyRef.key)) }}
+              {{- fail "secretKey is required: set secretKey.value or secretKey.secretKeyRef.name and secretKey.secretKeyRef.key" }}
+              {{- end }}
               {{- include "paperless-ngx.secretEnvVar" .Values.secretKey | indent 14 }}
             - name: PAPERLESS_DATA_DIR
               value: /volumes/data

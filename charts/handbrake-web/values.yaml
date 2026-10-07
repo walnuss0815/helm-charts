@@ -91,8 +91,8 @@ persistence:
   data:
     # -- Annotations for the data PVC
     annotations: {}
-    # -- Storage class for the data PVC
-    storageClass: "-"
+    # -- Storage class for the data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the data PVC
     size: "1Gi"
     # -- Mount path for this volume within the server/worker containers
@@ -104,8 +104,8 @@ persistence:
   video:
     # -- Annotations for the video PVC
     annotations: {}
-    # -- Storage class for the video PVC
-    storageClass: "-"
+    # -- Storage class for the video PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    storageClass: ""
     # -- Size of the video PVC
     size: "16Gi"
     # -- Mount path for this volume within the server/worker containers

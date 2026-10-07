@@ -20,6 +20,10 @@ spec:
   resources:
     requests:
       storage: {{ .Values.persistence.data.size | quote }}
-  {{- if not (eq .Values.persistence.data.storageClass "-") }}
-  storageClassName: {{ .Values.persistence.data.storageClass }}
+  {{- with .Values.persistence.data.storageClass }}
+  {{- if eq "-" . }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
   {{- end }}

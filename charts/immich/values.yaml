@@ -228,6 +228,7 @@ microservices:
     enabled: false
     # -- Service annotations
     annotations: {}
+  # -- Resource requests and limits for the microservices container.
   resources:
     requests:
       cpu: 200m
@@ -313,6 +314,7 @@ machineLearning:
   service:
     # -- Service port
     port: 3003
+  # -- Resource requests and limits for the machine-learning container.
   resources:
     requests:
       cpu: 250m
@@ -484,7 +486,7 @@ persistence:
     existingClaim: ""
     # -- Annotations for the media volume PVC
     annotations: {}
-    # -- Storage class for the media volume. Use `"-"` to disable dynamic provisioning
+    # -- Storage class for the media volume. Empty uses the cluster's default StorageClass
     storageClass: ""
     # -- Access modes for the media volume
     accessModes:
@@ -502,7 +504,7 @@ persistence:
     existingClaim: ""
     # -- Annotations for the model cache volume PVC
     annotations: {}
-    # -- Storage class for the model cache volume
+    # -- Storage class for the model cache volume. Empty uses the cluster's default StorageClass
     storageClass: ""
     # -- Access modes for the model cache volume
     accessModes:
@@ -519,9 +521,9 @@ persistence:
 monitoring:
   # -- Enable metrics scraping. Sets `IMMICH_TELEMETRY_INCLUDE=all` on the workloads
   enabled: false
-  # -- Create ServiceMonitors for the server and microservices services.
-  # Enable this only when a Prometheus Operator (CRDs) is installed in the cluster
   serviceMonitors:
+    # -- Create ServiceMonitors for the server and microservices services.
+    # Enable this only when a Prometheus Operator (CRDs) is installed in the cluster
     enabled: false
   # -- Scrape interval for the ServiceMonitors
   interval: 30s
@@ -570,15 +572,15 @@ postgres:
   user: immich
   # -- Name of the Immich database
   database: immich
-  #   -- PostgreSQL password: the database user password for Immich.
-  #   Accepts either an inline `value` (stored in a chart-managed Secret named
-  #   `<fullname>-postgresql-credentials` together with the `username`) or a
-  #   `secretKeyRef` referencing an existing Secret containing the password
-  #   (plus the `username` when the CNPG cluster is enabled). When none of these
-  #   is set and the chart-managed CNPG cluster is enabled, CloudNativePG
-  #   generates a random password itself (stored in `<fullname>-postgresql-app`).
-  #   An external database (`postgres.enabled: false`) always requires a password
-  #   source.
+  # -- PostgreSQL password: the database user password for Immich.
+  # Accepts either an inline `value` (stored in a chart-managed Secret named
+  # `<fullname>-postgresql-credentials` together with the `username`) or a
+  # `secretKeyRef` referencing an existing Secret containing the password
+  # (plus the `username` when the CNPG cluster is enabled). When none of these
+  # is set and the chart-managed CNPG cluster is enabled, CloudNativePG
+  # generates a random password itself (stored in `<fullname>-postgresql-app`).
+  # An external database (`postgres.enabled: false`) always requires a password
+  # source.
   password:
     # -- Inline password value. Stored in a chart-managed Secret when set
     value: ""
@@ -621,8 +623,8 @@ postgres:
     # -- Extension name
     - name: vchord
       image:
-        # -- Image reference containing the extension files
         # renovate: image=ghcr.io/tensorchord/vchord-scratch
+        # -- Image reference containing the extension files
         reference: ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1
       # -- Directories to search for the extension libraries
       dynamic_library_path:
@@ -665,8 +667,8 @@ valkey:
   auth:
     # -- Enable ACL-based authentication. Requires `aclUsers` and the password in `redis.password`
     enabled: false
-  # -- Number of Valkey replicas (master-replica mode). Requires `replica.persistence.size` and `auth.aclUsers` when authentication is enabled
   replica:
+    # -- Deploy Valkey replicas (master-replica mode). Requires `replica.persistence.size`, and `auth.aclUsers` when authentication is enabled
     enabled: false
 
 ## @section Upload optimizer

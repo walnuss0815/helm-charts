@@ -202,7 +202,8 @@ securityContext:
 # parsed as a Go template and must be escaped (e.g. `{{ "{{" }}`) or it will fail to render.
 extraEnv: {}
 
-# -- Extra environment variables sourced from ConfigMaps/Secrets
+# -- Extra environment variables as a map of variable name to a Kubernetes `valueFrom` object,
+# e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
 extraEnvFrom: {}
 
 # -- Node selector for pod scheduling

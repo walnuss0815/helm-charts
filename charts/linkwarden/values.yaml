@@ -227,7 +227,7 @@ postgres:
     # -- Name of the secret (supports Helm templating)
     name: '{{ .Release.Name }}-db'
 
-# -- External database connection configuration. Only used if `postgres.enabled` is `false`
+# -- External database connection configuration. Only used if `postgres.enabled` is `false` and `database.enabled` is `true`
 database:
   # -- Enable configuring an external database connection
   enabled: false

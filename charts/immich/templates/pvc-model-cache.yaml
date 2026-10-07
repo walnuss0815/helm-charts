@@ -16,7 +16,11 @@ spec:
     - {{ . }}
     {{- end }}
   {{- with .Values.persistence.modelCache.storageClass }}
-  storageClassName: {{ . }}
+  {{- if eq "-" . }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
   {{- end }}
   resources:
     requests:

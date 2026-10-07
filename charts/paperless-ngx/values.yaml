@@ -193,10 +193,11 @@ secretKey:
     # -- Key within the secret
     key: ""
 
-# -- Additional environment variables to set
+# -- Additional environment variables as a map of variable name to value. Values are rendered with `tpl`
 env: {}
 
-# -- Additional environment variables from ConfigMaps or Secrets
+# -- Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object,
+# e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
 envFrom: {}
 
 # -- Persistence configuration for paperless-ngx volumes
@@ -343,7 +344,7 @@ valkey:
   enabled: true
   # -- Valkey authentication configuration
   auth:
-    # -- Enable Valkey password authentication (TODO: Enable in production)
+    # -- Enable Valkey password authentication. Disabled by default; enable it for production and include the credentials in `valkeyKV.url`
     enabled: false
   # -- Resource limits/requests for the Valkey container
   resources:

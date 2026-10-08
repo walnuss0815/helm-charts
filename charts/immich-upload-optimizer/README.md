@@ -1,6 +1,6 @@
 # immich-upload-optimizer
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.5.5](https://img.shields.io/badge/AppVersion-v0.5.5-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.5.5](https://img.shields.io/badge/AppVersion-v0.5.5-informational?style=flat-square)
 
 A Helm chart for Immich Upload Optimizer, the smart upload proxy that optimizes images losslessly and transcodes videos with hardware acceleration before they reach Immich.
 
@@ -93,7 +93,7 @@ for encoder flags to use inside task commands.
 | affinity | object | `{}` | Affinity rules for pod scheduling |
 | config.tasks | list | `[{"command":"cjxl --lossless_jpeg=1 {{.folder}}/{{.name}}.{{.extension}} {{.folder}}/{{.name}}-new.jxl && rm {{.folder}}/{{.name}}.{{.extension}}","extensions":["jpeg","jpg","png","pgx","pam","pnm","pgm","ppm","pfm","gif","exr"],"name":"jpeg-xl"},{"command":"caesiumclt --keep-dates --exif --quality=0 --output-dir={{.folder}} {{.folder}}/{{.name}}.{{.extension}}","extensions":["jpeg","jpg","png","tiff","tif","webp","gif"],"name":"caesium"},{"command":"","extensions":["avif","bmp","heic","heif","insp","jxl","psd","raw","rw2","svg"],"name":"passthrough-images"},{"command":"","extensions":["3gp","3gpp","avi","flv","m4v","mkv","mts","m2ts","m2t","mp4","insv","mpg","mpe","mpeg","mov","webm","wmv"],"name":"passthrough-videos"}]` | Task definitions (see TASKS.md / README), rendered under the `tasks` key of the generated `/config/tasks.yaml`. `${TOKEN}`-style placeholders in a task `command` are shell-expanded at runtime by `sh -c`, so values from `extraEnv`/`extraEnvFrom` (e.g. Kubernetes Secrets) are available directly. |
 | extraEnv | object | `{}` | Extra environment variables, rendered with `tpl`. Values must be strings (e.g. quote numbers) and may reference chart values (e.g. `{{ .Release.Namespace }}`); a literal `{{`/`}}` in a value will be parsed as a Go template and must be escaped (e.g. `{{ "{{" }}`) or it will fail to render. |
-| extraEnvFrom | object | `{}` | Extra environment variables sourced from ConfigMaps/Secrets |
+| extraEnvFrom | object | `{}` | Extra environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with the Helm template engine, so it can reference chart values such as `.Release.Namespace`. Only trusted manifests should be used here. |
 | extraVolumeMounts | list | `[]` | Extra volume mounts (for the extra volumes) |
 | extraVolumes | list | `[]` | Extra volumes |

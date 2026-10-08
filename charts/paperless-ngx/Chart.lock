@@ -4,12 +4,12 @@ dependencies:
   version: 0.12.0
 - name: webdav
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.15
+  version: 0.1.16
 - name: tika
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.3
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.9
-digest: sha256:125d663d58598eac390f49401a41d3892d0bc2cfad933c9a88913d5d05cfb6c9
-generated: "2026-10-08T12:38:38.414370961Z"
+digest: sha256:b3738a4bd654434236b6e7df9db1d6ffd19b4895042e381d8b8e310b188e6ad7
+generated: "2026-10-08T21:30:11.956013062Z"

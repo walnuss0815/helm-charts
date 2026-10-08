@@ -930,6 +930,25 @@ entries:
   linkwarden:
   - apiVersion: v2
     appVersion: 2.16.3
+    created: "2026-10-08T16:59:59.836154611Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.3.5
+    description: A Helm chart for Linkwarden
+    digest: 95b3feb2438b23d35f0032c07edb82bc655568919f9be5fcba88cbadea8e4833
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: linkwarden
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/linkwarden-0.1.4/linkwarden-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: 2.16.3
     created: "2026-10-08T11:56:43.972586706Z"
     dependencies:
     - condition: postgres.enabled
@@ -1005,6 +1024,25 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/linkwarden-0.1.0/linkwarden-0.1.0.tgz
     version: 0.1.0
   odoo:
+  - apiVersion: v2
+    appVersion: "19.0"
+    created: "2026-10-08T17:00:00.025035302Z"
+    dependencies:
+    - condition: postgres.enabled
+      name: postgres
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.3.5
+    description: A Helm chart for Odoo
+    digest: 046d9dcad71d11bbc1774ddfde86effd685ebd51c5d0cb11765e14d8532b876c
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: odoo
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/odoo-1.0.6/odoo-1.0.6.tgz
+    version: 1.0.6
   - apiVersion: v2
     appVersion: "19.0"
     created: "2026-10-08T11:56:44.121884832Z"
@@ -2863,4 +2901,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-08T12:47:38.548181878Z"
+generated: "2026-10-08T17:00:00.025189671Z"

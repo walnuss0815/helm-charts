@@ -1,6 +1,6 @@
 # odoo
 
-![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
+![Version: 1.0.5](https://img.shields.io/badge/Version-1.0.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
 
 A Helm chart for Odoo
 
@@ -35,8 +35,8 @@ A Helm chart for Odoo
 | database.username.secretKeyRef.key | string | `""` | Key within the secret |
 | database.username.secretKeyRef.name | string | `""` | Name of the secret |
 | database.username.value | string | `"odoo"` | Plain-text username value. Ignored if `secretKeyRef.name` is set |
-| env | object | `{}` | Additional environment variables to set |
-| envFrom | object | `{}` | Additional environment variables from ConfigMaps or Secrets |
+| env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl` |
+| envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
 | extraConfig | string | `""` | Extra content appended to the Odoo config file. Supports multiline INI-style options |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
 | fullnameOverride | string | `""` | Override the full chart name |
@@ -59,7 +59,7 @@ A Helm chart for Odoo
 | ingress.tls | list | `[]` | TLS configuration for ingress |
 | initContainer | list | `[]` | Configuration of init containers |
 | livenessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":5}` | Liveness probe configuration |
-| logLevel | string | `"info"` | Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/de/developer/reference/cli.html#cmdoption-odoo-bin-log-level) |
+| logLevel | string | `"info"` | Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/developer/reference/cli.html#cmdoption-odoo-bin-log-level) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
 | persistence | object | `{"addons":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}}` | Persistence configuration for Odoo volumes |
@@ -67,12 +67,12 @@ A Helm chart for Odoo
 | persistence.addons.accessModes | list | `["ReadWriteOnce"]` | Access modes for the Odoo addons PVC |
 | persistence.addons.annotations | object | `{}` | Annotations for the Odoo addons PVC |
 | persistence.addons.size | string | `"1Gi"` | Size of the Odoo addons PVC |
-| persistence.addons.storageClass | string | `"-"` | Storage class for the Odoo addons PVC. Use `"-"` to disable dynamic provisioning |
+| persistence.addons.storageClass | string | `"-"` | Storage class for the Odoo addons PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used |
 | persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}` | Odoo data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the Odoo data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the Odoo data PVC |
 | persistence.data.size | string | `"1Gi"` | Size of the Odoo data PVC |
-| persistence.data.storageClass | string | `"-"` | Storage class for the Odoo data PVC. Use `"-"` to disable dynamic provisioning |
+| persistence.data.storageClass | string | `"-"` | Storage class for the Odoo data PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used |
 | podAnnotations | object | `{}` | Annotations to add to the Odoo pod |
 | podLabels | object | `{}` | Labels to add to the Odoo pod |
 | podSecurityContext | object | `{"fsGroup":101,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod-level security context (e.g. fsGroup) |

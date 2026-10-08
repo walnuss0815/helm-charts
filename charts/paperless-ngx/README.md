@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 0.3.16](https://img.shields.io/badge/Version-0.3.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.0](https://img.shields.io/badge/AppVersion-3.3.0-informational?style=flat-square)
+![Version: 0.3.17](https://img.shields.io/badge/Version-0.3.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.0](https://img.shields.io/badge/AppVersion-3.3.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -59,8 +59,8 @@ A Helm chart for Kubernetes
 | database.username.secretKeyRef.key | string | `""` | Key within the secret |
 | database.username.secretKeyRef.name | string | `""` | Name of the secret |
 | database.username.value | string | `"paperless"` | Database username value |
-| env | object | `{}` | Additional environment variables to set |
-| envFrom | object | `{}` | Additional environment variables from ConfigMaps or Secrets |
+| env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl` |
+| envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
 | gotenberg | object | `{"enabled":true}` | Gotenberg subchart configuration (for document conversion) |
@@ -168,7 +168,7 @@ A Helm chart for Kubernetes
 | url | string | `"https://{{ .Values.host }}"` | URL for the paperless-ngx instance |
 | valkey | object | `{"auth":{"enabled":false},"enabled":true,"resources":{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | Valkey subchart configuration (Redis-compatible key-value store) |
 | valkey.auth | object | `{"enabled":false}` | Valkey authentication configuration |
-| valkey.auth.enabled | bool | `false` | Enable Valkey password authentication (TODO: Enable in production) |
+| valkey.auth.enabled | bool | `false` | Enable Valkey password authentication. Disabled by default; enable it for production and include the credentials in `valkeyKV.url` |
 | valkey.enabled | bool | `true` | Enable Valkey as a subchart |
 | valkey.resources | object | `{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource limits/requests for the Valkey container |
 | valkeyKV | object | `{"url":{"secretKeyRef":{"key":"","name":""},"value":"redis://{{ .Release.Name }}-valkey:6379"}}` | Valkey (Redis-compatible) key-value store configuration |

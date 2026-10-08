@@ -1,6 +1,6 @@
 # postgres
 
-![Version: 0.3.4](https://img.shields.io/badge/Version-0.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18.6](https://img.shields.io/badge/AppVersion-18.6-informational?style=flat-square)
+![Version: 0.3.5](https://img.shields.io/badge/Version-0.3.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18.6](https://img.shields.io/badge/AppVersion-18.6-informational?style=flat-square)
 
 A Helm chart for PostgreSQL
 
@@ -32,11 +32,11 @@ A Helm chart for PostgreSQL
 | persistence.pgdata.accessModes | list | `["ReadWriteOnce"]` | Access modes for the PostgreSQL data PVC |
 | persistence.pgdata.annotations | object | `{}` | Annotations for the PostgreSQL data PVC |
 | persistence.pgdata.size | string | `"1Gi"` | Size of the PostgreSQL data PVC |
-| persistence.pgdata.storageClass | string | `"-"` | Storage class for the PostgreSQL data PVC. Use `"-"` to disable dynamic provisioning |
+| persistence.pgdata.storageClass | string | `"-"` | Storage class for the PostgreSQL data PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used |
 | podAnnotations | object | `{}` | Annotations to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | podLabels | object | `{}` | Labels to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | podSecurityContext | object | `{}` | Pod-level security context |
-| port | int | `5432` | PostgreSQL port |
+| port | int | `5432` | Port written to the credentials Secret (`port` key and `uri`). The container and Service listen on `service.port`, so keep both in sync |
 | readinessProbe | object | `{"exec":{"command":["sh","-c","psql -U $POSTGRES_USER -d $POSTGRES_DB -c \"SELECT 1\""]},"initialDelaySeconds":5,"periodSeconds":5}` | Readiness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | resources | object | `{}` | Resource requests and limits for the PostgreSQL container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
 | secret | object | `{"create":true,"name":""}` | Secret configuration for database credentials |

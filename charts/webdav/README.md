@@ -1,6 +1,6 @@
 # webdav
 
-![Version: 0.1.15](https://img.shields.io/badge/Version-0.1.15-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.0](https://img.shields.io/badge/AppVersion-v5.17.0-informational?style=flat-square)
+![Version: 0.1.16](https://img.shields.io/badge/Version-0.1.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.0](https://img.shields.io/badge/AppVersion-v5.17.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -39,7 +39,7 @@ A Helm chart for Kubernetes
 | ingress.hosts[0].paths[0] | object | `{"path":"/","pathType":"ImplementationSpecific"}` | Path to route |
 | ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` | Path type (ImplementationSpecific, Exact, Prefix) |
 | ingress.tls | list | `[]` | TLS configuration |
-| livenessProbe | object | `{}` | Liveness probe configuration (disabled by default) livenessProbe:   httpGet:     path: /     port: http |
+| livenessProbe | object | `{}` | Liveness probe configuration. Empty disables the probe |
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":"-"}}` | Persistence configuration for WebDAV |
@@ -54,7 +54,7 @@ A Helm chart for Kubernetes
 | podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod security context configuration |
 | podSecurityContext.fsGroup | int | `1000` | Set filesystem group ownership for mounted volumes |
 | podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` | Define behavior when fsGroup changes |
-| readinessProbe | object | `{}` | Readiness probe configuration (disabled by default) readinessProbe:   httpGet:     path: /     port: http |
+| readinessProbe | object | `{}` | Readiness probe configuration. Empty disables the probe |
 | replicaCount | int | `1` | Number of replicas for the WebDAV deployment |
 | resources | object | `{}` | Resource limits and requests for the WebDAV container |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context configuration |

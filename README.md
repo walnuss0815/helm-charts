@@ -13,19 +13,17 @@ helm search repo walnuss0815
 
 ## Local Development
 
-**1. Install Helm 3** (if not installed):
-```bash
-curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-```
+**1. Get the tools.** With [Nix](https://nixos.org) and [direnv](https://direnv.net), `direnv allow` (or `nix develop`) provides `helm`, `kubectl`, `ct`, `helm-docs` and `yq`. Otherwise install [Helm](https://helm.sh/docs/intro/install/), [chart-testing](https://github.com/helm/chart-testing) and [helm-docs](https://github.com/norwoodj/helm-docs) yourself.
 
-**2. Lint a chart:**
+**2. Lint a chart** the same way CI does:
 ```bash
-helm lint charts/<chart-name>
+helm lint --strict charts/<chart-name>
+ct lint --config ct.yaml --charts charts/<chart-name>
 ```
 
 **3. Render templates:**
 ```bash
-helm template charts/<chart-name> --values charts/<chart-name>/values.yaml
+helm template charts/<chart-name>
 ```
 
 **4. Package a chart:**
@@ -52,10 +50,10 @@ Contributions are welcome! Please follow these steps:
 
 3. **Lint your chart** before opening a PR:
    ```bash
-   helm lint charts/<chart-name>
+   helm lint --strict charts/<chart-name>
    ```
 
-4. **Open a Pull Request** against `main`. The CI pipeline will automatically lint and test all changed charts. It will also update the readme and bump the chart version.
+4. **Open a Pull Request** against `main`. Use a [Conventional Commits](https://www.conventionalcommits.org/) title; if a related issue exists, append it, e.g. `(#123)`. The CI pipeline lints and installs all changed charts, regenerates their `README.md` and bumps the chart version. Do not bump `version` yourself.
 
 ### Commit Style
 
@@ -69,7 +67,7 @@ docs(readme): update contributing guide
 
 ### Chart Documentation
 
-All `values.yaml` parameters should be documented with [`helm-docs`-style](https://github.com/norwoodj/helm-docs) comments:
+All `values.yaml` parameters must be documented with [`helm-docs`-style](https://github.com/norwoodj/helm-docs) comments:
 
 ```yaml
 # -- Number of replicas for the deployment

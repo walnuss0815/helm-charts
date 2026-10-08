@@ -1,6 +1,6 @@
 # immich
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.0](https://img.shields.io/badge/AppVersion-v3.3.0-informational?style=flat-square)
+![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.0](https://img.shields.io/badge/AppVersion-v3.3.0-informational?style=flat-square)
 
 A Helm chart for Immich, the high performance self-hosted photo and video management solution.
 
@@ -214,7 +214,7 @@ server:
 
 For prerequisites, vendor-specific setup (e.g. `/dev/dri` access, NVIDIA
 Container Toolkit, libmali firmware) and supported codecs, see the
-[Immich hardware transcoding docs](https://immich.app/docs/features/hardware-transcoding).
+[Immich hardware transcoding docs](https://docs.immich.app/features/hardware-transcoding).
 
 ## Upload optimizer
 
@@ -250,7 +250,7 @@ upload-optimizer:
             pathType: Prefix
 ```
 
-See the [immich-upload-optimizer chart](https://github.com/RocketPadPlatforms/helm-charts/tree/main/charts/immich-upload-optimizer)
+See the [immich-upload-optimizer chart](https://github.com/walnuss0815/helm-charts/tree/main/charts/immich-upload-optimizer)
 for the full set of values (`config.tasks`, `resources`, hardware acceleration, ...).
 
 ## Configuration file
@@ -343,9 +343,7 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 | machineLearning.podSecurityContext | object | `{"fsGroup":1000}` | Pod-level security context for the machine-learning pods |
 | machineLearning.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/ping","port":"http"},"initialDelaySeconds":10,"periodSeconds":10,"timeoutSeconds":5}` | Readiness probe configuration for the machine-learning container. |
 | machineLearning.replicaCount | int | `1` | Number of machine-learning replicas |
-| machineLearning.resources.limits.memory | string | `"3Gi"` |  |
-| machineLearning.resources.requests.cpu | string | `"250m"` |  |
-| machineLearning.resources.requests.memory | string | `"1Gi"` |  |
+| machineLearning.resources | object | `{"limits":{"memory":"3Gi"},"requests":{"cpu":"250m","memory":"1Gi"}}` | Resource requests and limits for the machine-learning container. |
 | machineLearning.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Container-level security context for the machine-learning container. |
 | machineLearning.service.port | int | `3003` | Service port |
 | machineLearning.startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/ping","port":"http"},"initialDelaySeconds":5,"periodSeconds":10,"timeoutSeconds":5}` | Startup probe configuration for the machine-learning container. |
@@ -369,9 +367,7 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 | microservices.podSecurityContext | object | `{"fsGroup":1000}` | Pod-level security context for the microservices pods |
 | microservices.readinessProbe | object | `{}` | Readiness probe configuration for the microservices container. |
 | microservices.replicaCount | int | `1` | Number of microservices replicas |
-| microservices.resources.limits.memory | string | `"2Gi"` |  |
-| microservices.resources.requests.cpu | string | `"200m"` |  |
-| microservices.resources.requests.memory | string | `"512Mi"` |  |
+| microservices.resources | object | `{"limits":{"memory":"2Gi"},"requests":{"cpu":"200m","memory":"512Mi"}}` | Resource requests and limits for the microservices container. |
 | microservices.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Container-level security context for the microservices container. |
 | microservices.service.annotations | object | `{}` | Service annotations |
 | microservices.service.enabled | bool | `false` | Enable the microservices Service. Only required for scraping its metrics. The Service only exposes a metrics port. |
@@ -387,7 +383,7 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 | monitoring.microservicesMetricsPort | int | `8082` | Port the microservices workload exposes metrics on. Also sets `IMMICH_MICROSERVICES_METRICS_PORT` |
 | monitoring.namespaceSelector | object | `{}` | NamespaceSelector for the ServiceMonitors. Empty selects the namespace the ServiceMonitors are deployed in. |
 | monitoring.scrapeTimeout | string | `"10s"` | Scrape timeout for the ServiceMonitors |
-| monitoring.serviceMonitors | object | `{"enabled":false}` | Create ServiceMonitors for the server and microservices services. Enable this only when a Prometheus Operator (CRDs) is installed in the cluster |
+| monitoring.serviceMonitors.enabled | bool | `false` | Create ServiceMonitors for the server and microservices services. Enable this only when a Prometheus Operator (CRDs) is installed in the cluster |
 | nameOverride | string | `""` | Override the chart name |
 | persistence.media | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"enabled":true,"existingClaim":"","size":"100Gi","storageClass":""}` | Shared library media volume mounted by the server and microservices workloads at the fixed container path `/data` (the Immich `IMMICH_MEDIA_LOCATION` default). The volume must support sharing across pods (`ReadWriteMany`). |
 | persistence.media.accessModes | list | `["ReadWriteMany"]` | Access modes for the media volume |
@@ -395,14 +391,14 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 | persistence.media.enabled | bool | `true` | Enable dynamic provisioning of the media volume. Set to `false` when using an `existingClaim` |
 | persistence.media.existingClaim | string | `""` | Name of an existing PVC to use instead of creating a new one |
 | persistence.media.size | string | `"100Gi"` | Size of the media volume |
-| persistence.media.storageClass | string | `""` | Storage class for the media volume. Use `"-"` to disable dynamic provisioning |
+| persistence.media.storageClass | string | `""` | Storage class for the media volume. Empty uses the cluster's default StorageClass |
 | persistence.modelCache | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"enabled":true,"existingClaim":"","size":"5Gi","storageClass":""}` | Machine learning model cache volume, mounted at `/cache` inside the container (`MACHINE_LEARNING_CACHE_FOLDER` default). Downloaded models are shared across all machine-learning replicas. Use `ReadWriteMany` access modes when scaling the machine-learning workload horizontally (`autoscaling`) |
 | persistence.modelCache.accessModes | list | `["ReadWriteOnce"]` | Access modes for the model cache volume |
 | persistence.modelCache.annotations | object | `{}` | Annotations for the model cache volume PVC |
 | persistence.modelCache.enabled | bool | `true` | Enable dynamic provisioning of the model cache volume. Set to `false` when using an `existingClaim` |
 | persistence.modelCache.existingClaim | string | `""` | Name of an existing PVC to use instead of creating a new one |
 | persistence.modelCache.size | string | `"5Gi"` | Size of the model cache volume |
-| persistence.modelCache.storageClass | string | `""` | Storage class for the model cache volume |
+| persistence.modelCache.storageClass | string | `""` | Storage class for the model cache volume. Empty uses the cluster's default StorageClass |
 | postgres.affinity | object | `{}` | Affinity rules for PostgreSQL instance scheduling |
 | postgres.annotations | object | `{}` | Annotations to add to the CNPG Cluster |
 | postgres.backup | object | `{"barmanObjectStore":{},"enabled":false,"retentionPolicy":"30d"}` | CNPG backup configuration. |
@@ -416,13 +412,14 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 | postgres.extensions[0] | object | `{"dynamic_library_path":["/usr/lib/postgresql/18/lib"],"extension_control_path":["/usr/share/postgresql/18/"],"image":{"reference":"ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1"},"name":"vchord"}` | Extension name |
 | postgres.extensions[0].dynamic_library_path | list | `["/usr/lib/postgresql/18/lib"]` | Directories to search for the extension libraries |
 | postgres.extensions[0].extension_control_path | list | `["/usr/share/postgresql/18/"]` | Directories to search for the extension control files |
-| postgres.extensions[0].image.reference | string | `"ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1"` | Image reference containing the extension files renovate: image=ghcr.io/tensorchord/vchord-scratch |
+| postgres.extensions[0].image.reference | string | `"ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1"` | Image reference containing the extension files |
 | postgres.host | string | `""` | Host of an external database. Only used when `enabled` is `false` |
 | postgres.image.repository | string | `""` | Image repository for the CNPG cluster instances. Empty by default so the CloudNativePG operator applies its own default image. `imageName` is only rendered in the Cluster CR when this is set. Use a standard image with the `-trixie` tag (PostgreSQL 18) for `vchord` support via ImageVolume extensions |
 | postgres.image.tag | string | `""` | Image tag for the CNPG cluster instances. Only rendered together with `repository` |
 | postgres.instances | int | `1` | Number of PostgreSQL instances in the CNPG cluster |
 | postgres.monitoring.enablePodMonitor | bool | `false` | Enable CNPG PodMonitor for PostgreSQL |
 | postgres.nodeSelector | object | `{}` | Node selector for PostgreSQL instance scheduling |
+| postgres.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | PostgreSQL password: the database user password for Immich. Accepts either an inline `value` (stored in a chart-managed Secret named `<fullname>-postgresql-credentials` together with the `username`) or a `secretKeyRef` referencing an existing Secret containing the password (plus the `username` when the CNPG cluster is enabled). When none of these is set and the chart-managed CNPG cluster is enabled, CloudNativePG generates a random password itself (stored in `<fullname>-postgresql-app`). An external database (`postgres.enabled: false`) always requires a password source. |
 | postgres.password.secretKeyRef | object | `{"key":"","name":""}` | Reference to an existing Secret containing the password |
 | postgres.password.secretKeyRef.key | string | `""` | Key within the secret |
 | postgres.password.secretKeyRef.name | string | `""` | Name of the secret |
@@ -490,7 +487,7 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 | valkey.auth | object | `{"enabled":false}` | Valkey ACL authentication. |
 | valkey.auth.enabled | bool | `false` | Enable ACL-based authentication. Requires `aclUsers` and the password in `redis.password` |
 | valkey.enabled | bool | `true` | Deploy the bundled Valkey sub-chart (official Valkey Helm Chart) |
-| valkey.replica | object | `{"enabled":false}` | Number of Valkey replicas (master-replica mode). Requires `replica.persistence.size` and `auth.aclUsers` when authentication is enabled |
+| valkey.replica.enabled | bool | `false` | Deploy Valkey replicas (master-replica mode). Requires `replica.persistence.size`, and `auth.aclUsers` when authentication is enabled |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

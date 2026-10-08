@@ -1,6 +1,6 @@
 # immich-kiosk
 
-![Version: 0.2.6](https://img.shields.io/badge/Version-0.2.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.44.2](https://img.shields.io/badge/AppVersion-0.44.2-informational?style=flat-square)
+![Version: 0.2.7](https://img.shields.io/badge/Version-0.2.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.44.2](https://img.shields.io/badge/AppVersion-0.44.2-informational?style=flat-square)
 
 A Helm chart for Immich Kiosk
 
@@ -17,8 +17,8 @@ A Helm chart for Immich Kiosk
 | affinity | object | `{}` | Affinity rules for pod scheduling. |
 | config | object | `{}` | Immich Kiosk application configuration. ref: https://docs.immichkiosk.app/configuration/ |
 | customCSS | string | `""` | Custom CSS injected into the kiosk UI. |
-| env | object | `{}` | Additional environment variables to set on the container. |
-| envFrom | object | `{}` | Additional environment variables sourced from ConfigMaps or Secrets. |
+| env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl`. |
+| envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`. |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. |
 | fullnameOverride | string | `""` | Override the full chart name. |
 | httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Expose the service via Gateway API HTTPRoute. Requires Gateway API resources and a suitable controller installed in the cluster. ref: https://gateway-api.sigs.k8s.io/guides/ |

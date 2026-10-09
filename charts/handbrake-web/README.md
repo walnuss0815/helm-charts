@@ -1,6 +1,6 @@
 # handbrake-web
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.1](https://img.shields.io/badge/AppVersion-0.8.1-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.1](https://img.shields.io/badge/AppVersion-0.8.1-informational?style=flat-square)
 
 A Helm chart for HandBrake Web
 
@@ -36,19 +36,19 @@ A Helm chart for HandBrake Web
 | ingress.hosts | list | `[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Ingress hosts configuration |
 | ingress.tls | list | `[]` | TLS configuration |
 | nameOverride | string | `""` | Override the name of the chart |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":"-"},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":"-"}}` | Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart) |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":"-"}` | Config/data directory persistence configuration |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":""},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":""}}` | Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart) |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":""}` | Config/data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
 | persistence.data.mountPath | string | `"/data"` | Mount path for this volume within the server/worker containers |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
-| persistence.data.storageClass | string | `"-"` | Storage class for the data PVC |
-| persistence.video | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":"-"}` | Video library persistence configuration |
+| persistence.data.storageClass | string | `""` | Storage class for the data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
+| persistence.video | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":""}` | Video library persistence configuration |
 | persistence.video.accessModes | list | `["ReadWriteMany"]` | Access modes for the video PVC. Defaults to `ReadWriteMany` because the server, worker, and the optional webdav subchart all mount this PVC concurrently. Most default/local-path StorageClasses (including `kind`'s) only support `ReadWriteOnce` - make sure your StorageClass actually supports RWX before relying on this default, or override it if server/worker/webdav never run on different nodes at once. |
 | persistence.video.annotations | object | `{}` | Annotations for the video PVC |
 | persistence.video.mountPath | string | `"/video"` | Mount path for this volume within the server/worker containers |
 | persistence.video.size | string | `"16Gi"` | Size of the video PVC |
-| persistence.video.storageClass | string | `"-"` | Storage class for the video PVC |
+| persistence.video.storageClass | string | `""` | Storage class for the video PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | server | object | `{"affinity":{},"image":{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-server","tag":""},"livenessProbe":{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"readinessProbe":{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10},"replicaCount":1,"resources":{},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}},"service":{"port":9999,"type":"ClusterIP"},"tolerations":[]}` | Server workload configuration |
 | server.affinity | object | `{}` | Affinity rules for server pod assignment |
 | server.image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/thenickoftime/handbrake-web-server","tag":""}` | Container image configuration |

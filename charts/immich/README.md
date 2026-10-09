@@ -1,6 +1,6 @@
 # immich
 
-![Version: 0.1.8](https://img.shields.io/badge/Version-0.1.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.1](https://img.shields.io/badge/AppVersion-v3.3.1-informational?style=flat-square)
+![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.1](https://img.shields.io/badge/AppVersion-v3.3.1-informational?style=flat-square)
 
 A Helm chart for Immich, the high performance self-hosted photo and video management solution.
 
@@ -15,7 +15,7 @@ A Helm chart for Immich, the high performance self-hosted photo and video manage
 | Repository | Name | Version |
 |------------|------|---------|
 | https://valkey.io/valkey-helm/ | valkey | 0.12.0 |
-| https://walnuss0815.github.io/helm-charts | upload-optimizer(immich-upload-optimizer) | 0.1.0 |
+| https://walnuss0815.github.io/helm-charts | upload-optimizer(immich-upload-optimizer) | 0.1.1 |
 
 ### Required
 

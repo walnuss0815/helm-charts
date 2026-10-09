@@ -4,7 +4,7 @@ description: A Helm chart for Odoo
 type: application
 version: 1.0.7
 # renovate: image=odoo
-appVersion: "19.0"
+appVersion: "20.0"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

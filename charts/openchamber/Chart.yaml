@@ -4,7 +4,7 @@ description: A Helm chart for OpenChamber, a web workspace for running and revie
 type: application
 version: 0.1.0
 # renovate: image=ghcr.io/coyotle/openchamber
-appVersion: "v2.1.1"
+appVersion: "v2.2.0"
 home: https://openchamber.dev
 sources:
   - https://github.com/openchamber/openchamber

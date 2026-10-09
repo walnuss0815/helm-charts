@@ -2,7 +2,7 @@ apiVersion: v2
 name: odoo
 description: A Helm chart for Odoo
 type: application
-version: 1.0.6
+version: 1.0.7
 # renovate: image=odoo
 appVersion: "19.0"
 maintainers:

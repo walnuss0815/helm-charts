@@ -1,6 +1,6 @@
 # postgres
 
-![Version: 0.3.5](https://img.shields.io/badge/Version-0.3.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18.6](https://img.shields.io/badge/AppVersion-18.6-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18.6](https://img.shields.io/badge/AppVersion-18.6-informational?style=flat-square)
 
 A Helm chart for PostgreSQL
 
@@ -27,12 +27,12 @@ A Helm chart for PostgreSQL
 | livenessProbe | object | `{"exec":{"command":["sh","-c","pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]},"periodSeconds":5}` | Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
-| persistence | object | `{"pgdata":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}}` | Persistence configuration for PostgreSQL volumes |
-| persistence.pgdata | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}` | PostgreSQL data directory persistence configuration |
+| persistence | object | `{"pgdata":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}}` | Persistence configuration for PostgreSQL volumes |
+| persistence.pgdata | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | PostgreSQL data directory persistence configuration |
 | persistence.pgdata.accessModes | list | `["ReadWriteOnce"]` | Access modes for the PostgreSQL data PVC |
 | persistence.pgdata.annotations | object | `{}` | Annotations for the PostgreSQL data PVC |
 | persistence.pgdata.size | string | `"1Gi"` | Size of the PostgreSQL data PVC |
-| persistence.pgdata.storageClass | string | `"-"` | Storage class for the PostgreSQL data PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used |
+| persistence.pgdata.storageClass | string | `""` | Storage class for the PostgreSQL data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | podLabels | object | `{}` | Labels to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | podSecurityContext | object | `{}` | Pod-level security context |

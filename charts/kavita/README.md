@@ -1,6 +1,6 @@
 # kavita
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.1](https://img.shields.io/badge/AppVersion-0.9.1-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.1](https://img.shields.io/badge/AppVersion-0.9.1-informational?style=flat-square)
 
 A Helm chart for Kavita
 
@@ -37,17 +37,17 @@ A Helm chart for Kavita
 | livenessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Liveness probe configuration. Empty disables the probe. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
-| persistence | object | `{"config":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"},"library":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}}` | Persistence configuration for the Kavita volumes. Both PVCs are always created |
-| persistence.config | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}` | Config directory, mounted at `/kavita/config` (database, settings, covers) |
+| persistence | object | `{"config":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""},"library":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}}` | Persistence configuration for the Kavita volumes. Both PVCs are always created |
+| persistence.config | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Config directory, mounted at `/kavita/config` (database, settings, covers) |
 | persistence.config.accessModes | list | `["ReadWriteOnce"]` | Access modes for the config PVC |
 | persistence.config.annotations | object | `{}` | Annotations for the config PVC |
 | persistence.config.size | string | `"1Gi"` | Size of the config PVC |
-| persistence.config.storageClass | string | `"-"` | Storage class for the config PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used |
-| persistence.library | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}` | Library directory, mounted at `/library` (books, comics, manga) |
+| persistence.config.storageClass | string | `""` | Storage class for config PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
+| persistence.library | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Library directory, mounted at `/library` (books, comics, manga) |
 | persistence.library.accessModes | list | `["ReadWriteOnce"]` | Access modes for the library PVC |
 | persistence.library.annotations | object | `{}` | Annotations for the library PVC |
 | persistence.library.size | string | `"1Gi"` | Size of the library PVC |
-| persistence.library.storageClass | string | `"-"` | Storage class for the library PVC. `-` leaves `storageClassName` unset, so the cluster's default StorageClass is used |
+| persistence.library.storageClass | string | `""` | Storage class for library PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | podLabels | object | `{}` | Labels to add to the pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | podSecurityContext | object | `{}` | Pod-level security context |

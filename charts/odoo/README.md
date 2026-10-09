@@ -1,6 +1,6 @@
 # odoo
 
-![Version: 1.0.6](https://img.shields.io/badge/Version-1.0.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
+![Version: 1.0.7](https://img.shields.io/badge/Version-1.0.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
 
 A Helm chart for Odoo
 
@@ -21,7 +21,7 @@ A Helm chart for Odoo
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod scheduling |
-| config | string | `"[options]\naddons_path = /mnt/extra-addons\ndata_dir = /var/lib/odoo\n\ndb_host = $DB_HOST\ndb_port = $DB_PORT\ndb_user = $DB_USER\ndb_password = $DB_PASSWORD\n\nlog_level = $LOG_LEVEL\n\n{{ tpl .Values.extraConfig . }}"` | Odoo configuration file content (supports Helm templating) |
+| config | string | `"[options]\naddons_path = /mnt/extra-addons\ndata_dir = /var/lib/odoo\n\nhttp_interface = 0.0.0.0\n\ndb_host = $DB_HOST\ndb_port = $DB_PORT\ndb_user = $DB_USER\ndb_password = $DB_PASSWORD\n\nlog_level = $LOG_LEVEL\n\n{{ tpl .Values.extraConfig . }}"` | Odoo configuration file content (supports Helm templating) |
 | database | object | `{"host":"","password":{"secretKeyRef":{"key":"","name":""},"value":""},"port":5432,"username":{"secretKeyRef":{"key":"","name":""},"value":"odoo"}}` | External database connection config. Only used if `postgres.enabled` is `false` |
 | database.host | string | `""` | Database hostname |
 | database.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Database password configuration |

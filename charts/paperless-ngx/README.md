@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 0.3.21](https://img.shields.io/badge/Version-0.3.21-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.0](https://img.shields.io/badge/AppVersion-3.3.0-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.0](https://img.shields.io/badge/AppVersion-3.3.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -93,22 +93,22 @@ A Helm chart for Kubernetes
 | ocr.languages | list | `["eng"]` | OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) |
 | parser | object | `{"datetime":["en"]}` | Document parser configuration |
 | parser.datetime | list | `["en"]` | Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html) |
-| persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":"-"}}` | Persistence configuration for paperless-ngx volumes |
-| persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":"-"}` | Consumption directory persistence configuration |
+| persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":""},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":""}}` | Persistence configuration for paperless-ngx volumes |
+| persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":""}` | Consumption directory persistence configuration |
 | persistence.consumption.accessModes | list | `["ReadWriteMany"]` | Access modes for consumption PVC |
 | persistence.consumption.annotations | object | `{}` | Annotations for the consumption PVC |
 | persistence.consumption.size | string | `"512Mi"` | Size of the consumption PVC |
-| persistence.consumption.storageClass | string | `"-"` | Storage class for consumption PVC |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":"-"}` | Data directory persistence configuration |
+| persistence.consumption.storageClass | string | `""` | Storage class for consumption PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
-| persistence.data.storageClass | string | `"-"` | Storage class for data PVC |
-| persistence.media | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":"-"}` | Media directory persistence configuration |
+| persistence.data.storageClass | string | `""` | Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
+| persistence.media | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":""}` | Media directory persistence configuration |
 | persistence.media.accessModes | list | `["ReadWriteOnce"]` | Access modes for media PVC |
 | persistence.media.annotations | object | `{}` | Annotations for the media PVC |
 | persistence.media.size | string | `"8Gi"` | Size of the media PVC |
-| persistence.media.storageClass | string | `"-"` | Storage class for media PVC |
+| persistence.media.storageClass | string | `""` | Storage class for media PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
 | podLabels | object | `{}` | Labels to add to the pod |
 | podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod security context configuration |

@@ -2,7 +2,7 @@ apiVersion: v2
 name: kavita
 description: A Helm chart for Kavita
 type: application
-version: 0.1.4
+version: 1.0.0
 # renovate: image=jvmilazz0/kavita
 appVersion: "0.9.1"
 maintainers:

@@ -4,6 +4,6 @@ dependencies:
   version: 0.12.0
 - name: immich-upload-optimizer
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.0
-digest: sha256:6e416a8c5c379d614120ed10414782c036f5ee897aa1ad1e77c85d0d9c30359a
-generated: "2026-09-06T21:51:57.102869896Z"
+  version: 0.1.1
+digest: sha256:c95c07df81db62b654723ca386732b109cb75a050dc00afdf4f8a4740aea4ca6
+generated: "2026-10-09T11:01:28.918274874Z"

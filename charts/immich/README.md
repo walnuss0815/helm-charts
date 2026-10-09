@@ -1,6 +1,6 @@
 # immich
 
-![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.1](https://img.shields.io/badge/AppVersion-v3.3.1-informational?style=flat-square)
+![Version: 0.1.10](https://img.shields.io/badge/Version-0.1.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.1](https://img.shields.io/badge/AppVersion-v3.3.1-informational?style=flat-square)
 
 A Helm chart for Immich, the high performance self-hosted photo and video management solution.
 
@@ -391,14 +391,14 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 | persistence.media.enabled | bool | `true` | Enable dynamic provisioning of the media volume. Set to `false` when using an `existingClaim` |
 | persistence.media.existingClaim | string | `""` | Name of an existing PVC to use instead of creating a new one |
 | persistence.media.size | string | `"100Gi"` | Size of the media volume |
-| persistence.media.storageClass | string | `""` | Storage class for the media volume. Empty uses the cluster's default StorageClass |
+| persistence.media.storageClass | string | `""` | Storage class for the media volume. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | persistence.modelCache | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"enabled":true,"existingClaim":"","size":"5Gi","storageClass":""}` | Machine learning model cache volume, mounted at `/cache` inside the container (`MACHINE_LEARNING_CACHE_FOLDER` default). Downloaded models are shared across all machine-learning replicas. Use `ReadWriteMany` access modes when scaling the machine-learning workload horizontally (`autoscaling`) |
 | persistence.modelCache.accessModes | list | `["ReadWriteOnce"]` | Access modes for the model cache volume |
 | persistence.modelCache.annotations | object | `{}` | Annotations for the model cache volume PVC |
 | persistence.modelCache.enabled | bool | `true` | Enable dynamic provisioning of the model cache volume. Set to `false` when using an `existingClaim` |
 | persistence.modelCache.existingClaim | string | `""` | Name of an existing PVC to use instead of creating a new one |
 | persistence.modelCache.size | string | `"5Gi"` | Size of the model cache volume |
-| persistence.modelCache.storageClass | string | `""` | Storage class for the model cache volume. Empty uses the cluster's default StorageClass |
+| persistence.modelCache.storageClass | string | `""` | Storage class for the model cache volume. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | postgres.affinity | object | `{}` | Affinity rules for PostgreSQL instance scheduling |
 | postgres.annotations | object | `{}` | Annotations to add to the CNPG Cluster |
 | postgres.backup | object | `{"barmanObjectStore":{},"enabled":false,"retentionPolicy":"30d"}` | CNPG backup configuration. |

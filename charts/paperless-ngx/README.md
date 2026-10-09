@@ -120,11 +120,11 @@ A Helm chart for Kubernetes
 | readinessProbe.timeoutSeconds | int | `5` | Timeout in seconds for the probe |
 | replicaCount | int | `1` | Number of replicas for the paperless-ngx deployment |
 | resources | object | `{}` | Resource limits and requests for the paperless-ngx container |
-| secretKey | object | `{"secretKeyRef":{"key":"","name":""},"value":"FQdWQr5xKy8ZYTD4YB5rJAE9e2CbWb3E"}` | Secret key configuration for Django |
+| secretKey | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Django secret key (`PAPERLESS_SECRET_KEY`) used to sign sessions and tokens. Required: set `value` or `secretKeyRef`, otherwise rendering fails. Use a long random string and keep it stable, changing it signs out all users |
 | secretKey.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing the secret key |
 | secretKey.secretKeyRef.key | string | `""` | Key within the secret |
 | secretKey.secretKeyRef.name | string | `""` | Name of the secret |
-| secretKey.value | string | `"FQdWQr5xKy8ZYTD4YB5rJAE9e2CbWb3E"` | Secret key value (use secretKeyRef in production) |
+| secretKey.value | string | `""` | Plain-text secret key. Ignored if `secretKeyRef.name` and `secretKeyRef.key` are set. Prefer `secretKeyRef` |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context configuration |
 | securityContext.allowPrivilegeEscalation | bool | `false` | Prevent privilege escalation |
 | securityContext.capabilities | object | `{"drop":["ALL"]}` | Linux capabilities to drop |

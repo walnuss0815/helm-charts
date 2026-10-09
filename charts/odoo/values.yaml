@@ -217,6 +217,8 @@ config: |-
   addons_path = /mnt/extra-addons
   data_dir = /var/lib/odoo
 
+  http_interface = 0.0.0.0
+
   db_host = $DB_HOST
   db_port = $DB_PORT
   db_user = $DB_USER

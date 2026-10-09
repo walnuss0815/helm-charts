@@ -7,9 +7,9 @@ dependencies:
   version: 0.1.16
 - name: tika
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.3
+  version: 0.1.4
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.9
-digest: sha256:b3738a4bd654434236b6e7df9db1d6ffd19b4895042e381d8b8e310b188e6ad7
-generated: "2026-10-08T21:30:11.956013062Z"
+digest: sha256:560de312811dabababf1ca895a104235eea73e20301dfe57d3222d35b563dbd6
+generated: "2026-10-09T01:06:02.407134026Z"

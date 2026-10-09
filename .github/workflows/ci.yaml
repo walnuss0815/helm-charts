@@ -36,6 +36,8 @@ jobs:
     strategy:
       matrix:
         chart: ${{ fromJson(needs.list-changed.outputs.changed-charts) }}
+      # All jobs push to the same branch, so run them one at a time
+      max-parallel: 1
     steps:
       - uses: actions/checkout@v7
         with:

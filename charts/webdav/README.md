@@ -1,6 +1,6 @@
 # webdav
 
-![Version: 0.1.16](https://img.shields.io/badge/Version-0.1.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.0](https://img.shields.io/badge/AppVersion-v5.17.0-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.0](https://img.shields.io/badge/AppVersion-v5.17.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -42,13 +42,13 @@ A Helm chart for Kubernetes
 | livenessProbe | object | `{}` | Liveness probe configuration. Empty disables the probe |
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":"-"}}` | Persistence configuration for WebDAV |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":"-"}` | Data directory persistence configuration |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":""}}` | Persistence configuration for WebDAV |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":""}` | Data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
 | persistence.data.claimName | string | `""` | Existing PVC claim name to use (if empty, creates new PVC) |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
-| persistence.data.storageClass | string | `"-"` | Storage class for data PVC |
+| persistence.data.storageClass | string | `""` | Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
 | podLabels | object | `{}` | Labels to add to the pod |
 | podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod security context configuration |

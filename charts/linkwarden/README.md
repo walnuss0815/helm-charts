@@ -1,6 +1,6 @@
 # linkwarden
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.16.3](https://img.shields.io/badge/AppVersion-2.16.3-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.16.3](https://img.shields.io/badge/AppVersion-2.16.3-informational?style=flat-square)
 
 A Helm chart for Linkwarden
 
@@ -74,11 +74,11 @@ A Helm chart for Linkwarden
 | nextauth.secret.value | string | `""` | Plain-text secret value. Ignored if `secretKeyRef.name` is set |
 | nextauth.url | string | `"http://localhost:3000/api/v1/auth"` | Public URL of the NextAuth API endpoint. Must be set to the real, externally-reachable URL in any non-local deployment - NextAuth uses this for redirect/callback validation, so a stale/incorrect value here is a functional and security concern (e.g. behind an Ingress, this must match the Ingress host, not localhost) |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"2Gi","storageClass":"-"}}` | Persistence configuration for the linkwarden data directory |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"2Gi","storageClass":""}}` | Persistence configuration for the linkwarden data directory |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
 | persistence.data.size | string | `"2Gi"` | Size of the data PVC |
-| persistence.data.storageClass | string | `"-"` | Storage class for the data PVC |
+| persistence.data.storageClass | string | `""` | Storage class for the data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
 | podLabels | object | `{}` | Labels to add to the pod |
 | podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}` | Pod security context configuration |

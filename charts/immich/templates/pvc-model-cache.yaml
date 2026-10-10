@@ -1,21 +1,20 @@
-{{- if and .Values.machineLearning.enabled .Values.persistence.modelCache.enabled (not .Values.persistence.modelCache.existingClaim) }}
+{{- $cache := .Values.persistence.modelCache }}
+{{- if and .Values.machineLearning.enabled (eq $cache.type "pvc") (not $cache.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "immich.fullname" . }}-model-cache
+  name: {{ include "immich.modelCacheVolumeName" . }}
   labels:
     {{- include "immich.labels" . | nindent 4 }}
     app.kubernetes.io/component: machine-learning
-  {{- with .Values.persistence.modelCache.annotations }}
+  {{- with $cache.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   accessModes:
-    {{- range .Values.persistence.modelCache.accessModes }}
-    - {{ . }}
-    {{- end }}
-  {{- with .Values.persistence.modelCache.storageClass }}
+    - ReadWriteMany
+  {{- with $cache.storageClass }}
   {{- if eq "-" . }}
   storageClassName: ""
   {{- else }}
@@ -24,5 +23,5 @@ spec:
   {{- end }}
   resources:
     requests:
-      storage: {{ .Values.persistence.modelCache.size | quote }}
+      storage: {{ $cache.size | quote }}
 {{- end }}

@@ -1,0 +1,14 @@
+{{- if and .Values.machineLearning.enabled .Values.machineLearning.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "immich.fullname" . }}-machine-learning
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+    app.kubernetes.io/component: machine-learning
+spec:
+  maxUnavailable: {{ .Values.machineLearning.podDisruptionBudget.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "machine-learning") | nindent 6 }}
+{{- end }}

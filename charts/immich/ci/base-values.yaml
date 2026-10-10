@@ -14,16 +14,28 @@ microservices:
     minReplicas: 1
     maxReplicas: 3
 
-# Same for the machine-learning HPA. The model cache volume is `ReadWriteOnce`
-# in the test cluster, but replicas never exceed `minReplicas` there.
+# Same for the machine-learning HPA, together with the multi-node scaling
+# options: a per-pod `emptyDir` model cache, topology spread and a PDB.
 machineLearning:
   autoscaling:
     enabled: true
     minReplicas: 1
     maxReplicas: 3
+  podDisruptionBudget:
+    enabled: true
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: machine-learning
 
 persistence:
   media:
     # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
     accessModes:
       - ReadWriteOnce
+  modelCache:
+    # Workaround: No ReadWriteMany storage in the CI, so use a per-pod cache
+    type: emptyDir

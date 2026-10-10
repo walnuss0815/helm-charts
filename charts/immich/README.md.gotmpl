@@ -26,7 +26,7 @@ None
 - An Ingress controller (e.g. [ingress-nginx](https://kubernetes.github.io/ingress-nginx/)) when exposing the server via `server.ingress`
 - [Gateway API](https://gateway-api.sigs.k8s.io/) when exposing the server via `server.httpRoute`
 - An external PostgreSQL instance when disabling the bundled cluster (`postgres.enabled: false`)
-- Storage supporting `ReadWriteMany` access modes when scaling the workloads horizontally
+- Storage supporting `ReadWriteMany` access modes for the media volume and, with `persistence.modelCache.type: pvc` (the default), the machine-learning model cache
 - GPU device plugins when running the machine-learning workload with hardware acceleration
 
 ## Quick start
@@ -211,6 +211,58 @@ config:
 For prerequisites, vendor-specific setup (e.g. `/dev/dri` access, NVIDIA
 Container Toolkit, libmali firmware) and supported codecs, see the
 [Immich hardware transcoding docs](https://docs.immich.app/features/hardware-transcoding).
+
+## Scaling machine learning
+
+The machine-learning workload is stateless: the server reaches all replicas
+through a single Service, which spreads the requests. It can therefore run
+several replicas on different nodes, scaled manually (`replicaCount`) or by
+the HorizontalPodAutoscaler (`autoscaling`). The model cache must not be bound
+to a node, so `persistence.modelCache.type` offers two options:
+
+| `type` | Volume | Trade-off |
+|--------|--------|-----------|
+| `pvc` (default) | `ReadWriteMany` PVC shared by all replicas | Models are downloaded once; requires RWX storage (e.g. NFS, CephFS) |
+| `emptyDir` | Per pod, up to `sizeLimit` | Works on any cluster; each new pod downloads the models again |
+
+```yaml
+machineLearning:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 4
+  podDisruptionBudget:
+    enabled: true
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: machine-learning
+persistence:
+  modelCache:
+    type: emptyDir
+```
+
+Keep in mind:
+
+- **Job concurrency limits throughput.** Each microservices replica processes
+  only as many ML jobs in parallel as configured (defaults: `smartSearch: 2`,
+  `faceDetection: 2`, `ocr: 1`), so more ML replicas only help if the job
+  concurrency (*Administration > Settings > Job Settings* or
+  `config.content.job`) or the number of microservices replicas is raised too.
+- **Scale on CPU.** Loaded models stay in memory until
+  `MACHINE_LEARNING_MODEL_TTL` (default 300 s) expires, so memory-based scaling
+  rarely scales down. The default `behavior` delays scale-down by 10 minutes.
+- **Cold starts.** A new replica loads (and with `emptyDir` downloads) models on
+  its first request. Preload them via `machineLearning.extraEnv`, e.g.
+  `MACHINE_LEARNING_PRELOAD__CLIP__TEXTUAL: ViT-B-32__openai`.
+- **GPUs.** CPU utilization does not reflect GPU load. Scale GPU replicas
+  manually or with external metrics (e.g. KEDA with DCGM metrics).
+
+See the [Immich environment variables](https://docs.immich.app/install/environment-variables#machine-learning)
+for all machine-learning tuning options.
 
 ## Upload optimizer
 

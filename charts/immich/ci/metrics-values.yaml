@@ -14,3 +14,6 @@ persistence:
     # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
     accessModes:
       - ReadWriteOnce
+  modelCache:
+    # Workaround: No ReadWriteMany storage in the CI, so use a per-pod cache
+    type: emptyDir

@@ -34,6 +34,16 @@ Deployment, which is always rendered.
 {{- fail (printf "config.env.%s must set either value, secretKeyRef or configMapRef" $token) }}
 {{- end }}
 {{- end }}
+{{- with .Values.persistence.modelCache }}
+{{- if not (has .type (list "pvc" "emptyDir")) }}
+{{- fail (printf "persistence.modelCache.type must be \"pvc\" or \"emptyDir\" (got %q)" (toString .type)) }}
+{{- end }}
+{{- range .accessModes }}
+{{- if ne . "ReadWriteMany" }}
+{{- fail "persistence.modelCache.accessModes was removed: the model cache PVC is always ReadWriteMany so machine-learning replicas can run on any node. Use persistence.modelCache.type: emptyDir without ReadWriteMany storage" }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- /* Removed values: fail instead of silently ignoring them */ -}}
 {{- with .Values.jwtSecret }}
 {{- if or .value (and .secretKeyRef .secretKeyRef.name) }}

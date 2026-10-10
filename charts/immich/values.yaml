@@ -402,75 +402,21 @@ machineLearning:
 
 ## @section Configuration file
 
-# Immich can be configured through a YAML/JSON config file referenced by the
-# `IMMICH_CONFIG_FILE` environment variable (see
-# [Immich docs](https://docs.immich.app/install/config-file)). This is the way to
-# configure features that are not exposed as dedicated values in this chart, such
-# as `ffmpeg`, `job` concurrency, `machineLearning` tuning, `notifications.smtp`,
-# `oauth`, `theme`, `trash` retention, ...
-#
-# The base config is stored in a plaintext ConfigMap, but any sensitive values
-# (e.g. `oauth.clientSecret`, `notifications.smtp.transport.password`) are
-# written as `${UPPER_CASE}` placeholders and resolved at pod start: an
-# `initContainer` substitutes each placeholder and writes the final file to an
-# ephemeral in-memory volume that the server reads. The ConfigMap therefore never
-# holds secrets. The substitution values come from `config.env`, which accepts a
-# plain `value`, an existing `secretKeyRef` or a `configMapRef` per entry.
-#
-# Enabling this wires up an init step on the server workload and sets
-# `IMMICH_CONFIG_FILE` to the fixed path `/config/immich.yaml`. The init step and
-# the ConfigMap are always rendered (even when `content`/`env` are empty), so the
-# feature can be turned on purely by supplying `content`. Placeholders must occupy
-# an entire YAML scalar, e.g. `clientSecret: ${OAUTH_CLIENT_SECRET}` (the value is
-# YAML-quoted on substitution, so unquoted syntax is expected). Placeholders not
-# listed in `config.env` are left untouched.
+# Optional Immich config file (see https://docs.immich.app/install/config-file).
+# Setting `config.content` makes the admin settings UI read-only, so the file is
+# only rendered when `content` is not empty. See the README for examples.
 config:
-  # -- Base config file content as a YAML map (mirrors the default Immich config,
-  # see the [Immich docs](https://docs.immich.app/install/config-file)). Sensitive
-  # values must NOT be hardcoded here; use `${UPPER_SNAKE_CASE}` placeholders and
-  # provide the matching values under `config.env`. The file is rendered to the
-  # fixed container path `/config/immich.yaml`. Example:
-  # ```
-  # content:
-  #   oauth:
-  #     enabled: true
-  #     clientId: "<id>"
-  #     clientSecret: ${OAUTH_CLIENT_SECRET}
-  #     issuerUrl: "https://..."
-  #   notifications:
-  #     smtp:
-  #       enabled: true
-  #       from: "immich@example.com"
-  #       transport:
-  #         host: "smtp.example.com"
-  #         password: ${SMTP_PASSWORD}
-  #   trash:
-  #     enabled: true
-  #     days: 30
-  # ```
+  # -- Config file content as a YAML map (same structure as the Immich default config).
+  # When set, the file is mounted into the server and microservices workloads at
+  # `/config/immich.yaml` and `IMMICH_CONFIG_FILE` is set, which makes the admin
+  # settings UI read-only. Write sensitive values as `${UPPER_SNAKE_CASE}`
+  # placeholders (an entire YAML scalar, e.g. `clientSecret: ${OAUTH_CLIENT_SECRET}`)
+  # and provide them via `config.env`
   content: {}
-  # -- Values injected into the config file at runtime. Each placeholder
-  # `${TOKEN}` in `content` is matched to the entry with the same `TOKEN` key,
-  # so the map keys are the placeholder names. Each entry provides its value via
-  # either a plain `value` (simplest, fine for testing), an existing `secretKeyRef`
-  # or a `configMapRef`.
-  # > Do not use `value` for production secrets: it is stored in plaintext in the
-  # > chart values / GitOps repository. Prefer `secretKeyRef` (or `configMapRef`)
-  # > so the value never lands in the chart's rendered manifests.
-  # Example:
-  # ```
-  # env:
-  #   OAUTH_CLIENT_SECRET:
-  #     value: "<client-secret>"
-  #   SMTP_PASSWORD:
-  #     secretKeyRef:
-  #       name: smtp-secret
-  #       key: password
-  #   THEME_CSS:
-  #     configMapRef:
-  #       name: theme-cm
-  #       key: brand
-  # ```
+  # -- Values substituted for the `${TOKEN}` placeholders in `content` at pod start.
+  # Map of placeholder name to a value source: `value` (plain text, testing only),
+  # `secretKeyRef` or `configMapRef` (each with `name` and `key`). Resolved values
+  # are written to an in-memory volume and never stored in a ConfigMap
   env: {}
 
 ## @section Persistence

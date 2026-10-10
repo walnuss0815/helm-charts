@@ -1,0 +1,13 @@
+{{- if include "immich.configFileEnabled" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "immich.configFileConfigMapName" . }}
+  labels:
+    {{- include "immich.labels" . | nindent 4 }}
+data:
+  {{ include "immich.configFilename" . }}: |
+    {{- toYaml .Values.config.content | nindent 4 }}
+  substitute-config.js: |
+    {{- .Files.Get "scripts/substitute-config.js" | nindent 4 }}
+{{- end }}

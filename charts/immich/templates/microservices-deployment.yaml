@@ -15,7 +15,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/immich-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/immich-env: {{ include (print $.Template.BasePath "/configmap-env.yaml") . | sha256sum }}
+        checksum/immich-config-file: {{ include (print $.Template.BasePath "/configmap-config-file.yaml") . | sha256sum }}
         checksum/immich-secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         {{- with .Values.microservices.podAnnotations }}
         {{- toYaml . | nindent 8 }}
@@ -36,6 +37,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
+      {{- if include "immich.configFileEnabled" . }}
+      initContainers:
+        {{- include "immich.configFileInitContainer" (dict "root" $ "workload" .Values.microservices) | nindent 8 }}
+      {{- end }}
       containers:
         - name: microservices
           {{- with .Values.microservices.securityContext }}
@@ -52,7 +57,7 @@ spec:
             {{- end }}
           envFrom:
             - configMapRef:
-                name: {{ include "immich.configName" . }}
+                name: {{ include "immich.envConfigName" . }}
           env:
             - name: IMMICH_WORKERS_EXCLUDE
               value: "api"
@@ -71,6 +76,10 @@ spec:
             {{- if include "immich.secretConfigured" .Values.jwtSecret }}
             - name: JWT_SECRET
               {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.jwtSecret "secret" (include "immich.jwtSecretName" .) "key" "jwt-secret") | nindent 14 }}
+            {{- end }}
+            {{- if include "immich.configFileEnabled" . }}
+            - name: IMMICH_CONFIG_FILE
+              value: {{ include "immich.configFilePath" . }}
             {{- end }}
             {{- range $key, $value := .Values.microservices.extraEnv }}
             - name: {{ $key | quote }}
@@ -99,10 +108,16 @@ spec:
           volumeMounts:
             - name: media
               mountPath: /data
+            {{- if include "immich.configFileEnabled" . }}
+            {{- include "immich.configFileVolumeMount" . | nindent 12 }}
+            {{- end }}
       volumes:
         - name: media
           persistentVolumeClaim:
             claimName: {{ include "immich.mediaVolumeName" . }}
+        {{- if include "immich.configFileEnabled" . }}
+        {{- include "immich.configFileVolumes" . | nindent 8 }}
+        {{- end }}
       {{- with .Values.microservices.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

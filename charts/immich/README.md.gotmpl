@@ -287,11 +287,19 @@ config:
         key: brand
 ```
 
-At pod start an init step replaces every `${TOKEN}` placeholder with the value of
-the matching environment variable set on the init container
-(`config.env` provides those variables) and writes the final file to an ephemeral
-in-memory volume that the server reads via `IMMICH_CONFIG_FILE` at the fixed path
+> Setting `config.content` sets `IMMICH_CONFIG_FILE`, which makes the admin
+> settings UI read-only: every setting is then managed through `config.content`
+> (unset keys use the Immich defaults). Leave `config.content` empty (the default)
+> to configure Immich through the web UI instead.
+
+At pod start an init container in both the server and the microservices pods
+replaces every `${TOKEN}` placeholder with the value of the matching environment
+variable set on the init container (`config.env` provides those variables) and
+writes the final file to an in-memory volume (`emptyDir` with `medium: Memory`)
+that Immich reads via `IMMICH_CONFIG_FILE` at the fixed path
 `/config/immich.yaml`. The ConfigMap therefore never contains secrets.
+Both workloads need the file: the microservices worker runs the jobs (e.g.
+`ffmpeg`, `machineLearning`, `notifications`) that read these settings.
 Placeholders must occupy an entire YAML scalar (e.g. `clientSecret: ${OAUTH_CLIENT_SECRET}`);
 the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 `config.env` entry (i.e. no matching environment variable) is left unresolved.

@@ -1,6 +1,9 @@
 {{- if and (not .Values.postgres.enabled) (not (include "immich.databasePasswordProvided" .)) }}
 {{- fail "postgres.password (value or secretKeyRef) is required when postgres.enabled is false" }}
 {{- end }}
+{{- if and .Values.config.env (not (include "immich.configFileEnabled" .)) }}
+{{- fail "config.env is set but config.content is empty: the placeholders are only used by the config file" }}
+{{- end }}
 {{- range $token, $entry := .Values.config.env -}}
 {{- if not (include "immich.configEnvConfigured" (dict "entry" $entry)) }}
 {{- fail (printf "config.env.%s must set either value, secretKeyRef or configMapRef" $token) }}
@@ -21,8 +24,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/immich-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/immich-config-scripts: {{ include (print $.Template.BasePath "/config-scripts.yaml") . | sha256sum }}
+        checksum/immich-env: {{ include (print $.Template.BasePath "/configmap-env.yaml") . | sha256sum }}
+        checksum/immich-config-file: {{ include (print $.Template.BasePath "/configmap-config-file.yaml") . | sha256sum }}
         checksum/immich-secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         {{- with .Values.server.podAnnotations }}
         {{- toYaml . | nindent 8 }}
@@ -43,33 +46,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       enableServiceLinks: false
+      {{- if include "immich.configFileEnabled" . }}
       initContainers:
-        - name: config-init
-          {{- with .Values.server.securityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          image: "{{ include "immich.image" (dict "root" $ "workload" .Values.server) }}"
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          command:
-            - node
-            - /config.template/scripts/substitute-config.js
-            - /config.template/immich.yaml
-            - /config/immich.yaml
-          env:
-            {{- range $token, $entry := .Values.config.env }}
-            - name: {{ $token | quote }}
-              {{- include "immich.configEnvVar" (dict "root" $ "entry" $entry) | nindent 14 }}
-            {{- end }}
-          volumeMounts:
-            - name: config-template
-              mountPath: /config.template
-              readOnly: true
-            - name: config-scripts
-              mountPath: /config.template/scripts
-              readOnly: true
-            - name: config
-              mountPath: /config
+        {{- include "immich.configFileInitContainer" (dict "root" $ "workload" .Values.server) | nindent 8 }}
+      {{- end }}
       containers:
         - name: server
           {{- with .Values.server.securityContext }}
@@ -89,7 +69,7 @@ spec:
             {{- end }}
           envFrom:
             - configMapRef:
-                name: {{ include "immich.configName" . }}
+                name: {{ include "immich.envConfigName" . }}
           env:
             - name: IMMICH_WORKERS_INCLUDE
               value: "api"
@@ -111,8 +91,10 @@ spec:
             - name: JWT_SECRET
               {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.jwtSecret "secret" (include "immich.jwtSecretName" .) "key" "jwt-secret") | nindent 14 }}
             {{- end }}
+            {{- if include "immich.configFileEnabled" . }}
             - name: IMMICH_CONFIG_FILE
               value: {{ include "immich.configFilePath" . }}
+            {{- end }}
             {{- range $key, $value := .Values.server.extraEnv }}
             - name: {{ $key | quote }}
               value: {{ (tpl $value $) | quote }}
@@ -140,21 +122,16 @@ spec:
           volumeMounts:
             - name: media
               mountPath: /data
-            - name: config
-              mountPath: /config
-              readOnly: true
+            {{- if include "immich.configFileEnabled" . }}
+            {{- include "immich.configFileVolumeMount" . | nindent 12 }}
+            {{- end }}
       volumes:
         - name: media
           persistentVolumeClaim:
             claimName: {{ include "immich.mediaVolumeName" . }}
-        - name: config-template
-          configMap:
-            name: {{ include "immich.configName" . }}
-        - name: config-scripts
-          configMap:
-            name: {{ include "immich.configScriptsName" . }}
-        - name: config
-          emptyDir: {}
+        {{- if include "immich.configFileEnabled" . }}
+        {{- include "immich.configFileVolumes" . | nindent 8 }}
+        {{- end }}
       {{- with .Values.server.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

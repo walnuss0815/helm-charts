@@ -306,6 +306,72 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 > Prefer `secretKeyRef`/`configMapRef` for real secrets. A plain `value` ends up
 > in your chart values / GitOps repository and is only recommended for testing.
 
+## Database
+
+By default the chart deploys a CloudNativePG `Cluster` (`postgres.enabled: true`).
+
+### PostgreSQL and VectorChord versions
+
+The PostgreSQL major version is declared exactly once, as the leading number of
+`postgres.image.tag`. The `vchord` ImageVolume extension image
+(`<postgres.vchord.repository>:pg<major>-v<postgres.vchord.version>`) and its
+library/control paths are derived from it, so the PostgreSQL image and the
+extension always match:
+
+```yaml
+postgres:
+  image:
+    tag: "18.6-standard-trixie"   # PostgreSQL 18 -> vchord-scratch:pg18-v1.1.1
+  vchord:
+    version: "1.1.1"
+```
+
+Both values are tracked by Renovate (`renovate-custom-managers.json`):
+
+- PostgreSQL minor/patch updates are proposed; major updates are disabled,
+  because changing the major version makes CloudNativePG perform an offline
+  in-place major upgrade. Bump the major version deliberately; `vchord` follows
+  automatically.
+- `vchord` updates are limited to `< 2.0`, the range Immich supports.
+
+Every update runs through the CI install test, which bootstraps the CNPG
+cluster and creates the `vchord` extension, so an incompatible combination
+fails before it reaches `main`.
+
+### Superuser
+
+Immich expects superuser privileges in its database
+([Immich docs](https://docs.immich.app/administration/postgres-standalone/)):
+its built-in daily database dump uses `pg_dumpall`, and after a `vchord`
+upgrade it runs `ALTER EXTENSION vchord UPDATE` and reindexes automatically.
+The chart therefore grants the `postgres.user` role superuser privileges through
+CNPG declarative role management (`postgres.superuser: true`). The role is
+dedicated to this cluster.
+
+With `postgres.superuser: false`, Immich's database backups fail and you must
+run the following after every `vchord` upgrade:
+
+```sql
+ALTER EXTENSION vchord UPDATE;
+REINDEX INDEX face_index;
+REINDEX INDEX clip_index;
+```
+
+### Credentials
+
+Without a password source, CloudNativePG generates a random password in the
+`<fullname>-postgresql-app` Secret. To provide your own credentials with the
+bundled cluster, reference a Secret with the keys `username` (equal to
+`postgres.user`) and `password`; CloudNativePG bootstraps the database from it:
+
+```yaml
+postgres:
+  password:
+    secretKeyRef:
+      name: immich-db-credentials
+      key: password   # must be "password"
+```
+
 {{ template "chart.valuesSection" . }}
 
 {{ template "helm-docs.versionFooter" . }}

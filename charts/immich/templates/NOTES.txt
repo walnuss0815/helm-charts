@@ -32,6 +32,10 @@ Notes:
 - The database password was not provided. CloudNativePG generated a random one,
   stored in the Secret `{{ include "immich.fullname" . }}-postgresql-app`.
 {{- end }}
+{{- if and .Values.postgres.enabled (not .Values.postgres.superuser) }}
+- `postgres.superuser` is false: Immich's built-in database backups fail and you
+  must run `ALTER EXTENSION vchord UPDATE` and reindex after every vchord upgrade.
+{{- end }}
 - The database password is sourced from `postgres.password` (inline value, existing
   secret or the CNPG-generated `<fullname>-postgresql-app` Secret).
 - To configure Immich features that are not exposed as dedicated values (e.g.

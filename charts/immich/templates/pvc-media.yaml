@@ -6,9 +6,14 @@ metadata:
   labels:
     {{- include "immich.labels" . | nindent 4 }}
     app.kubernetes.io/component: media
-  {{- with .Values.persistence.media.annotations }}
+  {{- if or .Values.persistence.media.keep .Values.persistence.media.annotations }}
   annotations:
+    {{- if .Values.persistence.media.keep }}
+    helm.sh/resource-policy: keep
+    {{- end }}
+    {{- with .Values.persistence.media.annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   accessModes:

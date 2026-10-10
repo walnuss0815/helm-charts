@@ -359,6 +359,24 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 > Prefer `secretKeyRef`/`configMapRef` for real secrets. A plain `value` ends up
 > in your chart values / GitOps repository and is only recommended for testing.
 
+## Persistence
+
+The media volume (`persistence.media`, mounted at `/data`) holds the original
+photos and videos. It is annotated with `helm.sh/resource-policy: keep`
+(`persistence.media.keep: true`), so Helm keeps the PVC on `helm uninstall` and
+Argo CD treats it like `Delete=false` when the Application is deleted. A
+reinstall with the same release name adopts the kept PVC again. Delete it
+manually once it is no longer needed:
+
+```sh
+kubectl delete pvc <fullname>-media
+```
+
+The annotation protects the PVC object, not the underlying volume. As a second
+layer, provision the media volume from a StorageClass with
+`reclaimPolicy: Retain`, so the PersistentVolume and its data survive even if the
+PVC is deleted (re-binding it then requires manual steps).
+
 ## Database
 
 By default the chart deploys a CloudNativePG `Cluster` (`postgres.enabled: true`).

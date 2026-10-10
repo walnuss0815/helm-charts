@@ -417,6 +417,10 @@ persistence:
     enabled: true
     # -- Name of an existing PVC to use instead of creating a new one
     existingClaim: ""
+    # -- Keep the media PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # original photos and videos
+    keep: true
     # -- Annotations for the media volume PVC
     annotations: {}
     # -- Storage class for the media volume. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning

@@ -555,14 +555,55 @@ postgres:
     storageClass: ""
     # -- Size of the PostgreSQL PVC
     size: 100Gi
-  # -- CNPG backup configuration.
   backup:
-    # -- Enable backups. Requires a Barman object store for `barmanObjectStore`
+    # -- Enable scheduled physical backups of the CNPG cluster (`ScheduledBackup`).
+    # Requires the [Barman Cloud Plugin](https://cloudnative-pg.io/plugin-barman-cloud/)
+    # for `method: plugin`, or CSI volume snapshots for `method: volumeSnapshot`
     enabled: false
-    # -- Backup retention policy (e.g. `30d`)
-    retentionPolicy: 30d
-    # -- Barman object store configuration. See [CNPG docs](https://cloudnative-pg.io/documentation/current/backup/)
-    barmanObjectStore: {}
+    # -- Backup method: `plugin` (Barman Cloud Plugin, object storage) or
+    # `volumeSnapshot` (Kubernetes CSI volume snapshots)
+    method: plugin
+    # -- Backup schedule as a six-field cron expression including seconds
+    # (e.g. `0 0 3 * * *` = daily at 03:00)
+    schedule: "0 0 3 * * *"
+    # -- Take a backup immediately when the `ScheduledBackup` is created
+    immediate: false
+    # -- Instance to back up from: `prefer-standby` or `primary`. Empty uses the CNPG default (`prefer-standby`)
+    target: ""
+    objectStore:
+      # -- Create a Barman Cloud `ObjectStore` named `<fullname>-postgresql` from
+      # `configuration`. Set to `false` to reference an existing one via `name`
+      create: true
+      # -- Name of an existing `ObjectStore`. Only used when `create` is `false`
+      name: ""
+      # -- `ObjectStore` configuration (`destinationPath`, `endpointURL`,
+      # `s3Credentials`, `wal`, `data`, ...). See the
+      # [plugin docs](https://cloudnative-pg.io/plugin-barman-cloud/docs/object_stores/).
+      # When set, WAL archiving is enabled even with `method: volumeSnapshot`
+      configuration: {}
+      # -- Recovery window of the backups in the `ObjectStore` (e.g. `30d`)
+      retentionPolicy: 30d
+      # -- Barman Cloud sidecar settings of the `ObjectStore` (e.g. `resources`)
+      instanceSidecarConfiguration: {}
+      # -- Folder name of this cluster inside the object store. Defaults to the
+      # Cluster name. Change it when restoring into the same object store
+      serverName: ""
+    # -- CNPG `volumeSnapshot` backup configuration (e.g. `className`). Only used with `method: volumeSnapshot`
+    volumeSnapshot: {}
+  recovery:
+    # -- Bootstrap the CNPG cluster from a backup instead of an empty database.
+    # Only applies when the Cluster is created
+    enabled: false
+    # -- Barman Cloud `ObjectStore` holding the backup. Defaults to the backup object store
+    objectStoreName: ""
+    # -- Folder name of the source cluster inside the object store. Defaults to the Cluster name
+    serverName: ""
+    # -- Recover from CSI volume snapshots instead of an object store, in the CNPG
+    # `bootstrap.recovery.volumeSnapshots` format
+    volumeSnapshots: {}
+    # -- Point-in-time recovery target in the CNPG `recoveryTarget` format
+    # (e.g. `targetTime: "2026-01-01 00:00:00+00"`). Empty restores the latest state
+    recoveryTarget: {}
   monitoring:
     # -- Enable CNPG PodMonitor for PostgreSQL
     enablePodMonitor: false

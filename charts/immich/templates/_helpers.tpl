@@ -169,6 +169,44 @@ It is the single source for the `vchord` image tag and extension paths.
 {{- end }}
 
 {{/*
+Name of the CNPG Cluster.
+*/}}
+{{- define "immich.databaseClusterName" -}}
+{{- include "immich.fullname" . }}-postgresql
+{{- end }}
+
+{{/*
+Name of the Barman Cloud ObjectStore used for WAL archiving and base backups.
+*/}}
+{{- define "immich.backupObjectStoreName" -}}
+{{- if .Values.postgres.backup.objectStore.create -}}
+{{- include "immich.databaseClusterName" . -}}
+{{- else -}}
+{{- .Values.postgres.backup.objectStore.name -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Returns "true" when the chart creates the Barman Cloud ObjectStore.
+*/}}
+{{- define "immich.backupObjectStoreCreate" -}}
+{{- $bk := .Values.postgres.backup -}}
+{{- if and .Values.postgres.enabled $bk.objectStore.create $bk.objectStore.configuration (or $bk.enabled .Values.postgres.recovery.enabled) -}}true{{- end -}}
+{{- end }}
+
+{{/*
+Returns "true" when WAL archiving through the Barman Cloud Plugin is enabled:
+always for `method: plugin`, and for `method: volumeSnapshot` when an object
+store is configured.
+*/}}
+{{- define "immich.walArchivingEnabled" -}}
+{{- $bk := .Values.postgres.backup -}}
+{{- if $bk.enabled -}}
+{{- if or (eq $bk.method "plugin") (and $bk.objectStore.create $bk.objectStore.configuration) (and (not $bk.objectStore.create) $bk.objectStore.name) -}}true{{- end -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 CNPG ImageVolume extension entry for `vchord`, matching the PostgreSQL major.
 */}}
 {{- define "immich.vchordExtension" -}}

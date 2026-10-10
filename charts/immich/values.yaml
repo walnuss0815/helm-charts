@@ -51,6 +51,8 @@ redis:
   port: 6379
   # -- Redis/Valkey database index
   dbindex: 0
+  # -- Redis/Valkey username (`REDIS_USERNAME`). Required for ACL users other than `default`
+  username: ""
   # -- Redis/Valkey password injected into the server and microservices workloads.
   # Only needed when authentication is enabled on Valkey. Accepts either an
   # inline `value` (stored in a chart-managed Secret named `<fullname>-redis-password`)
@@ -157,6 +159,7 @@ server:
   # -- Pod-level security context for the server pods
   podSecurityContext:
     fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
   # -- Container-level security context for the server container.
   securityContext:
     allowPrivilegeEscalation: false
@@ -178,12 +181,24 @@ server:
   tolerations: []
   # -- Affinity rules for server pod scheduling
   affinity: {}
+  # -- Topology spread constraints for the server pods.
+  # See [Kubernetes docs](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
+  topologySpreadConstraints: []
+  # -- Deployment update strategy of the server workload. Empty uses `RollingUpdate`
+  strategy: {}
+  # -- IPs or CIDRs of trusted reverse proxies (`IMMICH_TRUSTED_PROXIES`), e.g. the
+  # pod CIDR of the ingress controller. Required for correct client IPs behind a proxy
+  trustedProxies: []
   # -- Additional environment variables for the server container
   extraEnv: {}
   # -- Additional environment variables sourced from ConfigMaps or Secrets for the server container.
   # Mapping of variable names to Kubernetes `valueFrom` objects, e.g.
   # `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
   extraEnvFrom: {}
+  # -- Additional volumes for the server pods, e.g. an external library or host devices
+  extraVolumes: []
+  # -- Additional volume mounts for the server container
+  extraVolumeMounts: []
 
 ## @section Microservices
 
@@ -219,6 +234,7 @@ microservices:
   # -- Pod-level security context for the microservices pods
   podSecurityContext:
     fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
   # -- Container-level security context for the microservices container.
   securityContext:
     allowPrivilegeEscalation: false
@@ -243,6 +259,8 @@ microservices:
   # -- Topology spread constraints for the microservices pods.
   # See [Kubernetes docs](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
   topologySpreadConstraints: []
+  # -- Deployment update strategy of the microservices workload. Empty uses `RollingUpdate`
+  strategy: {}
   # -- Horizontal Pod Autoscaler for the microservices workload.
   # Every scaled-up replica must be connected to the same Postgres and Redis
   # instances and mount the same media volume, so make sure
@@ -267,6 +285,10 @@ microservices:
   # Mapping of variable names to Kubernetes `valueFrom` objects, e.g.
   # `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
   extraEnvFrom: {}
+  # -- Additional volumes for the microservices pods, e.g. an external library or host devices
+  extraVolumes: []
+  # -- Additional volume mounts for the microservices container
+  extraVolumeMounts: []
 
 ## @section Machine learning
 
@@ -326,6 +348,7 @@ machineLearning:
   # -- Pod-level security context for the machine-learning pods
   podSecurityContext:
     fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
   # -- Container-level security context for the machine-learning container.
   securityContext:
     allowPrivilegeEscalation: false
@@ -386,6 +409,10 @@ machineLearning:
   # Mapping of variable names to Kubernetes `valueFrom` objects, e.g.
   # `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
   extraEnvFrom: {}
+  # -- Additional volumes for the machine-learning pods, e.g. an external library or host devices
+  extraVolumes: []
+  # -- Additional volume mounts for the machine-learning container
+  extraVolumeMounts: []
 
 ## @section Configuration file
 
@@ -500,6 +527,9 @@ postgres:
   user: immich
   # -- Name of the Immich database
   database: immich
+  # -- SSL mode of the database connection (`DB_SSL_MODE`), e.g. `require` for an
+  # external database. Empty uses the Immich default
+  sslMode: ""
   # -- PostgreSQL password of `user`. If no source is set and `enabled` is `true`,
   # CloudNativePG generates a random password in the `<fullname>-postgresql-app`
   # Secret. Required when `enabled` is `false`

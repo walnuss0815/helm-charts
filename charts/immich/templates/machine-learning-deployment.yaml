@@ -60,7 +60,7 @@ spec:
               value: {{ .Values.machineLearning.service.port | toString | quote }}
             {{- range $key, $value := .Values.machineLearning.extraEnv }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
             {{- range $key, $valueFrom := .Values.machineLearning.extraEnvFrom }}
             - name: {{ $key | quote }}
@@ -85,6 +85,9 @@ spec:
           volumeMounts:
             - name: model-cache
               mountPath: /cache
+            {{- with .Values.machineLearning.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       volumes:
         - name: model-cache
           {{- if eq .Values.persistence.modelCache.type "emptyDir" }}
@@ -96,6 +99,9 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "immich.modelCacheVolumeName" . }}
           {{- end }}
+        {{- with .Values.machineLearning.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.machineLearning.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

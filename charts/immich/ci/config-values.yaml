@@ -52,3 +52,21 @@ extraManifests:
       name: immich-ci-theme
     data:
       brand: "immich-ci-brand"
+
+# Exercise extra volumes (external library stand-in) and non-string extraEnv values.
+server:
+  trustedProxies:
+    - 10.244.0.0/16
+  extraVolumes: &extLib
+    - name: external-library
+      emptyDir: {}
+  extraVolumeMounts: &extLibMount
+    - name: external-library
+      mountPath: /mnt/external
+      readOnly: true
+microservices:
+  extraVolumes: *extLib
+  extraVolumeMounts: *extLibMount
+machineLearning:
+  extraEnv:
+    MACHINE_LEARNING_MODEL_TTL: 600

@@ -347,14 +347,23 @@ machineLearning:
   tolerations: []
   # -- Affinity rules for machine-learning pod scheduling
   affinity: {}
-  # -- Horizontal Pod Autoscaler for the machine-learning workload.
-  # Every scaled-up replica mounts the same model cache volume (models are
-  # downloaded once and reused). Enable autoscaling only when
-  # `persistence.modelCache` is backed by storage that supports multi-pod
-  # access (`ReadWriteMany`), otherwise replicas cannot be scheduled on other
-  # nodes. See [Immich docs](https://docs.immich.app/guides/scaling-immich)
+  # -- Topology spread constraints for the machine-learning pods, e.g. to spread
+  # replicas across nodes. See [Kubernetes docs](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
+  topologySpreadConstraints: []
+  # -- Deployment update strategy of the machine-learning workload. Empty uses `RollingUpdate`
+  strategy: {}
+  podDisruptionBudget:
+    # -- Create a PodDisruptionBudget for the machine-learning pods
+    enabled: false
+    # -- Maximum number of unavailable machine-learning pods during voluntary disruptions
+    maxUnavailable: 1
+  # Machine learning is stateless: the server reaches all replicas through one
+  # Service. Throughput is bounded by the job concurrency of the server, not only
+  # by the number of replicas (see the README section "Scaling machine learning").
   autoscaling:
-    # -- Enable autoscaling of the machine-learning deployment
+    # -- Enable the HorizontalPodAutoscaler of the machine-learning workload.
+    # Replicas on different nodes require `persistence.modelCache.type: emptyDir`
+    # or a `pvc` backed by `ReadWriteMany` storage
     enabled: false
     # -- Lower limit for the number of machine-learning replicas
     minReplicas: 1
@@ -362,11 +371,14 @@ machineLearning:
     maxReplicas: 5
     # -- Target CPU utilization percentage to scale on
     targetCPUUtilizationPercentage: 80
-    # -- Target memory utilization percentage to scale on. Models are loaded into
-    # memory, so scaling on memory is usually more reactive than on CPU
-    targetMemoryUtilizationPercentage: 80
-    # -- Scale-up/down behavior. See [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configurable-scaling-behavior)
-    behavior: {}
+    # -- Target memory utilization percentage to scale on. Disabled when empty.
+    # Not recommended: loaded models stay in memory until their TTL expires
+    targetMemoryUtilizationPercentage: ""
+    # -- Scale-up/down behavior. The default delays scale-down by 10 minutes so
+    # replicas are not removed between job bursts. See [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configurable-scaling-behavior)
+    behavior:
+      scaleDown:
+        stabilizationWindowSeconds: 600
   # -- Additional environment variables for the machine-learning container.
   # Machine learning device overrides like `MACHINE_LEARNING_DEVICES` belong here.
   extraEnv: {}
@@ -414,23 +426,23 @@ persistence:
       - ReadWriteMany
     # -- Size of the media volume
     size: 100Gi
-  # -- Machine learning model cache volume, mounted at `/cache` inside the
-  # container (`MACHINE_LEARNING_CACHE_FOLDER` default). Downloaded models are
-  # shared across all machine-learning replicas. Use `ReadWriteMany` access modes
-  # when scaling the machine-learning workload horizontally (`autoscaling`)
+  # Machine learning model cache, mounted at `/cache` (`MACHINE_LEARNING_CACHE_FOLDER`).
+  # Shared by all machine-learning replicas, so only node-independent options are
+  # offered: an `emptyDir` per pod or a `ReadWriteMany` PVC.
   modelCache:
-    # -- Enable dynamic provisioning of the model cache volume. Set to `false` when using an `existingClaim`
-    enabled: true
-    # -- Name of an existing PVC to use instead of creating a new one
+    # -- Model cache volume type: `pvc` (a `ReadWriteMany` PVC shared by all
+    # replicas) or `emptyDir` (per pod; models are downloaded again on each pod start)
+    type: pvc
+    # -- Size limit of the `emptyDir`. Only used with `type: emptyDir`
+    sizeLimit: 10Gi
+    # -- Name of an existing PVC to use instead of creating one. Only used with
+    # `type: pvc`. Must support `ReadWriteMany` to run replicas on several nodes
     existingClaim: ""
-    # -- Annotations for the model cache volume PVC
+    # -- Annotations for the model cache PVC
     annotations: {}
-    # -- Storage class for the model cache volume. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
+    # -- Storage class for the model cache PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
     storageClass: ""
-    # -- Access modes for the model cache volume
-    accessModes:
-      - ReadWriteOnce
-    # -- Size of the model cache volume
+    # -- Size of the model cache PVC
     size: 5Gi
 
 ## @section Monitoring

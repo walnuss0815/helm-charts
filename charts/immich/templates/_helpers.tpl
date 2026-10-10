@@ -474,6 +474,6 @@ Name of the machine learning model cache volume / PVC.
 {{- if .Values.persistence.modelCache.existingClaim -}}
 {{- .Values.persistence.modelCache.existingClaim -}}
 {{- else -}}
-{{- printf "%s-model-cache" (include "immich.fullname" .) -}}
+{{- printf "%s-machine-learning-cache" (include "immich.fullname" .) -}}
 {{- end -}}
 {{- end }}

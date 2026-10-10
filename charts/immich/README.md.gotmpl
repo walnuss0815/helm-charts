@@ -31,7 +31,7 @@ None
 
 ## Quick start
 
-Prerequisites: The CloudNativePG operator and an Ingress controller.
+Prerequisites: The CloudNativePG operator, an Ingress controller and `ReadWriteMany` storage.
 
 The chart works out of the box with sensible defaults. The bundled CloudNativePG
 cluster generates a random database password itself, which the workloads resolve
@@ -49,6 +49,71 @@ server:
           - path: /
             pathType: Prefix
 ```
+
+Most ingress controllers limit the request body size by default, which breaks
+video uploads; see [Reverse proxy](#reverse-proxy) for the required settings.
+
+## Reverse proxy
+
+Immich must be served on the root path of a (sub)domain; sub-paths such as
+`/immich` are not supported. The proxy in front of the server must allow large
+uploads, long requests and WebSockets, and forward the `Host`, `X-Real-IP`,
+`X-Forwarded-Proto` and `X-Forwarded-For` headers
+([Immich docs](https://docs.immich.app/administration/reverse-proxy)).
+Otherwise photos upload but videos fail, or the web UI shows *Server Offline*.
+
+Set `server.trustedProxies` to the addresses of the proxy (e.g. the pod CIDR of
+the ingress controller), so Immich uses the forwarded client IP.
+
+Ingress (example annotations for ingress-nginx; other controllers have
+equivalents):
+
+```yaml
+server:
+  trustedProxies:
+    - 10.244.0.0/16
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    hosts:
+      - host: immich.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: immich-tls
+        hosts:
+          - immich.example.com
+```
+
+Gateway API (request body limits are implementation-specific, e.g. a
+`ClientTrafficPolicy` in Envoy Gateway):
+
+```yaml
+server:
+  httpRoute:
+    enabled: true
+    parentRefs:
+      - name: gateway
+        sectionName: https
+    hostnames:
+      - immich.example.com
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+        timeouts:
+          request: 600s
+```
+
+If the proxy uses the Let's Encrypt `http-01` challenge, make sure
+`/.well-known/immich` is still routed to Immich; the mobile app relies on it.
 
 ## Hardware acceleration
 
@@ -527,6 +592,31 @@ postgres:
       name: immich-db-credentials
       key: password   # must be "password"
 ```
+
+## Upgrading
+
+### From 0.1.x
+
+Removed or renamed values fail rendering with a hint instead of being ignored.
+
+- `jwtSecret` and `server.transcodingDevice` were removed; Immich reads neither.
+  Configure hardware transcoding via `ffmpeg.accel` (admin UI or
+  `config.content`).
+- `IMMICH_CONFIG_FILE` is only set when `config.content` is not empty, so the
+  admin settings UI is editable again by default.
+- `postgres.image.tag` now pins the CNPG image (PostgreSQL 18 by default). If
+  your cluster runs another major version, set the tag to that version first;
+  otherwise CloudNativePG performs a major upgrade.
+- `postgres.extensions`/`postgres.sharedPreloadLibraries` were replaced by
+  `postgres.vchord`, `postgres.extraExtensions` and
+  `postgres.extraSharedPreloadLibraries`.
+- The database role is a superuser by default (`postgres.superuser`).
+- `postgres.backup.barmanObjectStore`/`retentionPolicy` were replaced by
+  `postgres.backup.objectStore` (Barman Cloud Plugin).
+- `persistence.modelCache.enabled`/`accessModes` were replaced by
+  `persistence.modelCache.type` (`pvc` with `ReadWriteMany`, or `emptyDir`). The
+  model cache PVC is recreated as `<fullname>-machine-learning-cache`; models are
+  downloaded once again.
 
 {{ template "chart.valuesSection" . }}
 

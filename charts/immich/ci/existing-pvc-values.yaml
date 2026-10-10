@@ -11,9 +11,6 @@ persistence:
   modelCache:
     existingClaim: immich-ci-model-cache
 
-jwtSecret:
-  value: "immich-ci-jwt-secret"
-
 extraManifests:
   - |
     apiVersion: v1

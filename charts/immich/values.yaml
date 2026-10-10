@@ -65,23 +65,6 @@ redis:
       # -- Key within the secret
       key: ""
 
-## @section Application
-
-# -- JWT secret used to sign session tokens. Accepts either an inline `value`
-# (stored in a chart-managed Secret named `<fullname>-jwt-secret`) or a
-# `secretKeyRef` referencing an existing Secret.
-# Strongly recommended: when unset, Immich falls back to a temporary secret and
-# existing sessions are invalidated whenever the workload restarts.
-jwtSecret:
-  # -- Inline secret value. Stored in a chart-managed Secret when set
-  value: ""
-  # -- Reference to an existing Secret containing the secret
-  secretKeyRef:
-    # -- Name of the secret
-    name: ""
-    # -- Key within the secret
-    key: ""
-
 ## @section Server
 
 # The `server` workload serves the web UI and the REST API. It runs the `api`
@@ -195,14 +178,6 @@ server:
   tolerations: []
   # -- Affinity rules for server pod scheduling
   affinity: {}
-  # -- Hardware device used for transcoding. Maps to `IMMICH_TRANSCODING_HW_DEVICE`,
-  # which is injected via the shared ConfigMap into both the server and
-  # microservices workloads (the microservices worker executes the actual
-  # transcoding jobs). Set to `null` (default) to disable hardware transcoding.
-  # Supported values: `nvenc` (NVIDIA), `qsv` (Intel), `vaapi` (AMD/NVIDIA/Intel),
-  # `rkmpp` (Rockchip). If the same variable is also set in `extraEnv`, the
-  # `extraEnv` value takes precedence (container `env` overrides `envFrom`).
-  transcodingDevice: null
   # -- Additional environment variables for the server container
   extraEnv: {}
   # -- Additional environment variables sourced from ConfigMaps or Secrets for the server container.

@@ -17,8 +17,8 @@ data:
   {{- if .Values.machineLearning.enabled }}
   IMMICH_MACHINE_LEARNING_URL: http://{{ include "immich.fullname" . }}-machine-learning:{{ .Values.machineLearning.service.port }}
   {{- end }}
-  {{- if .Values.server.transcodingDevice }}
-  IMMICH_TRANSCODING_HW_DEVICE: {{ .Values.server.transcodingDevice | quote }}
+  {{- if not .Values.machineLearning.enabled }}
+  IMMICH_MACHINE_LEARNING_ENABLED: "false"
   {{- end }}
   {{- if .Values.monitoring.enabled }}
   IMMICH_TELEMETRY_INCLUDE: all

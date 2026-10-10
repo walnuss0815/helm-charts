@@ -4,9 +4,6 @@
 machineLearning:
   enabled: false
 
-jwtSecret:
-  value: "immich-ci-jwt-secret"
-
 persistence:
   media:
     # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI

@@ -1,6 +1,7 @@
 # Install test exercising the hardware-acceleration values. No GPU/accelerator
-# is present in the test cluster, so only the values plumbing (image tag suffix,
-# tolerations and transcoding environment) is exercised, not actual devices.
+# is present in the test cluster, so only the values plumbing (tolerations,
+# supplemental groups and the ffmpeg acceleration setting in the config file)
+# is exercised, not actual devices.
 # Uses the bundled CNPG Cluster (chart default) for the database.
 
 machineLearning:
@@ -12,11 +13,18 @@ machineLearning:
   #   limits:
   #     nvidia.com/gpu: "1"
 
-server:
-  transcodingDevice: "vaapi"
+microservices:
+  podSecurityContext:
+    fsGroup: 1000
+    # GID of the host `render` group (device access for VAAPI/QSV)
+    supplementalGroups:
+      - 993
 
-jwtSecret:
-  value: "immich-ci-jwt-secret"
+config:
+  content:
+    ffmpeg:
+      accel: vaapi
+      accelDecode: true
 
 persistence:
   media:

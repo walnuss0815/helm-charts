@@ -73,10 +73,6 @@ spec:
             - name: REDIS_PASSWORD
               {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.redis.password "secret" (include "immich.redisPasswordName" .) "key" "password") | nindent 14 }}
             {{- end }}
-            {{- if include "immich.secretConfigured" .Values.jwtSecret }}
-            - name: JWT_SECRET
-              {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.jwtSecret "secret" (include "immich.jwtSecretName" .) "key" "jwt-secret") | nindent 14 }}
-            {{- end }}
             {{- if include "immich.configFileEnabled" . }}
             - name: IMMICH_CONFIG_FILE
               value: {{ include "immich.configFilePath" . }}

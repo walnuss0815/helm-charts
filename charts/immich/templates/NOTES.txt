@@ -34,8 +34,6 @@ Notes:
 {{- end }}
 - The database password is sourced from `postgres.password` (inline value, existing
   secret or the CNPG-generated `<fullname>-postgresql-app` Secret).
-- Set `jwtSecret` (inline value or existing secret) to keep sessions valid across
-  workload restarts.
 - To configure Immich features that are not exposed as dedicated values (e.g.
   `oauth`, `ffmpeg`, `notifications.smtp`, `theme`), provide the config as a YAML
   map in `config.content`. Sensitive values must be written as

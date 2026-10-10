@@ -1,6 +1,6 @@
 # linkwarden
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.16.3](https://img.shields.io/badge/AppVersion-2.16.3-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.16.3](https://img.shields.io/badge/AppVersion-2.16.3-informational?style=flat-square)
 
 A Helm chart for Linkwarden
 
@@ -14,7 +14,7 @@ A Helm chart for Linkwarden
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://walnuss0815.github.io/helm-charts | postgres | 0.3.5 |
+| https://walnuss0815.github.io/helm-charts | postgres | 1.0.0 |
 
 ## Values
 

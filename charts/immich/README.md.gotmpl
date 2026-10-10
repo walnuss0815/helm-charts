@@ -35,13 +35,10 @@ Prerequisites: The CloudNativePG operator and an Ingress controller.
 The chart works out of the box with sensible defaults. The bundled CloudNativePG
 cluster generates a random database password itself, which the workloads resolve
 from the operator-managed `<fullname>-postgresql-app` Secret, so no credentials
-need to be supplied. The only values you typically need to set are a JWT secret
-and the ingress for external access:
+need to be supplied. The only values you typically need to set are for external
+access:
 
 ```yaml
-jwtSecret:
-  value: "<generate-a-long-random-string>"
-
 server:
   ingress:
     enabled: true
@@ -173,40 +170,42 @@ machineLearning:
 
 ### Transcoding per manufacturer
 
-Enable hardware transcoding by setting `server.transcodingDevice` (defaults to
-`null`, i.e. no hardware transcoding). The value maps to
-`IMMICH_TRANSCODING_HW_DEVICE` and is injected via the shared ConfigMap into
-both the server and the microservices workload — the latter actually executes
-the transcoding jobs, so both containers see the same configuration.
+Video transcoding is executed by the microservices worker. Hardware transcoding
+needs two things:
 
-Note that actual hardware access usually
-requires exposing host devices (e.g. `/dev/dri`, `/dev/mali0`) to the pod. The
-chart does not provide dedicated device-mount values yet, so use a custom
-device plugin / vendor driver where available, or extend the chart:
+1. Device access for the microservices pods, usually through a device plugin
+   resource (e.g. the NVIDIA GPU Operator or the Intel GPU plugin). The pod may
+   also need the GID of the host `render` group in
+   `microservices.podSecurityContext.supplementalGroups`.
+2. The acceleration API, selected in the admin UI (*Administration > Settings >
+   Video Transcoding Settings > Hardware Acceleration*) or, when the config file
+   is used, via `config.content.ffmpeg.accel` (`nvenc`, `qsv`, `vaapi` or
+   `rkmpp`).
 
 ```yaml
-# NVIDIA (NVENC)
-server:
-  transcodingDevice: "nvenc"
+# Intel (Quick Sync) with the Intel GPU device plugin
+microservices:
+  resources:
+    limits:
+      gpu.intel.com/i915: "1"
 ```
 
 ```yaml
-# AMD (VAAPI)
-server:
-  transcodingDevice: "vaapi"
+# NVIDIA (NVENC) with the NVIDIA GPU Operator, configured via the config file
+microservices:
+  resources:
+    limits:
+      nvidia.com/gpu: "1"
+config:
+  content:
+    ffmpeg:
+      accel: nvenc
+      accelDecode: true
 ```
 
-```yaml
-# Intel (Quick Sync)
-server:
-  transcodingDevice: "qsv"
-```
-
-```yaml
-# Rockchip (RKMPP)
-server:
-  transcodingDevice: "rkmpp"
-```
+> Setting `config.content` makes the whole admin settings UI read-only (see
+> [Configuration file](#configuration-file)). Prefer the admin UI if you do not
+> manage the remaining settings through the config file.
 
 For prerequisites, vendor-specific setup (e.g. `/dev/dri` access, NVIDIA
 Container Toolkit, libmali firmware) and supported codecs, see the

@@ -5,9 +5,6 @@
 # This exercises all three value sources: a plain `value`, an existing
 # `secretKeyRef` and a `configMapRef`.
 
-jwtSecret:
-  value: "immich-ci-jwt-secret"
-
 config:
   content:
     newVersionCheck:

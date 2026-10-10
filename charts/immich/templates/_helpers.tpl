@@ -204,14 +204,6 @@ Created when `redis.password.value` is set.
 {{- end }}
 
 {{/*
-Name of the chart-managed Secret carrying the JWT secret.
-Created when `jwtSecret.value` is set.
-*/}}
-{{- define "immich.jwtSecretName" -}}
-{{- include "immich.fullname" . }}-jwt-secret
-{{- end }}
-
-{{/*
 Name of the shared non-sensitive environment ConfigMap (loaded via `envFrom`).
 */}}
 {{- define "immich.envConfigName" -}}

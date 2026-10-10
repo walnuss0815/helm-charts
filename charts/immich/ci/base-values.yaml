@@ -6,9 +6,6 @@
 # password itself, which the workloads resolve from the operator-managed
 # `<fullname>-postgresql-app` Secret.
 
-jwtSecret:
-  value: "immich-ci-jwt-secret"
-
 # Exercise the microservices HPA in the install test. It never scales above
 # `minReplicas` because the test cluster has no metrics-server.
 microservices:

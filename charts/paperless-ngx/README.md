@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.0](https://img.shields.io/badge/AppVersion-3.3.0-informational?style=flat-square)
+![Version: 2.0.1](https://img.shields.io/badge/Version-2.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.3.0](https://img.shields.io/badge/AppVersion-3.3.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -17,7 +17,7 @@ A Helm chart for Kubernetes
 | https://valkey.io/valkey-helm/ | valkey | 0.12.0 |
 | https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.9 |
 | https://walnuss0815.github.io/helm-charts | tika | 0.1.4 |
-| https://walnuss0815.github.io/helm-charts | webdav | 0.1.16 |
+| https://walnuss0815.github.io/helm-charts | webdav | 1.0.1 |
 
 ## Values
 

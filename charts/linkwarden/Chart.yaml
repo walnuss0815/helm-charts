@@ -2,7 +2,7 @@ apiVersion: v2
 name: linkwarden
 description: A Helm chart for Linkwarden
 type: application
-version: 1.0.0
+version: 1.0.1
 # renovate: image=ghcr.io/linkwarden/linkwarden
 appVersion: "2.16.3"
 maintainers:
@@ -12,6 +12,6 @@ maintainers:
 
 dependencies:
   - name: postgres
-    version: "0.3.5"
+    version: "1.0.0"
     repository: https://walnuss0815.github.io/helm-charts
     condition: postgres.enabled

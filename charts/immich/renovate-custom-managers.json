@@ -1,16 +1,34 @@
 {
-  "description": "Renovate custom manager for the Immich chart (CNPG ImageVolume extension images in values.yaml).",
+  "description": "Renovate preset for the Immich chart: PostgreSQL and vchord image versions in values.yaml.",
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update CNPG ImageVolume extension image references in values.yaml",
-      "fileMatch": [
-        "(^|/)values\\.yaml$"
+      "description": "Update values annotated with a `# renovate: datasource=... depName=...` comment in values.yaml",
+      "managerFilePatterns": [
+        "/(^|/)charts/immich/values\\.yaml$/"
       ],
       "matchStrings": [
-        "# renovate: image=(?<depName>[^\\s:]+)\\s*\\n(?:\\s*#.*\\n)*\\s*reference: \\S+:(?<currentValue>[\\w+.\\-]+)"
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\s*\\n(?:\\s*#.*\\n)*\\s*[\\w-]+:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "PostgreSQL major upgrades of the bundled CNPG cluster are a deliberate, manual change",
+      "matchDepNames": [
+        "ghcr.io/cloudnative-pg/postgresql"
       ],
-      "datasourceTemplate": "docker"
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Immich supports vchord >= 0.3, < 2.0",
+      "matchDepNames": [
+        "ghcr.io/tensorchord/vchord-scratch"
+      ],
+      "allowedVersions": "<2.0.0"
     }
   ]
 }

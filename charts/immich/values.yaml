@@ -466,25 +466,16 @@ monitoring:
 
 ## @section PostgreSQL
 
-# Immich requires PostgreSQL `>= 14, < 20` with the `vchord` and `earthdistance`
-# extensions. The bundled cluster uses the official CloudNativePG standard image,
-# which ships `pgvector`, `cube` and `earthdistance`; the `vchord` extension is
-# injected at runtime through the CNPG ImageVolume extension mechanism (see
-# `extensions` below). This requires CloudNativePG `1.30`+ and Kubernetes
-# `1.35`+ (with containerd `2.1`+).
-# See [Immich docs](https://docs.immich.app/administration/postgres-standalone/)
+# Immich requires PostgreSQL `>= 14, < 20` with the `vchord` (VectorChord) and
+# `earthdistance` extensions. The bundled CloudNativePG cluster uses the official
+# CNPG `standard` image and injects `vchord` through the CNPG ImageVolume
+# extension mechanism. This requires CloudNativePG `1.30`+ and Kubernetes `1.35`+
+# (containerd `2.1`+). See the README section "Database" for details.
 postgres:
-  # -- Enable CNPG Cluster creation. Set to `false` to use an external database
+  # -- Deploy a CloudNativePG `Cluster`. Set to `false` to use an external database
   enabled: true
   # -- Annotations to add to the CNPG Cluster
   annotations: {}
-  # -- List of SQL statements executed after the database bootstrap.
-  # Creates the required extensions inside the Immich database
-  postInitApplicationSQL:
-    - CREATE EXTENSION IF NOT EXISTS vector
-    - CREATE EXTENSION IF NOT EXISTS vchord
-    - CREATE EXTENSION IF NOT EXISTS cube
-    - CREATE EXTENSION IF NOT EXISTS earthdistance
   # -- Host of an external database. Only used when `enabled` is `false`
   host: ""
   # -- Port of an external database. Only used when `enabled` is `false`
@@ -493,66 +484,66 @@ postgres:
   user: immich
   # -- Name of the Immich database
   database: immich
-  # -- PostgreSQL password: the database user password for Immich.
-  # Accepts either an inline `value` (stored in a chart-managed Secret named
-  # `<fullname>-postgresql-credentials` together with the `username`) or a
-  # `secretKeyRef` referencing an existing Secret containing the password
-  # (plus the `username` when the CNPG cluster is enabled). When none of these
-  # is set and the chart-managed CNPG cluster is enabled, CloudNativePG
-  # generates a random password itself (stored in `<fullname>-postgresql-app`).
-  # An external database (`postgres.enabled: false`) always requires a password
-  # source.
+  # -- PostgreSQL password of `user`. If no source is set and `enabled` is `true`,
+  # CloudNativePG generates a random password in the `<fullname>-postgresql-app`
+  # Secret. Required when `enabled` is `false`
   password:
-    # -- Inline password value. Stored in a chart-managed Secret when set
+    # -- Plain-text value, stored in a chart-managed Secret. Ignored if `secretKeyRef.name` is set. Prefer `secretKeyRef`
     value: ""
-    # -- Reference to an existing Secret containing the password
     secretKeyRef:
-      # -- Name of the secret
+      # -- Name of an existing Secret. With the bundled cluster, the Secret also
+      # bootstraps the database: it must contain the keys `username` (equal to
+      # `user`) and `password`, so `key` must be `password`
       name: ""
-      # -- Key within the secret
+      # -- Key within the Secret
       key: ""
-  # -- Name of an existing Secret containing `username` and `password` keys used to
-  # bootstrap the CNPG cluster. Defaults to the chart-managed or referenced db password
+  # -- Name of an existing Secret with `username` and `password` keys used to
+  # bootstrap the CNPG cluster and as `DB_PASSWORD`. Takes precedence over `password`
   bootstrapSecretOverride: ""
+  # -- Grant the database role superuser privileges (via CNPG declarative role
+  # management). Immich expects this: its built-in database backups use
+  # `pg_dumpall` and it updates the `vchord` extension and reindexes
+  # automatically after a `vchord` upgrade. Without it, run
+  # `ALTER EXTENSION vchord UPDATE` and the reindex manually after each upgrade
+  superuser: true
   image:
-    # -- Image repository for the CNPG cluster instances. Empty by default so the
-    # CloudNativePG operator applies its own default image. `imageName` is only
-    # rendered in the Cluster CR when this is set. Use a standard image with the
-    # `-trixie` tag (PostgreSQL 18) for `vchord` support via ImageVolume extensions
-    repository: ""
-    # -- Image tag for the CNPG cluster instances. Only rendered together with `repository`
-    tag: ""
+    # -- PostgreSQL image repository for the CNPG cluster instances
+    repository: ghcr.io/cloudnative-pg/postgresql
+    # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
+    # -- PostgreSQL image tag. Must start with the PostgreSQL major version
+    # (e.g. `18.6-standard-trixie`), which selects the matching `vchord` image
+    # and paths. Changing the major version triggers a CNPG major upgrade
+    tag: "18.6-standard-trixie"
+  vchord:
+    # -- Inject the `vchord` extension via an ImageVolume extension. Disable
+    # only if `image` already ships `vchord`
+    enabled: true
+    # -- `vchord` extension image repository. The tag is `pg<major>-v<version>`
+    repository: ghcr.io/tensorchord/vchord-scratch
+    # renovate: datasource=docker depName=ghcr.io/tensorchord/vchord-scratch extractVersion=^pg\d+-v(?<version>\d+\.\d+\.\d+)$
+    # -- `vchord` version. Immich accepts `>= 0.3, < 2.0`
+    version: "1.1.1"
+  # -- Additional ImageVolume extensions in the CNPG `ExtensionConfiguration`
+  # format. See [CNPG docs](https://cloudnative-pg.io/docs/1.30/imagevolume_extensions)
+  extraExtensions: []
+  # -- Additional shared preload libraries. `vchord.so` is always preloaded
+  extraSharedPreloadLibraries: []
+  # -- SQL statements executed in the Immich database after the bootstrap
+  postInitApplicationSQL:
+    - CREATE EXTENSION IF NOT EXISTS vector
+    - CREATE EXTENSION IF NOT EXISTS vchord
+    - CREATE EXTENSION IF NOT EXISTS cube
+    - CREATE EXTENSION IF NOT EXISTS earthdistance
   # -- Number of PostgreSQL instances in the CNPG cluster
   instances: 1
   # -- Resource requests and limits for the PostgreSQL instances
   resources: {}
-  # -- Pod-level security context for the PostgreSQL instances.
-  # Empty by default so CloudNativePG applies its hardened defaults (the official
-  # images run the `postgres` user as UID/GID `26`)
+  # -- Pod-level security context for the PostgreSQL instances. Empty applies the
+  # CloudNativePG defaults (UID/GID `26`)
   podSecurityContext: {}
   # -- Container-level security context for the PostgreSQL instance container.
-  # Merged with CloudNativePG's hardened defaults; no overrides by default
+  # Merged with the CloudNativePG defaults
   securityContext: {}
-  # -- Shared preload libraries loaded at PostgreSQL server start.
-  # `vchord` must be preloaded for the extension to work
-  sharedPreloadLibraries:
-    - vchord.so
-  # -- PostgreSQL extensions injected via the CNPG ImageVolume extension mechanism.
-  # See [CNPG docs](https://cloudnative-pg.io/documentation/current/imagevolume_extensions/).
-  # Set to `[]` to disable ImageVolume extensions (e.g. when using a prebuilt image)
-  extensions:
-    # -- Extension name
-    - name: vchord
-      image:
-        # renovate: image=ghcr.io/tensorchord/vchord-scratch
-        # -- Image reference containing the extension files
-        reference: ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1
-      # -- Directories to search for the extension libraries
-      dynamic_library_path:
-        - /usr/lib/postgresql/18/lib
-      # -- Directories to search for the extension control files
-      extension_control_path:
-        - /usr/share/postgresql/18/
   # -- Node selector for PostgreSQL instance scheduling
   nodeSelector: {}
   # -- Tolerations for PostgreSQL instance scheduling

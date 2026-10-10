@@ -149,14 +149,37 @@ Resolve the PostgreSQL database name.
 {{- end }}
 
 {{/*
-Resolve the PostgreSQL container image (only used when the CNPG cluster is enabled).
-Returns an empty string when no repository is configured, so the CloudNativePG
-operator applies its default image.
+Resolve the PostgreSQL container image of the CNPG cluster. The image is always
+pinned so the PostgreSQL major version cannot change with an operator upgrade.
 */}}
 {{- define "immich.databaseImage" -}}
-{{- if .Values.postgres.image.repository -}}
-{{- printf "%s:%s" .Values.postgres.image.repository (.Values.postgres.image.tag | default "") -}}
+{{- printf "%s:%s" (required "postgres.image.repository is required" .Values.postgres.image.repository) (required "postgres.image.tag is required" .Values.postgres.image.tag) -}}
+{{- end }}
+
+{{/*
+PostgreSQL major version, parsed from the leading digits of `postgres.image.tag`.
+It is the single source for the `vchord` image tag and extension paths.
+*/}}
+{{- define "immich.databaseMajor" -}}
+{{- $major := regexFind "^[0-9]+" (toString .Values.postgres.image.tag) -}}
+{{- if not $major -}}
+{{- fail (printf "postgres.image.tag %q must start with the PostgreSQL major version (e.g. 18.6-standard-trixie)" (toString .Values.postgres.image.tag)) -}}
 {{- end -}}
+{{- $major -}}
+{{- end }}
+
+{{/*
+CNPG ImageVolume extension entry for `vchord`, matching the PostgreSQL major.
+*/}}
+{{- define "immich.vchordExtension" -}}
+{{- $major := include "immich.databaseMajor" . -}}
+- name: vchord
+  image:
+    reference: {{ printf "%s:pg%s-v%s" .Values.postgres.vchord.repository $major (toString .Values.postgres.vchord.version) }}
+  dynamic_library_path:
+    - /usr/lib/postgresql/{{ $major }}/lib
+  extension_control_path:
+    - /usr/share/postgresql/{{ $major }}/
 {{- end }}
 
 {{/*

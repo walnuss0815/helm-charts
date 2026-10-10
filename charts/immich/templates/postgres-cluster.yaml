@@ -12,9 +12,7 @@ metadata:
   {{- end }}
 spec:
   description: Immich PostgreSQL cluster
-  {{- with include "immich.databaseImage" . }}
-  imageName: {{ . }}
-  {{- end }}
+  imageName: {{ include "immich.databaseImage" . }}
   instances: {{ .Values.postgres.instances }}
   {{- with .Values.postgres.podSecurityContext }}
   podSecurityContext:
@@ -24,17 +22,25 @@ spec:
   securityContext:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if or .Values.postgres.sharedPreloadLibraries .Values.postgres.extensions }}
+  {{- $preload := uniq (concat (list "vchord.so") .Values.postgres.extraSharedPreloadLibraries) }}
   postgresql:
-    {{- with .Values.postgres.sharedPreloadLibraries }}
     shared_preload_libraries:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-    {{- with .Values.postgres.extensions }}
+      {{- toYaml $preload | nindent 6 }}
+    {{- if or .Values.postgres.vchord.enabled .Values.postgres.extraExtensions }}
     extensions:
+      {{- if .Values.postgres.vchord.enabled }}
+      {{- include "immich.vchordExtension" . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.postgres.extraExtensions }}
       {{- toYaml . | nindent 6 }}
+      {{- end }}
     {{- end }}
-  {{- end }}
+  managed:
+    roles:
+      - name: {{ include "immich.databaseUser" . }}
+        ensure: present
+        login: true
+        superuser: {{ .Values.postgres.superuser }}
   {{- with .Values.postgres.resources }}
   resources:
     {{- toYaml . | nindent 4 }}

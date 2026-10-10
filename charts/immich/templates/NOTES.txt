@@ -42,7 +42,12 @@ Notes:
   `${UPPER_SNAKE_CASE}` placeholders and supplied under `config.env` (a plain
   `value`, an existing `secretKeyRef` or a `configMapRef`). The base config
   (without secrets) lives in a ConfigMap; an init step substitutes the values
-  into the file the server reads via `IMMICH_CONFIG_FILE`.
+  into the file the server and microservices read via `IMMICH_CONFIG_FILE`.
+  Note: this makes the admin settings UI read-only.
+{{- if include "immich.configFileEnabled" . }}
+- The config file is enabled (`config.content` is set): the admin settings UI is
+  read-only.
+{{- end }}
 - To enable Prometheus metrics set `monitoring.enabled: true`. This sets
   `IMMICH_TELEMETRY_INCLUDE=all` and exposes the metrics ports. Set
   `monitoring.serviceMonitors.enabled: true` to also create ServiceMonitors

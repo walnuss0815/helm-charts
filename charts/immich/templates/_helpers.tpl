@@ -212,10 +212,83 @@ Created when `jwtSecret.value` is set.
 {{- end }}
 
 {{/*
-Name of the shared non-sensitive configuration ConfigMap.
+Name of the shared non-sensitive environment ConfigMap (loaded via `envFrom`).
 */}}
-{{- define "immich.configName" -}}
-{{- include "immich.fullname" . }}-config
+{{- define "immich.envConfigName" -}}
+{{- include "immich.fullname" . }}-env
+{{- end }}
+
+{{/*
+Name of the ConfigMap carrying the config file template and the substitution
+script. Only rendered when the config file is enabled.
+*/}}
+{{- define "immich.configFileConfigMapName" -}}
+{{- include "immich.fullname" . }}-config-file
+{{- end }}
+
+{{/*
+Returns "true" when the Immich config file is enabled, i.e. `config.content`
+is not empty. Setting `IMMICH_CONFIG_FILE` makes the admin settings UI
+read-only, so the file is strictly opt-in.
+*/}}
+{{- define "immich.configFileEnabled" -}}
+{{- if .Values.config.content -}}true{{- end -}}
+{{- end }}
+
+{{/*
+Init container resolving the `${TOKEN}` placeholders of the config file
+template. Usage: include "immich.configFileInitContainer" (dict "root" $ "workload" $sub)
+*/}}
+{{- define "immich.configFileInitContainer" -}}
+{{- $root := .root -}}
+- name: config-init
+  {{- with .workload.securityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  image: {{ include "immich.image" (dict "root" $root "workload" .workload) | quote }}
+  imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+  command:
+    - node
+    - /config.template/substitute-config.js
+    - /config.template/{{ include "immich.configFilename" $root }}
+    - {{ include "immich.configFilePath" $root }}
+  {{- with $root.Values.config.env }}
+  env:
+    {{- range $token, $entry := . }}
+    - name: {{ $token | quote }}
+      {{- include "immich.configEnvVar" (dict "root" $root "entry" $entry) | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  volumeMounts:
+    - name: config-template
+      mountPath: /config.template
+      readOnly: true
+    - name: config
+      mountPath: /config
+{{- end }}
+
+{{/*
+Volumes backing the config file: the template ConfigMap and an in-memory
+volume holding the resolved file (it may contain secrets).
+*/}}
+{{- define "immich.configFileVolumes" -}}
+- name: config-template
+  configMap:
+    name: {{ include "immich.configFileConfigMapName" . }}
+- name: config
+  emptyDir:
+    medium: Memory
+    sizeLimit: 2Mi
+{{- end }}
+
+{{/*
+Volume mount of the resolved config file for the Immich containers.
+*/}}
+{{- define "immich.configFileVolumeMount" -}}
+- name: config
+  mountPath: /config
+  readOnly: true
 {{- end }}
 
 {{/*
@@ -324,13 +397,6 @@ valueFrom:
 {{- else -}}
 value: {{ tpl .entry.value .root | quote }}
 {{- end -}}
-{{- end }}
-
-{{/*
-Name of the ConfigMap carrying the substitution script (`<fullname>-scripts`).
-*/}}
-{{- define "immich.configScriptsName" -}}
-{{- include "immich.fullname" . }}-scripts
 {{- end }}
 
 {{/*

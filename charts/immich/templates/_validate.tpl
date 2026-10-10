@@ -10,6 +10,21 @@ Deployment, which is always rendered.
 {{- if and .enabled (not .bootstrapSecretOverride) .password.secretKeyRef.name .password.secretKeyRef.key (ne .password.secretKeyRef.key "password") }}
 {{- fail (printf "postgres.password.secretKeyRef.key must be \"password\" when postgres.enabled is true (got %q): CloudNativePG bootstraps the database from the keys `username` and `password` of the same Secret. Rename the key or set postgres.bootstrapSecretOverride" .password.secretKeyRef.key) }}
 {{- end }}
+{{- with .backup }}
+{{- if not (has .method (list "plugin" "volumeSnapshot")) }}
+{{- fail (printf "postgres.backup.method must be \"plugin\" or \"volumeSnapshot\" (got %q)" (toString .method)) }}
+{{- end }}
+{{- if .barmanObjectStore }}
+{{- fail "postgres.backup.barmanObjectStore was removed (the in-tree Barman integration is deprecated by CloudNativePG): move the configuration to postgres.backup.objectStore.configuration, which requires the Barman Cloud Plugin" }}
+{{- end }}
+{{- $storeConfigured := or (and .objectStore.create .objectStore.configuration) (and (not .objectStore.create) .objectStore.name) }}
+{{- if and $.Values.postgres.enabled .enabled (eq .method "plugin") (not $storeConfigured) }}
+{{- fail "postgres.backup.method \"plugin\" requires postgres.backup.objectStore.configuration (or objectStore.create: false with objectStore.name)" }}
+{{- end }}
+{{- if and $.Values.postgres.enabled $.Values.postgres.recovery.enabled (not $.Values.postgres.recovery.volumeSnapshots) (not $.Values.postgres.recovery.objectStoreName) (not $storeConfigured) }}
+{{- fail "postgres.recovery requires postgres.recovery.objectStoreName, postgres.recovery.volumeSnapshots or a configured postgres.backup.objectStore" }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- if and .Values.config.env (not (include "immich.configFileEnabled" .)) }}
 {{- fail "config.env is set but config.content is empty: the placeholders are only used by the config file" }}

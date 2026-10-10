@@ -8,6 +8,10 @@ metadata:
     app.kubernetes.io/component: server
 spec:
   replicas: {{ .Values.server.replicaCount }}
+  {{- with .Values.server.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "server") | nindent 6 }}
@@ -65,6 +69,10 @@ spec:
               value: "api"
             - name: IMMICH_PORT
               value: {{ .Values.server.service.port | toString | quote }}
+            {{- with .Values.server.trustedProxies }}
+            - name: IMMICH_TRUSTED_PROXIES
+              value: {{ join "," . | quote }}
+            {{- end }}
             {{- if .Values.monitoring.enabled }}
             - name: IMMICH_API_METRICS_PORT
               value: {{ .Values.monitoring.apiMetricsPort | toString | quote }}
@@ -83,7 +91,7 @@ spec:
             {{- end }}
             {{- range $key, $value := .Values.server.extraEnv }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
             {{- range $key, $valueFrom := .Values.server.extraEnvFrom }}
             - name: {{ $key | quote }}
@@ -111,12 +119,18 @@ spec:
             {{- if include "immich.configFileEnabled" . }}
             {{- include "immich.configFileVolumeMount" . | nindent 12 }}
             {{- end }}
+            {{- with .Values.server.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       volumes:
         - name: media
           persistentVolumeClaim:
             claimName: {{ include "immich.mediaVolumeName" . }}
         {{- if include "immich.configFileEnabled" . }}
         {{- include "immich.configFileVolumes" . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.server.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.server.nodeSelector }}
       nodeSelector:
@@ -128,5 +142,9 @@ spec:
       {{- end }}
       {{- with .Values.server.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.topologySpreadConstraints }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}

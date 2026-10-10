@@ -212,6 +212,29 @@ For prerequisites, vendor-specific setup (e.g. `/dev/dri` access, NVIDIA
 Container Toolkit, libmali firmware) and supported codecs, see the
 [Immich hardware transcoding docs](https://docs.immich.app/features/hardware-transcoding).
 
+## External libraries
+
+[External libraries](https://docs.immich.app/features/libraries) import existing
+photo folders without copying them. Mount the folder into both the server and the
+microservices workloads at the same path with `extraVolumes`/`extraVolumeMounts`,
+then add that path as an import path in the admin UI:
+
+```yaml
+server:
+  extraVolumes: &photos
+    - name: photos
+      nfs:
+        server: nas.example.com
+        path: /volume1/photos
+  extraVolumeMounts: &photosMount
+    - name: photos
+      mountPath: /mnt/photos
+      readOnly: true
+microservices:
+  extraVolumes: *photos
+  extraVolumeMounts: *photosMount
+```
+
 ## Scaling machine learning
 
 The machine-learning workload is stateless: the server reaches all replicas

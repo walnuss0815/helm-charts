@@ -774,7 +774,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| postgres.affinity | object | `{}` | Affinity rules for PostgreSQL instance scheduling |
+| postgres.affinity | object | `{}` | Scheduling of the PostgreSQL instances in the CNPG `AffinityConfiguration` format (`enablePodAntiAffinity`, `topologyKey`, `nodeAffinity`, `additionalPodAntiAffinity`, ...). See the [CNPG docs](https://cloudnative-pg.io/docs/1.30/scheduling) |
 | postgres.annotations | object | `{}` | Annotations to add to the CNPG Cluster |
 | postgres.backup.enabled | bool | `false` | Enable scheduled physical backups of the CNPG cluster (`ScheduledBackup`). Requires the [Barman Cloud Plugin](https://cloudnative-pg.io/plugin-barman-cloud/) for `method: plugin`, or CSI volume snapshots for `method: volumeSnapshot` |
 | postgres.backup.immediate | bool | `false` | Take a backup immediately when the `ScheduledBackup` is created |
@@ -797,8 +797,8 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | postgres.image.repository | string | `"ghcr.io/cloudnative-pg/postgresql"` | PostgreSQL image repository for the CNPG cluster instances |
 | postgres.image.tag | string | `"18.6-standard-trixie"` | PostgreSQL image tag. Must start with the PostgreSQL major version (e.g. `18.6-standard-trixie`), which selects the matching `vchord` image and paths. Changing the major version triggers a CNPG major upgrade |
 | postgres.instances | int | `1` | Number of PostgreSQL instances in the CNPG cluster |
-| postgres.monitoring.enablePodMonitor | bool | `false` | Enable CNPG PodMonitor for PostgreSQL |
-| postgres.nodeSelector | object | `{}` | Node selector for PostgreSQL instance scheduling |
+| postgres.monitoring.enablePodMonitor | bool | `false` | Create a Prometheus Operator `PodMonitor` named `<fullname>-postgresql-metrics` for the PostgreSQL instances. Requires the Prometheus Operator CRDs. The chart renders it itself because the CNPG `enablePodMonitor` field is deprecated |
+| postgres.nodeSelector | object | `{}` | Node selector for PostgreSQL instance scheduling. Merged into the CNPG `spec.affinity`; do not also set `affinity.nodeSelector` |
 | postgres.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | PostgreSQL password of `user`. If no source is set and `enabled` is `true`, CloudNativePG generates a random password in the `<fullname>-postgresql-app` Secret. Required when `enabled` is `false` |
 | postgres.password.secretKeyRef.key | string | `""` | Key within the Secret |
 | postgres.password.secretKeyRef.name | string | `""` | Name of an existing Secret. With the bundled cluster, the Secret also bootstraps the database: it must contain the keys `username` (equal to `user`) and `password`, so `key` must be `password` |
@@ -817,7 +817,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | postgres.storage.size | string | `"100Gi"` | Size of the PostgreSQL PVC |
 | postgres.storage.storageClass | string | `""` | Storage class for the PostgreSQL PVCs |
 | postgres.superuser | bool | `true` | Grant the database role superuser privileges (via CNPG declarative role management). Immich expects this: its built-in database backups use `pg_dumpall` and it updates the `vchord` extension and reindexes automatically after a `vchord` upgrade. Without it, run `ALTER EXTENSION vchord UPDATE` and the reindex manually after each upgrade |
-| postgres.tolerations | list | `[]` | Tolerations for PostgreSQL instance scheduling |
+| postgres.tolerations | list | `[]` | Tolerations for PostgreSQL instance scheduling. Merged into the CNPG `spec.affinity`; do not also set `affinity.tolerations` |
 | postgres.user | string | `"immich"` | Name of the role that owns the Immich database (also used as `DB_USERNAME`) |
 | postgres.vchord.enabled | bool | `true` | Inject the `vchord` extension via an ImageVolume extension. Disable only if `image` already ships `vchord` |
 | postgres.vchord.repository | string | `"ghcr.io/tensorchord/vchord-scratch"` | `vchord` extension image repository. The tag is `pg<major>-v<version>` |

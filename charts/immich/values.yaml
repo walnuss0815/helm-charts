@@ -762,13 +762,18 @@ postgres:
   # Merged with the CloudNativePG defaults
   # @section -- PostgreSQL
   securityContext: {}
-  # -- Node selector for PostgreSQL instance scheduling
+  # -- Node selector for PostgreSQL instance scheduling. Merged into the CNPG
+  # `spec.affinity`; do not also set `affinity.nodeSelector`
   # @section -- PostgreSQL
   nodeSelector: {}
-  # -- Tolerations for PostgreSQL instance scheduling
+  # -- Tolerations for PostgreSQL instance scheduling. Merged into the CNPG
+  # `spec.affinity`; do not also set `affinity.tolerations`
   # @section -- PostgreSQL
   tolerations: []
-  # -- Affinity rules for PostgreSQL instance scheduling
+  # -- Scheduling of the PostgreSQL instances in the CNPG `AffinityConfiguration`
+  # format (`enablePodAntiAffinity`, `topologyKey`, `nodeAffinity`,
+  # `additionalPodAntiAffinity`, ...). See the
+  # [CNPG docs](https://cloudnative-pg.io/docs/1.30/scheduling)
   # @section -- PostgreSQL
   affinity: {}
   storage:
@@ -845,7 +850,10 @@ postgres:
     # @section -- PostgreSQL
     recoveryTarget: {}
   monitoring:
-    # -- Enable CNPG PodMonitor for PostgreSQL
+    # -- Create a Prometheus Operator `PodMonitor` named
+    # `<fullname>-postgresql-metrics` for the PostgreSQL instances. Requires the
+    # Prometheus Operator CRDs. The chart renders it itself because the CNPG
+    # `enablePodMonitor` field is deprecated
     # @section -- PostgreSQL
     enablePodMonitor: false
 

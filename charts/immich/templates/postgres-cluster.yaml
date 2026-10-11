@@ -45,16 +45,16 @@ spec:
   resources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.postgres.affinity }}
-  affinity:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- /* CloudNativePG only knows these fields below spec.affinity */ -}}
+  {{- $affinity := deepCopy (.Values.postgres.affinity | default dict) }}
   {{- with .Values.postgres.nodeSelector }}
-  nodeSelector:
-    {{- toYaml . | nindent 4 }}
+  {{- $_ := set $affinity "nodeSelector" . }}
   {{- end }}
   {{- with .Values.postgres.tolerations }}
-  tolerations:
+  {{- $_ := set $affinity "tolerations" . }}
+  {{- end }}
+  {{- with $affinity }}
+  affinity:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   storage:
@@ -124,9 +124,5 @@ spec:
         parameters:
           barmanObjectName: {{ $rec.objectStoreName | default (include "immich.backupObjectStoreName" .) }}
           serverName: {{ $rec.serverName | default (include "immich.databaseClusterName" .) }}
-  {{- end }}
-  {{- if .Values.postgres.monitoring.enablePodMonitor }}
-  monitoring:
-    enablePodMonitor: true
   {{- end }}
 {{- end }}

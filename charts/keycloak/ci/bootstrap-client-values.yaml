@@ -1,0 +1,15 @@
+# Bootstrap admin service account only (client credentials grant, as used by
+# the edp-keycloak-operator), with a generated client secret and metrics.
+keycloak:
+  hostname: http://keycloak.example.test
+  metricsEnabled: true
+  features:
+    - token-exchange
+
+bootstrapAdmin:
+  user:
+    enabled: false
+  client:
+    enabled: true
+    clientSecret:
+      generate: true

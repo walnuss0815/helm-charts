@@ -1,0 +1,109 @@
+{{- if .Values.postgres.enabled }}
+{{- $pg := .Values.postgres -}}
+{{- $bk := $pg.backup -}}
+{{- $rec := $pg.recovery -}}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "keycloak.databaseClusterName" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+  {{- with $pg.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  description: Keycloak PostgreSQL cluster
+  imageName: {{ include "keycloak.databaseImage" . }}
+  instances: {{ $pg.instances }}
+  enablePDB: {{ $pg.enablePDB }}
+  {{- with $pg.parameters }}
+  postgresql:
+    parameters:
+      {{- range $key, $value := . }}
+      {{ $key }}: {{ toString $value | quote }}
+      {{- end }}
+  {{- end }}
+  {{- with $pg.podSecurityContext }}
+  podSecurityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $pg.securityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $pg.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $pg.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  storage:
+    {{- with $pg.storage.storageClass }}
+    storageClass: {{ . }}
+    {{- end }}
+    size: {{ $pg.storage.size | quote }}
+  {{- if include "keycloak.walArchivingEnabled" . }}
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: {{ include "keycloak.backupObjectStoreName" . }}
+        {{- with $bk.objectStore.serverName }}
+        serverName: {{ . }}
+        {{- end }}
+  {{- end }}
+  {{- if and $bk.enabled (or $bk.target (eq $bk.method "volumeSnapshot")) }}
+  backup:
+    {{- with $bk.target }}
+    target: {{ . }}
+    {{- end }}
+    {{- if eq $bk.method "volumeSnapshot" }}
+    volumeSnapshot:
+      {{- toYaml $bk.volumeSnapshot | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  bootstrap:
+    {{- if $rec.enabled }}
+    recovery:
+      {{- with $rec.volumeSnapshots }}
+      volumeSnapshots:
+        {{- toYaml . | nindent 8 }}
+      {{- else }}
+      source: backup-source
+      {{- end }}
+      database: {{ $pg.database }}
+      owner: {{ $pg.username }}
+      {{- if include "keycloak.databasePasswordProvided" . }}
+      secret:
+        name: {{ include "keycloak.bootstrapSecretName" . }}
+      {{- end }}
+      {{- with $rec.recoveryTarget }}
+      recoveryTarget:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- else }}
+    initdb:
+      database: {{ $pg.database }}
+      owner: {{ $pg.username }}
+      {{- if include "keycloak.databasePasswordProvided" . }}
+      secret:
+        name: {{ include "keycloak.bootstrapSecretName" . }}
+      {{- end }}
+      {{- with (omit ($pg.initdb | default dict) "database" "owner" "secret") }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+    {{- end }}
+  {{- if and $rec.enabled (not $rec.volumeSnapshots) }}
+  externalClusters:
+    - name: backup-source
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: {{ $rec.objectStoreName | default (include "keycloak.backupObjectStoreName" .) }}
+          serverName: {{ $rec.serverName | default (include "keycloak.databaseClusterName" .) }}
+  {{- end }}
+{{- end }}

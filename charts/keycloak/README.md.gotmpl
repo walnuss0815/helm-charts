@@ -1,0 +1,469 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+## Requirements
+
+### Required
+
+- Keycloak 26.6 or newer. The chart passes secrets as `KCRAW_` environment
+  variables, which older versions do not know.
+- `keycloak.hostname`: the public URL of Keycloak, e.g. `https://sso.example.com`.
+- A password source for the temporary bootstrap admin
+  (`bootstrapAdmin.user.password`), or the bootstrap admin disabled.
+- The [CloudNativePG operator](https://cloudnative-pg.io/) when `postgres.enabled`
+  is `true` (default), or an external PostgreSQL 14 to 18.
+
+### Optional
+
+- An Ingress controller or a [Gateway API](https://gateway-api.sigs.k8s.io/) implementation
+- The [Barman Cloud Plugin](https://cloudnative-pg.io/plugin-barman-cloud/) for
+  backups to object storage, or CSI volume snapshots
+- The Prometheus Operator for `serviceMonitor` and `postgres.podMonitor`
+- cert-manager for the certificate of `tls.secretName`
+
+## Quick start
+
+A GitOps setup with all credentials in existing Secrets (e.g. from External
+Secrets or Sealed Secrets):
+
+```yaml
+keycloak:
+  hostname: https://sso.example.com
+
+bootstrapAdmin:
+  user:
+    password:
+      secretKeyRef:
+        name: keycloak-bootstrap-admin
+        key: password
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: sso.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: sso-example-com-tls
+      hosts:
+        - sso.example.com
+```
+
+The chart deploys a CloudNativePG cluster `<fullname>-postgresql`. Keycloak
+becomes ready once the database is running.
+
+## Optimized start
+
+Keycloak persists some options, the build options (`db`, `health-enabled`,
+`metrics-enabled`, `features`, `features-disabled`, `http-relative-path`, ...),
+in an optimized build. Starting with `--optimized` skips the build step and is
+the recommended way to run Keycloak in production. The stock image is built
+with the default build options, which do not match this chart, so
+`build.mode` decides where the build happens:
+
+| `build.mode` | Build | Start | Root filesystem |
+|--------------|-------|-------|-----------------|
+| `initContainer` (default) | Init container on every pod start (about 10-30s) | `start --optimized` | Read-only |
+| `prebuilt` | In your custom image | `start --optimized` | Read-only |
+| `auto` | Keycloak rebuilds itself on start when build options changed | `start` | Writable |
+
+With `initContainer`, the init container copies the Keycloak distribution of
+`image` into the `emptyDir` volume `keycloak-home` and runs `kc.sh build` with
+the same environment ConfigMap the Keycloak container loads, so the build
+options always match.
+
+### Providers
+
+For themes, see [Themes](#themes). With `build.mode: initContainer`, add other
+providers with an init container that writes into `keycloak-home` before the
+build:
+
+```yaml
+initContainers:
+  - name: providers
+    image: ghcr.io/example/keycloak-providers:1.0.0
+    command: [sh, -c, "mkdir -p /keycloak-home/providers && cp /providers/*.jar /keycloak-home/providers/"]
+    volumeMounts:
+      - name: keycloak-home
+        mountPath: /keycloak-home
+```
+
+### Custom optimized image
+
+For `build.mode: prebuilt`, the build options of the image must match the
+chart's values, otherwise Keycloak refuses to start:
+
+```dockerfile
+FROM quay.io/keycloak/keycloak:{{ .AppVersion }} AS builder
+ENV KC_DB=postgres \
+    KC_HEALTH_ENABLED=true \
+    KC_METRICS_ENABLED=false
+# Providers, themes, KC_FEATURES, KC_HTTP_RELATIVE_PATH, ...
+RUN /opt/keycloak/bin/kc.sh build
+
+FROM quay.io/keycloak/keycloak:{{ .AppVersion }}
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
+```
+
+## Themes
+
+Keycloak themes customize the login, account, admin and email pages and the
+welcome page ([themes guide](https://www.keycloak.org/ui-customization/themes)).
+`themes.custom` adds themes in two formats:
+
+- `type: directory` (default): a theme directory with one subdirectory per
+  theme type (`login/theme.properties`, ...). It is mounted read-only at
+  `/opt/keycloak/themes/<name>` and needs no build.
+- `type: jar`: a theme archive with `META-INF/keycloak-themes.json`, e.g. built
+  with [Keycloakify](https://www.keycloakify.dev/). It is added as
+  `providers/<name>.jar` before the build. Not supported with
+  `build.mode: prebuilt`; add the JAR to your image instead.
+
+Each theme comes from one source:
+
+| Source | Settings | Notes |
+|--------|----------|-------|
+| Image, copied | `image` | An init container copies `path` from the image. The image needs `sh` and `cp` (e.g. based on busybox), and the files must be readable by UID `1000` |
+| Image volume | `image`, `imageVolume: true` | Mounted as a Kubernetes [image volume](https://kubernetes.io/docs/concepts/storage/volumes/#image), so scratch images work. Requires a Kubernetes version and container runtime with image volume support |
+| ConfigMap | `configMap` | Directory themes only. Map flat ConfigMap keys to paths with `items`. Changes are not picked up until the pods restart |
+
+`path` is the location of the theme directory or JAR in the image (default
+`/theme` or `/theme.jar`).
+
+```yaml
+themes:
+  custom:
+    # Directory theme copied from an image
+    - name: acme
+      image:
+        repository: ghcr.io/acme/keycloak-theme
+        tag: 1.2.0
+      path: /theme
+    # Keycloakify JAR from a scratch image
+    - name: acme-keycloakify
+      type: jar
+      imageVolume: true
+      image:
+        repository: ghcr.io/acme/keycloakify-theme
+        tag: 3.0.0
+      path: /keycloak-theme.jar
+    # Small directory theme from a ConfigMap
+    - name: branding
+      configMap:
+        name: keycloak-branding
+        items:
+          - key: login-theme.properties
+            path: login/theme.properties
+          - key: login-styles.css
+            path: login/resources/css/styles.css
+  # The welcome page theme is set server-wide
+  welcomeTheme: acme
+```
+
+Login, account, admin and email themes are selected per realm, in the Admin
+Console (*Realm settings* > *Themes*) or declaratively, e.g. with
+`spec.themes` (`loginTheme`, `accountTheme`, `adminConsoleTheme`,
+`emailTheme`) of an edp-keycloak-operator `KeycloakRealm`. Clients can
+override the login theme.
+
+Set `themes.cache: false` only while developing a theme: it disables the
+theme, template and static resource caches.
+
+> Themes contain FreeMarker templates that Keycloak executes. Only use themes
+> from trusted sources.
+
+## Exposing Keycloak
+
+Keycloak serves the public endpoints and the Admin Console on the `http` port
+(`8080`), or `https` (`8443`) with `tls.enabled`, through the Service
+`<fullname>`. Health checks and metrics are served on the `management` port
+(`9000`) by the separate Service `<fullname>-management`, which is always of
+type `ClusterIP`, so a `LoadBalancer` or `NodePort` `service.type` never
+publishes them. Never route the management port through an Ingress or a
+Gateway.
+
+### Reverse proxy
+
+- **Edge termination** (default): the proxy terminates TLS and forwards plain
+  HTTP to port `8080`.
+- **Re-encrypt** (`tls.enabled`): the proxy terminates TLS and opens a new TLS
+  connection to port `8443`. Configure the proxy for HTTPS to the backend, e.g.
+  `nginx.ingress.kubernetes.io/backend-protocol: HTTPS`, or a `BackendTLSPolicy`
+  for an HTTPRoute.
+
+In both modes the proxy must **overwrite** the `X-Forwarded-*` headers
+(`keycloak.proxyHeaders: xforwarded`) or the `Forwarded` header (`forwarded`).
+Restrict `keycloak.proxyTrustedAddresses` to the proxy addresses where possible,
+and use `networkPolicy.ingressFrom` so clients cannot bypass the proxy.
+
+### Paths
+
+Keycloak only needs these paths to be public
+([reverse proxy guide](https://www.keycloak.org/server/reverseproxy)):
+
+| Path | Public |
+|------|--------|
+| `/realms/` | Yes (`/realms/master/` only internally) |
+| `/resources/` | Yes |
+| `/.well-known/` | Yes |
+| `/admin/` | Only internally |
+
+Example HTTPRoute exposing only the public paths. Serve the Admin Console on an
+internal hostname with `keycloak.hostnameAdmin`:
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: public-gateway
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - sso.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /realms/
+        - path:
+            type: PathPrefix
+            value: /resources/
+        - path:
+            type: PathPrefix
+            value: /.well-known/
+```
+
+Requests to `/realms/master/` still match `/realms/`; block them with an
+additional rule or at the Gateway if the `master` realm must not be public.
+
+## Bootstrap admin
+
+Keycloak creates the bootstrap admin user (`bootstrapAdmin.user`) and service
+account client (`bootstrapAdmin.client`) in the `master` realm **only on its
+first start**. Later changes to these values have no effect. The accounts are
+marked as temporary: create permanent admin accounts and delete the temporary
+ones afterwards.
+
+The chart stores the usernames and inline or generated values in the Secret
+`<fullname>-bootstrap-admin` with the keys `username`, `password`, `client-id`
+and `client-secret`. Values from `secretKeyRef` stay in their Secret.
+
+### Generated credentials
+
+`bootstrapAdmin.user.password.generate` and
+`bootstrapAdmin.client.clientSecret.generate` create random values on the first
+install and keep them on upgrades by reading the existing Secret (`lookup`).
+The Secret is annotated with `helm.sh/resource-policy: keep`, so that a
+`helm uninstall` followed by an install against a kept database does not
+replace the credentials. Note the consequences:
+
+- The Secret outlives the release. If you also remove the database (an
+  uninstall deletes the bundled CNPG cluster and, by default, its volumes), the
+  kept credentials belong to an account that no longer exists. Delete the
+  Secret manually before reinstalling, so that new credentials are generated.
+- Reinstalling under the same release name and namespace adopts the Secret.
+  Under another name that resolves to the same Secret name (e.g. with
+  `fullnameOverride`), the install fails because the Secret already exists.
+
+> **Only use `generate` with the Helm CLI or in CI.** Argo CD and
+> `helm template` cannot read the existing Secret: every render produces new
+> values, the application stays out of sync and the Secret no longer matches
+> the account Keycloak created on its first start. With Argo CD, reference a
+> Secret created by a generator instead, e.g. the External Secrets
+> [`Password` generator](https://external-secrets.io/latest/api/generator/password/).
+
+## Managing Keycloak with the edp-keycloak-operator
+
+The chart does not depend on any operator. To manage realms, clients, users
+and more declaratively with the
+[edp-keycloak-operator](https://github.com/epam/edp-keycloak-operator),
+install the operator separately and create a `Keycloak` resource pointing to
+the internal Service. Let Keycloak resolve backchannel URLs from the request,
+so token requests via the internal URL work:
+
+```yaml
+keycloak:
+  hostname: https://sso.example.com
+  hostnameBackchannelDynamic: true
+
+bootstrapAdmin:
+  client:
+    enabled: true
+    clientSecret:
+      secretKeyRef:
+        name: keycloak-operator-client
+        key: client-secret
+```
+
+```yaml
+apiVersion: v1.edp.epam.com/v1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  url: http://<fullname>.<namespace>.svc:8080
+  auth:
+    clientCredentials:
+      clientId:
+        value: temp-admin
+      clientSecretRef:
+        name: keycloak-operator-client
+        key: client-secret
+```
+
+With `tls.enabled`, use `https://<fullname>.<namespace>.svc:8443` and set
+`caCert` or `insecureSkipVerify`. For a password grant, use `auth.passwordGrant`
+with the `username` and `password` keys of the bootstrap admin Secret.
+
+The bootstrap accounts are temporary: create a permanent admin service account
+(e.g. with the operator) and switch the `Keycloak` resource to it.
+
+## High availability
+
+Replicas form a cluster through the database (`jdbc-ping` stack, encrypted with
+mTLS). No headless Service is required. The pods must reach each other on the
+TCP ports `7800` and `57800`. For high availability:
+
+- set `replicaCount` to 2 or more and spread the pods with
+  `topologySpreadConstraints`,
+- enable `podDisruptionBudget`,
+- run 2 or more PostgreSQL instances (`postgres.instances`).
+
+Keep `replicas * postgres.poolMaxSize` below the `max_connections` of the
+database (CNPG default: `100`, raise it with `postgres.parameters`).
+
+## Upgrades
+
+Keycloak only supports rolling updates between **patch** releases of the same
+minor version. Minor and major upgrades migrate the database schema, require
+all nodes to be stopped and **cannot be rolled back**. The default
+`strategy.type: Recreate` stops all pods before starting the new version.
+`RollingUpdate` is only safe for configuration changes and patch upgrades.
+
+Back up the database before a minor or major upgrade. Keycloak minor upgrades
+are released as a minor version of this chart.
+
+## Database
+
+### Bundled CloudNativePG cluster
+
+By default the chart creates the CNPG `Cluster` `<fullname>-postgresql` and
+Keycloak connects to its read-write Service `<fullname>-postgresql-rw`.
+
+The connection is encrypted and the server certificate is verified against the
+CNPG CA (Secret `<fullname>-postgresql-ca`, `postgres.tls.mode: verify-server`).
+
+The database password comes from, in this order:
+
+1. `postgres.bootstrapSecretOverride`: an existing Secret with `username` and `password`,
+2. `postgres.password.secretKeyRef`: an existing Secret with `username` and `password` (`key` must be `password`),
+3. `postgres.password.value`: stored in the Secret `<fullname>-postgresql-credentials`,
+4. otherwise the Secret `<fullname>-postgresql-app` generated by CloudNativePG.
+
+The PostgreSQL major version is pinned by `postgres.image.tag`. Changing it
+starts a CNPG major upgrade.
+
+### External database
+
+```yaml
+postgres:
+  enabled: false
+  host: postgres.example.com
+  database: keycloak
+  username: keycloak
+  password:
+    secretKeyRef:
+      name: keycloak-db
+      key: password
+  tls:
+    mode: verify-server
+    caSecretKeyRef:
+      name: postgres-ca
+      key: ca.crt
+```
+
+### Backups and recovery
+
+Physical backups use the CNPG `ScheduledBackup`:
+
+- `postgres.backup.method: plugin` stores base backups and the WAL archive in
+  object storage through the Barman Cloud Plugin, which enables point-in-time
+  recovery. The chart creates the `ObjectStore` from
+  `postgres.backup.objectStore.configuration`.
+- `postgres.backup.method: volumeSnapshot` uses CSI volume snapshots
+  (`postgres.backup.volumeSnapshot.className`). Add an `ObjectStore`
+  configuration to archive WAL files as well.
+
+Example with S3-compatible storage:
+
+```yaml
+postgres:
+  backup:
+    enabled: true
+    objectStore:
+      configuration:
+        destinationPath: s3://backups/keycloak
+        endpointURL: https://s3.example.com
+        s3Credentials:
+          accessKeyId:
+            name: keycloak-backup-s3
+            key: ACCESS_KEY_ID
+          secretAccessKey:
+            name: keycloak-backup-s3
+            key: ACCESS_SECRET_KEY
+        wal:
+          compression: gzip
+```
+
+To restore, the CNPG cluster must be created again: uninstall the release (or
+delete the `Cluster` and its PVCs), then install with `postgres.recovery`
+enabled. A WAL archive must start empty, so the restored cluster has to archive
+into a new folder:
+
+```yaml
+postgres:
+  backup:
+    objectStore:
+      # Folder the restored cluster archives to
+      serverName: <fullname>-postgresql-2
+  recovery:
+    enabled: true
+    # Folder of the backup to restore, defaults to <fullname>-postgresql
+    serverName: <fullname>-postgresql
+    # Optional point-in-time recovery
+    recoveryTarget:
+      targetTime: "2026-01-01 00:00:00+00"
+```
+
+Test the restore regularly.
+
+## Network policy
+
+`networkPolicy.enabled` restricts the ingress traffic of the Keycloak pods:
+
+- the HTTP(S) port from `networkPolicy.ingressFrom` (all sources if empty),
+- the cluster ports between Keycloak pods,
+- the management port from `networkPolicy.managementFrom` only, e.g. Prometheus.
+
+Kubelet probes are not affected with most network plugins.
+`networkPolicy.egress.enabled` additionally restricts egress traffic to DNS,
+the bundled database and the other Keycloak pods. Add identity providers, LDAP,
+SMTP or an external database with `networkPolicy.egress.extraEgress`.
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

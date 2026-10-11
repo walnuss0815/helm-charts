@@ -1,0 +1,761 @@
+## @section Global
+
+# -- Override the chart name
+# @section -- Global
+nameOverride: ""
+# -- Override the full resource name
+# @section -- Global
+fullnameOverride: ""
+
+## @section Image
+
+image:
+  # -- Keycloak image repository
+  # @section -- Image
+  repository: quay.io/keycloak/keycloak
+  # -- Image pull policy
+  # @section -- Image
+  pullPolicy: IfNotPresent
+  # -- Image tag. Defaults to the chart's `appVersion` if not set. The chart
+  # requires Keycloak 26.6 or newer (`KCRAW_` environment variables); this is
+  # only checked for plain `X.Y.Z` tags of the official image
+  # @section -- Image
+  tag: ""
+
+# -- Secrets for pulling images from a private registry
+# @section -- Image
+imagePullSecrets: []
+
+## @section Build
+
+# Keycloak persists build options (`db`, `health-enabled`, `metrics-enabled`,
+# `features`, `http-relative-path`, ...) in an optimized build. See the README
+# section "Optimized start" for details.
+build:
+  # -- How the optimized Keycloak build is created. `initContainer`: an init
+  # container copies the Keycloak distribution of `image` into an `emptyDir`,
+  # runs `kc.sh build` with the chart's build options and Keycloak starts with
+  # `--optimized` from there. Works with the stock image and a read-only root
+  # filesystem. `prebuilt`: `image` already contains an optimized build whose
+  # build options match the chart's values, Keycloak starts with `--optimized`.
+  # `auto`: Keycloak starts without `--optimized` and rebuilds itself on start
+  # when build options differ, which needs a writable root filesystem
+  # @section -- Build
+  mode: initContainer
+  # -- Resource requests and limits of the build init container. The build
+  # runs a JVM, which sizes its heap relative to the memory limit
+  # @section -- Build
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  # -- Size limit of the `emptyDir` holding the Keycloak distribution (about
+  # 200Mi) and the Keycloak data directory. Only used with `mode: initContainer`
+  # @section -- Build
+  sizeLimit: 1Gi
+
+## @section Keycloak
+
+keycloak:
+  # -- Public address of Keycloak (`KC_HOSTNAME`), preferably a full URL such
+  # as `https://sso.example.com`. Required unless `hostnameStrict` is `false`
+  # @section -- Keycloak
+  hostname: ""
+  # -- Address of the Admin Console (`KC_HOSTNAME_ADMIN`), e.g. an
+  # internal-only URL. Empty serves it on `hostname`
+  # @section -- Keycloak
+  hostnameAdmin: ""
+  # -- Resolve backchannel URLs (token, userinfo, ...) from the request
+  # (`KC_HOSTNAME_BACKCHANNEL_DYNAMIC`). Enable when clients, e.g. the
+  # edp-keycloak-operator, reach Keycloak via the internal Service URL.
+  # Requires `hostname` to be a full URL
+  # @section -- Keycloak
+  hostnameBackchannelDynamic: false
+  # -- Only accept the configured `hostname` (`KC_HOSTNAME_STRICT`). Set to
+  # `false` only if the proxy overwrites the `Host` header
+  # @section -- Keycloak
+  hostnameStrict: true
+  # -- Path Keycloak serves its resources under (`KC_HTTP_RELATIVE_PATH`, a
+  # build option), e.g. `/auth`. Empty serves them under `/`. The management
+  # interface and the probes inherit it
+  # @section -- Keycloak
+  httpRelativePath: ""
+  # -- Reverse proxy headers Keycloak trusts (`KC_PROXY_HEADERS`): `xforwarded`,
+  # `forwarded` or empty. The proxy must overwrite these headers. Must be
+  # empty with TLS passthrough
+  # @section -- Keycloak
+  proxyHeaders: xforwarded
+  # -- IP addresses or CIDRs of the proxies whose headers are trusted
+  # (`KC_PROXY_TRUSTED_ADDRESSES`). Empty trusts all addresses
+  # @section -- Keycloak
+  proxyTrustedAddresses: []
+  # -- Features to enable (`KC_FEATURES`, a build option), e.g. `token-exchange`
+  # @section -- Keycloak
+  features: []
+  # -- Features to disable (`KC_FEATURES_DISABLED`, a build option)
+  # @section -- Keycloak
+  featuresDisabled: []
+  # -- Expose Prometheus metrics on the management port under `/metrics`
+  # (`KC_METRICS_ENABLED`, a build option). Also enables the database health check
+  # @section -- Keycloak
+  metricsEnabled: false
+  # -- Log level (`KC_LOG_LEVEL`), e.g. `info` or `info,org.keycloak:debug`
+  # @section -- Keycloak
+  logLevel: info
+  # -- Console log format (`KC_LOG_CONSOLE_OUTPUT`): `default` or `json`
+  # @section -- Keycloak
+  logConsoleOutput: default
+  # -- JVM heap options (`JAVA_OPTS_KC_HEAP`). Empty uses the image default,
+  # which sizes the heap relative to the container memory limit
+  # (`-XX:MaxRAMPercentage=70 -XX:InitialRAMPercentage=50`)
+  # @section -- Keycloak
+  javaOptsHeap: ""
+  # -- Additional JVM options (`JAVA_OPTS_APPEND`), e.g. `-Djava.net.preferIPv4Stack=true`
+  # @section -- Keycloak
+  javaOptsAppend: ""
+  # -- Additional Keycloak options as a map of option name to value, rendered
+  # as `KC_*` environment variables in a ConfigMap, e.g. `http-max-queued-requests: 1000`.
+  # See [all configuration](https://www.keycloak.org/server/all-config). Do not
+  # put secrets here; use `extraEnvFrom`. The default disables the deprecated
+  # sticky session route
+  # @section -- Keycloak
+  config:
+    spi-sticky-session-encoder--infinispan--should-attach-route: "false"
+
+## @section Themes
+
+# Login, account, admin and email themes are selected per realm (Admin Console
+# or e.g. the edp-keycloak-operator). See the README section "Themes".
+themes:
+  # -- Custom themes. Each entry needs a `name` and one source: `image` (copied
+  # by an init container, or mounted as an ImageVolume with `imageVolume: true`)
+  # or `configMap` (directory themes only). `type` is `directory` (default,
+  # mounted at `themes/<name>`) or `jar` (a theme archive such as Keycloakify
+  # output, added as `providers/<name>.jar`; not with `build.mode: prebuilt`).
+  # `path` is the theme location in the image, default `/theme` or `/theme.jar`.
+  # `image.repository` and `image.tag` are rendered with `tpl`
+  # @section -- Themes
+  custom: []
+  # - name: acme
+  #   type: directory
+  #   image:
+  #     repository: ghcr.io/acme/keycloak-theme
+  #     tag: 1.2.0
+  #     pullPolicy: IfNotPresent
+  #   path: /theme
+  #   imageVolume: false
+  # - name: branding
+  #   configMap:
+  #     name: keycloak-branding
+  #     items:
+  #       - key: login-theme.properties
+  #         path: login/theme.properties
+  # -- Theme of the welcome page (`spi-theme--welcome-theme`). Empty uses the default theme
+  # @section -- Themes
+  welcomeTheme: ""
+  # -- Cache themes, templates and static resources. Set to `false` only while
+  # developing a theme
+  # @section -- Themes
+  cache: true
+  # -- Resource requests and limits of the init containers copying themes from images
+  # @section -- Themes
+  initContainerResources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      memory: 64Mi
+  # -- Size limit of the `emptyDir` the theme init containers copy into. Empty
+  # for no limit
+  # @section -- Themes
+  sizeLimit: 512Mi
+
+## @section Bootstrap admin
+
+# Keycloak creates these temporary admin accounts in the `master` realm only on
+# its first start, when the `master` realm does not exist yet. Changing them
+# later has no effect. Replace them with permanent accounts after the setup.
+bootstrapAdmin:
+  user:
+    # -- Create a temporary admin user (`KC_BOOTSTRAP_ADMIN_USERNAME` and `_PASSWORD`)
+    # @section -- Bootstrap admin
+    enabled: true
+    # -- Username of the temporary admin user
+    # @section -- Bootstrap admin
+    username: admin
+    password:
+      # -- Plain-text value, stored in a chart-managed Secret. Ignored if `secretKeyRef.name` is set. Prefer `secretKeyRef`
+      # @section -- Bootstrap admin
+      value: ""
+      # -- Generate a random password on the first install and keep it on
+      # upgrades (via `lookup`). Only for the Helm CLI or CI: Argo CD and
+      # `helm template` generate a new value on every render
+      # @section -- Bootstrap admin
+      generate: false
+      secretKeyRef:
+        # -- Name of an existing Secret
+        # @section -- Bootstrap admin
+        name: ""
+        # -- Key within the Secret
+        # @section -- Bootstrap admin
+        key: ""
+  client:
+    # -- Create a temporary admin service account client
+    # (`KC_BOOTSTRAP_ADMIN_CLIENT_ID` and `_SECRET`) for the client credentials grant
+    # @section -- Bootstrap admin
+    enabled: false
+    # -- Client ID of the temporary admin service account
+    # @section -- Bootstrap admin
+    clientId: temp-admin
+    clientSecret:
+      # -- Plain-text value, stored in a chart-managed Secret. Ignored if `secretKeyRef.name` is set. Prefer `secretKeyRef`
+      # @section -- Bootstrap admin
+      value: ""
+      # -- Generate a random client secret on the first install and keep it on
+      # upgrades (via `lookup`). Only for the Helm CLI or CI: Argo CD and
+      # `helm template` generate a new value on every render
+      # @section -- Bootstrap admin
+      generate: false
+      secretKeyRef:
+        # -- Name of an existing Secret
+        # @section -- Bootstrap admin
+        name: ""
+        # -- Key within the Secret
+        # @section -- Bootstrap admin
+        key: ""
+
+## @section TLS
+
+# Re-encrypt mode: the proxy terminates the client TLS connection and opens a
+# new TLS connection to Keycloak. Without TLS, Keycloak serves plain HTTP for a
+# TLS-terminating proxy (edge termination).
+tls:
+  # -- Serve HTTPS on port 8443 with the certificate from `secretName`. The
+  # management interface (health, metrics) then uses HTTPS as well
+  # @section -- TLS
+  enabled: false
+  # -- Name of an existing `kubernetes.io/tls` Secret with `tls.crt` and
+  # `tls.key`, e.g. issued by cert-manager. Keycloak reloads it periodically
+  # @section -- TLS
+  secretName: ""
+  # -- Keep the plain HTTP listener on port 8080 in addition to HTTPS
+  # @section -- TLS
+  httpEnabled: false
+
+## @section Service account
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  # @section -- Service account
+  create: true
+  # -- Automatically mount the service account token. Keycloak does not need
+  # the Kubernetes API
+  # @section -- Service account
+  automount: false
+  # -- Annotations to add to the service account
+  # @section -- Service account
+  annotations: {}
+  # -- Name of the service account to use. If not set and `create` is `true`, a name is generated using the fullname template
+  # @section -- Service account
+  name: ""
+
+## @section Pod
+
+# -- Number of Keycloak replicas. Replicas form a cluster through the database
+# (`jdbc-ping`). Ignored when `autoscaling.enabled` is `true`
+# @section -- Pod
+replicaCount: 1
+
+# -- Deployment update strategy. `Recreate` stops all pods before starting the
+# new version, which minor and major Keycloak upgrades require. `RollingUpdate`
+# is only safe for configuration changes and patch upgrades with 2+ replicas
+# @section -- Pod
+strategy:
+  type: Recreate
+
+# -- Annotations to add to the pods
+# @section -- Pod
+podAnnotations: {}
+# -- Labels to add to the pods
+# @section -- Pod
+podLabels: {}
+
+# -- Pod-level security context
+# @section -- Pod
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container-level security context of the Keycloak and build containers.
+# `readOnlyRootFilesystem` is ignored (always `false`) with `build.mode: auto`
+# @section -- Pod
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Resource requests and limits. Always set a memory limit: the JVM sizes
+# its heap relative to it. Use at least `2Gi` for production
+# @section -- Pod
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+  limits:
+    memory: 1Gi
+
+# -- Startup probe configuration. Empty disables the probe. Paths of probes on
+# the `management` port are prefixed with `keycloak.httpRelativePath` and the
+# scheme follows `tls.enabled`
+# @section -- Pod
+startupProbe:
+  httpGet:
+    path: /health/started
+    port: management
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 60
+# -- Liveness probe configuration. Empty disables the probe
+# @section -- Pod
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: management
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+# -- Readiness probe configuration. Empty disables the probe
+# @section -- Pod
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: management
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+# -- Grace period for the pod shutdown. Must be longer than Keycloak's
+# `shutdown-delay` plus `shutdown-timeout` (default `1s` + `10s`)
+# @section -- Pod
+terminationGracePeriodSeconds: 30
+
+# -- Size limit of the `emptyDir` mounted at `/tmp`. Empty for no limit
+# @section -- Pod
+tmpSizeLimit: 256Mi
+
+# -- Additional environment variables as a map of variable name to value.
+# Values are rendered with `tpl`. Also set in the build init container
+# @section -- Pod
+extraEnv: {}
+# -- Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`.
+# Use `KCRAW_*` names for secrets that may contain `$`
+# @section -- Pod
+extraEnvFrom: {}
+
+# -- Additional init containers, run before the theme and build init
+# containers. With `build.mode: initContainer`, mount the volume
+# `keycloak-home` to add providers (`providers/`) before the build. For themes,
+# prefer `themes.custom`
+# @section -- Pod
+initContainers: []
+# -- Additional volumes
+# @section -- Pod
+extraVolumes: []
+# -- Additional volume mounts of the Keycloak container
+# @section -- Pod
+extraVolumeMounts: []
+
+# -- Node selector for pod scheduling
+# @section -- Pod
+nodeSelector: {}
+# -- Tolerations for pod scheduling
+# @section -- Pod
+tolerations: []
+# -- Affinity rules for pod scheduling
+# @section -- Pod
+affinity: {}
+# -- Topology spread constraints, e.g. to spread replicas across nodes
+# @section -- Pod
+topologySpreadConstraints: []
+# -- Priority class name of the pods
+# @section -- Pod
+priorityClassName: ""
+
+## @section Service
+
+service:
+  # -- Service type
+  # @section -- Service
+  type: ClusterIP
+  # -- Annotations to add to the Service
+  # @section -- Service
+  annotations: {}
+  # -- HTTP port of the Service. Only exposed when HTTP is enabled
+  # @section -- Service
+  port: 8080
+  # -- HTTPS port of the Service. Only exposed with `tls.enabled`
+  # @section -- Service
+  httpsPort: 8443
+  # -- Management port (health and metrics). It is served by the separate
+  # `<fullname>-management` Service, which is always of type `ClusterIP`. Never
+  # route it through an Ingress or a Gateway
+  # @section -- Service
+  managementPort: 9000
+
+## @section Ingress
+
+# Expose only the paths Keycloak needs publicly. See the README section
+# "Exposing Keycloak".
+ingress:
+  # -- Create an Ingress
+  # @section -- Ingress
+  enabled: false
+  # -- Ingress class name
+  # @section -- Ingress
+  className: ""
+  # -- Annotations to add to the Ingress. With `tls.enabled`, configure the
+  # controller to use HTTPS to the backend (e.g. `nginx.ingress.kubernetes.io/backend-protocol: HTTPS`)
+  # @section -- Ingress
+  annotations: {}
+  # -- Ingress hosts and paths
+  # @section -- Ingress
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- Ingress TLS configuration
+  # @section -- Ingress
+  tls: []
+
+## @section Gateway API
+
+httpRoute:
+  # -- Create a Gateway API HTTPRoute. With `tls.enabled`, a `BackendTLSPolicy`
+  # is needed for HTTPS to the backend
+  # @section -- Gateway API
+  enabled: false
+  # -- Annotations to add to the HTTPRoute
+  # @section -- Gateway API
+  annotations: {}
+  # -- Gateways the HTTPRoute attaches to
+  # @section -- Gateway API
+  parentRefs:
+    - name: gateway
+      sectionName: http
+  # -- Hostnames matched by the HTTPRoute
+  # @section -- Gateway API
+  hostnames:
+    - chart-example.local
+  # -- HTTPRoute rules. Each rule supports `matches`, `filters` and `timeouts`;
+  # the backend is always the Keycloak Service
+  # @section -- Gateway API
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+## @section Monitoring
+
+serviceMonitor:
+  # -- Create a Prometheus Operator ServiceMonitor for the management port.
+  # Requires `keycloak.metricsEnabled`
+  # @section -- Monitoring
+  enabled: false
+  # -- Scrape interval
+  # @section -- Monitoring
+  interval: 30s
+  # -- Scrape timeout
+  # @section -- Monitoring
+  scrapeTimeout: 10s
+  # -- Annotations to add to the ServiceMonitor
+  # @section -- Monitoring
+  annotations: {}
+  # -- Extra labels to add to the ServiceMonitor
+  # @section -- Monitoring
+  labels: {}
+  # -- Keep the labels of the scraped metrics over the server-side labels
+  # @section -- Monitoring
+  honorLabels: false
+
+## @section Availability
+
+podDisruptionBudget:
+  # -- Create a PodDisruptionBudget. Useful with 2+ replicas
+  # @section -- Availability
+  enabled: false
+  # -- Minimum number of available pods, e.g. `1`. Takes precedence over
+  # `maxUnavailable` if set. Empty is unset; `0` is a valid value
+  # @section -- Availability
+  minAvailable: ""
+  # -- Maximum number of unavailable pods, used if `minAvailable` is not set.
+  # `0` blocks voluntary evictions, which makes node drains wait until the pod is moved manually
+  # @section -- Availability
+  maxUnavailable: 1
+
+autoscaling:
+  # -- Create a HorizontalPodAutoscaler. Requires at least one of the two
+  # utilization targets
+  # @section -- Availability
+  enabled: false
+  # -- Minimum number of replicas
+  # @section -- Availability
+  minReplicas: 2
+  # -- Maximum number of replicas
+  # @section -- Availability
+  maxReplicas: 4
+  # -- Target average CPU utilization in percent. Empty disables the CPU metric
+  # @section -- Availability
+  targetCPUUtilizationPercentage: 80
+  # -- Target average memory utilization in percent. Empty disables the memory metric
+  # @section -- Availability
+  targetMemoryUtilizationPercentage: ""
+  # -- Scaling behavior of the HorizontalPodAutoscaler
+  # @section -- Availability
+  behavior: {}
+
+## @section Network policy
+
+networkPolicy:
+  # -- Create a NetworkPolicy for the Keycloak pods. It always allows the
+  # cluster traffic (ports 7800 and 57800) between Keycloak pods
+  # @section -- Network policy
+  enabled: false
+  # -- Peers allowed to reach the HTTP(S) port, in the NetworkPolicy `from`
+  # format, e.g. the namespace of the Ingress controller. Empty allows all sources
+  # @section -- Network policy
+  ingressFrom: []
+  # -- Peers allowed to reach the management port (health, metrics), e.g.
+  # Prometheus. Empty allows no source besides the Keycloak pods
+  # @section -- Network policy
+  managementFrom: []
+  egress:
+    # -- Restrict egress traffic. Allows DNS, the bundled database, the
+    # Keycloak cluster traffic and `extraEgress`
+    # @section -- Network policy
+    enabled: false
+    # -- Additional egress rules, e.g. for an external database, identity
+    # providers, LDAP or SMTP
+    # @section -- Network policy
+    extraEgress: []
+
+## @section PostgreSQL
+
+# Keycloak supports PostgreSQL 14 to 18. By default the chart deploys a
+# CloudNativePG `Cluster`, which requires the CloudNativePG operator.
+postgres:
+  # -- Deploy a CloudNativePG `Cluster`. Set to `false` to use an external database
+  # @section -- PostgreSQL
+  enabled: true
+  # -- Annotations to add to the CNPG Cluster
+  # @section -- PostgreSQL
+  annotations: {}
+  # -- Host of an external database. Required when `enabled` is `false`
+  # @section -- PostgreSQL
+  host: ""
+  # -- Port of an external database. Only used when `enabled` is `false`
+  # @section -- PostgreSQL
+  port: 5432
+  # -- Name of the database role Keycloak uses (`KC_DB_USERNAME`). Owns the
+  # database in the CNPG cluster
+  # @section -- PostgreSQL
+  username: keycloak
+  # -- Name of the Keycloak database
+  # @section -- PostgreSQL
+  database: keycloak
+  # -- PostgreSQL password of `username`. If no source is set and `enabled` is
+  # `true`, CloudNativePG generates a random password in the
+  # `<fullname>-postgresql-app` Secret. Required when `enabled` is `false`
+  # @section -- PostgreSQL
+  password:
+    # -- Plain-text value, stored in a chart-managed Secret. Ignored if `secretKeyRef.name` is set. Prefer `secretKeyRef`
+    # @section -- PostgreSQL
+    value: ""
+    secretKeyRef:
+      # -- Name of an existing Secret. With the bundled cluster, the Secret also
+      # bootstraps the database: it must be of type `kubernetes.io/basic-auth`
+      # with the keys `username` (equal to `username`) and `password`, so `key`
+      # must be `password`
+      # @section -- PostgreSQL
+      name: ""
+      # -- Key within the Secret
+      # @section -- PostgreSQL
+      key: ""
+  tls:
+    # -- TLS mode of the database connection (`KC_DB_TLS_MODE`): `disabled`
+    # (driver default, encrypts if the server offers TLS without verifying it) or
+    # `verify-server` (requires TLS and verifies the server certificate). Empty
+    # uses `verify-server` with the bundled cluster and `disabled` with an
+    # external database
+    # @section -- PostgreSQL
+    mode: ""
+    caSecretKeyRef:
+      # -- Name of the Secret with the CA certificate (PEM) of the database
+      # server. Defaults to the CNPG CA Secret `<fullname>-postgresql-ca` with
+      # the bundled cluster. Required for `verify-server` with an external database
+      # @section -- PostgreSQL
+      name: ""
+      # -- Key within the Secret. Defaults to `ca.crt`
+      # @section -- PostgreSQL
+      key: ""
+  # -- Additional JDBC URL properties (`KC_DB_URL_PROPERTIES`), including the
+  # leading `?`, e.g. `?ApplicationName=keycloak`
+  # @section -- PostgreSQL
+  urlProperties: ""
+  # -- Maximum size of the Keycloak connection pool per replica (`KC_DB_POOL_MAX_SIZE`).
+  # Keep `replicas * poolMaxSize` below the `max_connections` of the database
+  # @section -- PostgreSQL
+  poolMaxSize: 50
+  # -- Name of an existing Secret of type `kubernetes.io/basic-auth` with
+  # `username` and `password` keys, used to bootstrap the CNPG cluster and as
+  # the Keycloak database password. Takes precedence over `password`
+  # @section -- PostgreSQL
+  bootstrapSecretOverride: ""
+  image:
+    # -- PostgreSQL image repository of the CNPG cluster instances
+    # @section -- PostgreSQL
+    repository: ghcr.io/cloudnative-pg/postgresql
+    # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
+    # -- PostgreSQL image tag. Keycloak supports PostgreSQL 14 to 18. Changing
+    # the major version triggers a CNPG major upgrade
+    # @section -- PostgreSQL
+    tag: "18.6-standard-trixie"
+  # -- Number of PostgreSQL instances in the CNPG cluster. Use 2+ for high availability
+  # @section -- PostgreSQL
+  instances: 1
+  # -- PostgreSQL parameters (`postgresql.parameters` of the Cluster), e.g. `max_connections: "200"`
+  # @section -- PostgreSQL
+  parameters: {}
+  # -- Additional fields of the CNPG `bootstrap.initdb` section, e.g. `localeCollate`,
+  # `localeCType` or `postInitApplicationSQL`. `database`, `owner` and `secret` are set by the chart
+  # @section -- PostgreSQL
+  initdb: {}
+  # -- Create the PodDisruptionBudgets of the CNPG cluster (`enablePDB`). With
+  # a single instance, they block node drains until the instance is moved manually
+  # @section -- PostgreSQL
+  enablePDB: true
+  # -- Resource requests and limits of the PostgreSQL instances
+  # @section -- PostgreSQL
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  # -- Pod-level security context of the PostgreSQL instances. Empty applies the
+  # CloudNativePG defaults (UID/GID `26`)
+  # @section -- PostgreSQL
+  podSecurityContext: {}
+  # -- Container-level security context of the PostgreSQL instance container.
+  # Merged with the CloudNativePG defaults
+  # @section -- PostgreSQL
+  securityContext: {}
+  # -- Scheduling of the PostgreSQL instances in the CNPG `AffinityConfiguration`
+  # format (`nodeSelector`, `tolerations`, `enablePodAntiAffinity`,
+  # `topologyKey`, `nodeAffinity`, ...). See the
+  # [CNPG docs](https://cloudnative-pg.io/docs/1.30/scheduling)
+  # @section -- PostgreSQL
+  affinity: {}
+  storage:
+    # -- Storage class of the PostgreSQL PVCs. Empty uses the cluster's default StorageClass
+    # @section -- PostgreSQL
+    storageClass: ""
+    # -- Size of the PostgreSQL PVC
+    # @section -- PostgreSQL
+    size: 10Gi
+  backup:
+    # -- Enable scheduled physical backups of the CNPG cluster (`ScheduledBackup`).
+    # Requires the [Barman Cloud Plugin](https://cloudnative-pg.io/plugin-barman-cloud/)
+    # for `method: plugin`, or CSI volume snapshots for `method: volumeSnapshot`
+    # @section -- PostgreSQL
+    enabled: false
+    # -- Backup method: `plugin` (Barman Cloud Plugin, object storage) or
+    # `volumeSnapshot` (Kubernetes CSI volume snapshots)
+    # @section -- PostgreSQL
+    method: plugin
+    # -- Backup schedule as a six-field cron expression including seconds
+    # (e.g. `0 0 3 * * *` = daily at 03:00)
+    # @section -- PostgreSQL
+    schedule: "0 0 3 * * *"
+    # -- Take a backup immediately when the `ScheduledBackup` is created
+    # @section -- PostgreSQL
+    immediate: false
+    # -- Instance to back up from: `prefer-standby` or `primary`. Empty uses the CNPG default (`prefer-standby`)
+    # @section -- PostgreSQL
+    target: ""
+    objectStore:
+      # -- Create a Barman Cloud `ObjectStore` named `<fullname>-postgresql` from
+      # `configuration`. Set to `false` to reference an existing one via `name`
+      # @section -- PostgreSQL
+      create: true
+      # -- Name of an existing `ObjectStore`. Only used when `create` is `false`
+      # @section -- PostgreSQL
+      name: ""
+      # -- `ObjectStore` configuration (`destinationPath`, `endpointURL`,
+      # `s3Credentials`, `wal`, `data`, ...). See the
+      # [plugin docs](https://cloudnative-pg.io/plugin-barman-cloud/docs/object_stores/).
+      # When set, WAL archiving is enabled even with `method: volumeSnapshot`
+      # @section -- PostgreSQL
+      configuration: {}
+      # -- Recovery window of the backups in the `ObjectStore` (e.g. `30d`)
+      # @section -- PostgreSQL
+      retentionPolicy: 30d
+      # -- Barman Cloud sidecar settings of the `ObjectStore` (e.g. `resources`)
+      # @section -- PostgreSQL
+      instanceSidecarConfiguration: {}
+      # -- Folder name of this cluster inside the object store. Defaults to the
+      # Cluster name. Must differ from `recovery.serverName` when restoring
+      # from the same object store
+      # @section -- PostgreSQL
+      serverName: ""
+    # -- CNPG `volumeSnapshot` backup configuration (e.g. `className`). Only used with `method: volumeSnapshot`
+    # @section -- PostgreSQL
+    volumeSnapshot: {}
+  recovery:
+    # -- Bootstrap the CNPG cluster from a backup instead of an empty database.
+    # Only applies when the Cluster is created
+    # @section -- PostgreSQL
+    enabled: false
+    # -- Barman Cloud `ObjectStore` holding the backup. Defaults to the backup object store
+    # @section -- PostgreSQL
+    objectStoreName: ""
+    # -- Folder name of the source cluster inside the object store. Defaults to the Cluster name
+    # @section -- PostgreSQL
+    serverName: ""
+    # -- Recover from CSI volume snapshots instead of an object store, in the CNPG
+    # `bootstrap.recovery.volumeSnapshots` format
+    # @section -- PostgreSQL
+    volumeSnapshots: {}
+    # -- Point-in-time recovery target in the CNPG `recoveryTarget` format
+    # (e.g. `targetTime: "2026-01-01 00:00:00+00"`). Empty restores the latest state
+    # @section -- PostgreSQL
+    recoveryTarget: {}
+  podMonitor:
+    # -- Create a Prometheus Operator PodMonitor for the PostgreSQL instances
+    # (replaces the deprecated CNPG `enablePodMonitor`)
+    # @section -- PostgreSQL
+    enabled: false
+    # -- Extra labels to add to the PodMonitor
+    # @section -- PostgreSQL
+    labels: {}
+
+## @section Other
+
+# -- Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with `tpl`
+# @section -- Other
+extraManifests: []

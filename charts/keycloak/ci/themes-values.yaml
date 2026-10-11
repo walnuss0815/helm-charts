@@ -1,0 +1,42 @@
+# Custom themes: a directory theme from a ConfigMap (also used as the welcome
+# theme) and a directory copied from an image by an init container.
+# There is no public theme image, so the Keycloak image itself serves as the
+# source to test the copy mechanics only: its `themes` directory contains no
+# theme types, so `copied` does not show up as a usable theme in Keycloak.
+keycloak:
+  hostname: http://keycloak.example.test
+
+bootstrapAdmin:
+  user:
+    password:
+      value: ci-admin-password
+
+themes:
+  welcomeTheme: branding
+  custom:
+    - name: branding
+      configMap:
+        name: keycloak-ci-branding
+        items:
+          - key: login-theme.properties
+            path: login/theme.properties
+          - key: welcome-theme.properties
+            path: welcome/theme.properties
+    - name: copied
+      image:
+        repository: quay.io/keycloak/keycloak
+        tag: "{{ .Chart.AppVersion }}"
+      path: /opt/keycloak/themes
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: keycloak-ci-branding
+    data:
+      login-theme.properties: |
+        parent=keycloak
+      welcome-theme.properties: |
+        parent=keycloak
+        import=common/keycloak

@@ -1,0 +1,71 @@
+# External PostgreSQL (no CNPG Cluster) and `build.mode: auto`, i.e. Keycloak
+# rebuilds itself on start with a writable root filesystem. A throw-away
+# PostgreSQL is deployed through extraManifests.
+keycloak:
+  hostname: http://keycloak.example.test
+
+build:
+  mode: auto
+
+bootstrapAdmin:
+  user:
+    password:
+      value: ci-admin-password
+
+postgres:
+  enabled: false
+  host: keycloak-ci-db
+  password:
+    value: ci-db-password
+
+extraManifests:
+  - |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: keycloak-ci-db
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: keycloak-ci-db
+      template:
+        metadata:
+          labels:
+            app: keycloak-ci-db
+        spec:
+          containers:
+            - name: postgres
+              image: postgres:18
+              env:
+                - name: POSTGRES_USER
+                  value: keycloak
+                - name: POSTGRES_DB
+                  value: keycloak
+                - name: POSTGRES_PASSWORD
+                  value: ci-db-password
+              ports:
+                - name: postgres
+                  containerPort: 5432
+              readinessProbe:
+                exec:
+                  command: ["pg_isready", "-U", "keycloak"]
+                periodSeconds: 5
+              volumeMounts:
+                - name: data
+                  mountPath: /var/lib/postgresql
+          volumes:
+            - name: data
+              emptyDir: {}
+  - |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: keycloak-ci-db
+    spec:
+      selector:
+        app: keycloak-ci-db
+      ports:
+        - name: postgres
+          port: 5432
+          targetPort: postgres

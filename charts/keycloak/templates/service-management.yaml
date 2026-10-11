@@ -1,0 +1,18 @@
+# Health and metrics. A separate, always internal Service keeps the management
+# port off the public Service, whatever its type is.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "keycloak.managementServiceName" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: management
+spec:
+  type: ClusterIP
+  ports:
+    - name: management
+      port: {{ .Values.service.managementPort }}
+      targetPort: management
+      protocol: TCP
+  selector:
+    {{- include "keycloak.serverSelectorLabels" . | nindent 4 }}

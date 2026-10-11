@@ -1,0 +1,52 @@
+{{- $scheme := ternary "https" "http" .Values.tls.enabled -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "keycloak.fullname" . }}-test-connection"
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    "helm.sh/hook": test
+spec:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    # curl instead of busybox wget: the busybox TLS client cannot negotiate
+    # with Keycloak's default TLS configuration
+    - name: curl
+      image: curlimages/curl:8.22.0
+      args:
+        - --fail
+        - --silent
+        - --show-error
+        - --output
+        - /dev/null
+        - --max-time
+        - '10'
+        # The test starts right after the pod became ready, which can be before
+        # the cluster network routes the Service to it
+        - --retry
+        - '10'
+        - --retry-delay
+        - '2'
+        - --retry-max-time
+        - '60'
+        - --retry-all-errors
+        {{- if .Values.tls.enabled }}
+        # The certificate is issued for the public hostname
+        - --insecure
+        {{- end }}
+        - '{{ $scheme }}://{{ include "keycloak.managementServiceName" . }}:{{ .Values.service.managementPort }}{{ include "keycloak.managementPathPrefix" . }}/health/ready'
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+  restartPolicy: Never

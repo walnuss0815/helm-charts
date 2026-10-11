@@ -1,0 +1,339 @@
+{{- include "keycloak.validateValues" . -}}
+{{- $mode := .Values.build.mode -}}
+{{- $user := .Values.bootstrapAdmin.user -}}
+{{- $client := .Values.bootstrapAdmin.client -}}
+{{- $adminSecret := include "keycloak.bootstrapAdminSecretName" . -}}
+{{- $dbTls := eq (include "keycloak.databaseTlsMode" .) "verify-server" -}}
+{{- $themes := fromYamlArray (include "keycloak.themes" .) -}}
+{{- $themesCopy := include "keycloak.themesCopy" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "keycloak.serverSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/env: {{ include (print $.Template.BasePath "/configmap-env.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "keycloak.labels" . | nindent 8 }}
+        app.kubernetes.io/component: server
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- if or .Values.initContainers (eq $mode "initContainer") $themesCopy }}
+      initContainers:
+        {{- with .Values.initContainers }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        {{- range $themes }}
+        {{- if eq .source "copy" }}
+        # Theme {{ .name | quote }}
+        - name: theme-{{ .index }}
+          image: {{ .image.reference }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          securityContext:
+            {{- include "keycloak.securityContext" $ | nindent 12 }}
+          command:
+            - sh
+            - -c
+          args:
+            {{- if eq .type "jar" }}
+            - cp "$THEME_SOURCE" "/themes/$THEME_NAME.jar"
+            {{- else }}
+            - mkdir -p "/themes/$THEME_NAME" && cp -R "$THEME_SOURCE/." "/themes/$THEME_NAME/"
+            {{- end }}
+          env:
+            - name: THEME_NAME
+              value: {{ .name | quote }}
+            - name: THEME_SOURCE
+              value: {{ .path | quote }}
+          {{- with $.Values.themes.initContainerResources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: themes
+              mountPath: /themes
+        {{- end }}
+        {{- end }}
+        {{- if eq $mode "initContainer" }}
+        - name: build
+          image: {{ include "keycloak.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- include "keycloak.securityContext" . | nindent 12 }}
+          command:
+            - /bin/bash
+            - -c
+          args:
+            - |
+              set -euo pipefail
+              # No --preserve: the owner of the emptyDir root is not UID 1000,
+              # so setting its mode and timestamps is not permitted
+              cp -R /opt/keycloak/. /keycloak-home/
+              {{- range $themes }}
+              {{- if eq .type "jar" }}
+              {{- if eq .source "copy" }}
+              cp "/themes/{{ .name }}.jar" "/keycloak-home/providers/{{ .name }}.jar"
+              {{- else }}
+              cp "/theme-sources/{{ .index }}{{ .path }}" "/keycloak-home/providers/{{ .name }}.jar"
+              {{- end }}
+              {{- end }}
+              {{- end }}
+              exec /keycloak-home/bin/kc.sh build
+          envFrom:
+            - configMapRef:
+                name: {{ include "keycloak.envConfigName" . }}
+          {{- with .Values.extraEnv }}
+          env:
+            {{- range $key, $value := . }}
+            - name: {{ $key | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
+            {{- end }}
+          {{- end }}
+          {{- with .Values.build.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: keycloak-home
+              mountPath: /keycloak-home
+            - name: tmp
+              mountPath: /tmp
+            {{- if $themesCopy }}
+            - name: themes
+              mountPath: /themes
+              readOnly: true
+            {{- end }}
+            {{- range $themes }}
+            {{- if and (eq .type "jar") (eq .source "imageVolume") }}
+            - name: {{ .volume }}
+              mountPath: /theme-sources/{{ .index }}
+              readOnly: true
+            {{- end }}
+            {{- end }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: keycloak
+          image: {{ include "keycloak.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- include "keycloak.securityContext" . | nindent 12 }}
+          args:
+            - start
+            {{- if include "keycloak.optimized" . }}
+            - --optimized
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "keycloak.envConfigName" . }}
+          env:
+            - name: KC_CACHE_EMBEDDED_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KC_CACHE_EMBEDDED_NETWORK_BIND_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            # KCRAW_ keeps `$` characters of secrets as they are
+            - name: KCRAW_DB_PASSWORD
+              {{- include "keycloak.databasePasswordEnv" . | nindent 14 }}
+            {{- if $user.enabled }}
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $adminSecret }}
+                  key: username
+            - name: KCRAW_BOOTSTRAP_ADMIN_PASSWORD
+              {{- include "keycloak.secretEnvVar" (dict "root" $ "entry" $user.password "secret" $adminSecret "key" "password") | nindent 14 }}
+            {{- end }}
+            {{- if $client.enabled }}
+            - name: KC_BOOTSTRAP_ADMIN_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $adminSecret }}
+                  key: client-id
+            - name: KCRAW_BOOTSTRAP_ADMIN_CLIENT_SECRET
+              {{- include "keycloak.secretEnvVar" (dict "root" $ "entry" $client.clientSecret "secret" $adminSecret "key" "client-secret") | nindent 14 }}
+            {{- end }}
+            {{- range $key, $value := .Values.extraEnv }}
+            - name: {{ $key | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
+            {{- end }}
+            {{- range $key, $valueFrom := .Values.extraEnvFrom }}
+            - name: {{ $key | quote }}
+              valueFrom:
+                {{- toYaml $valueFrom | nindent 16 }}
+            {{- end }}
+          ports:
+            {{- if include "keycloak.httpEnabled" . }}
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+            {{- end }}
+            - name: management
+              containerPort: 9000
+              protocol: TCP
+            - name: jgroups
+              containerPort: 7800
+              protocol: TCP
+            - name: jgroups-fd
+              containerPort: 57800
+              protocol: TCP
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- include "keycloak.probe" (dict "root" $ "probe" .) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- include "keycloak.probe" (dict "root" $ "probe" .) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- include "keycloak.probe" (dict "root" $ "probe" .) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            {{- if eq $mode "initContainer" }}
+            - name: keycloak-home
+              mountPath: /opt/keycloak
+            {{- else if eq $mode "prebuilt" }}
+            - name: data
+              mountPath: /opt/keycloak/data
+            {{- end }}
+            {{- range $themes }}
+            {{- if eq .type "directory" }}
+            - name: {{ .volume }}
+              mountPath: /opt/keycloak/themes/{{ .name }}
+              {{- if eq .source "copy" }}
+              subPath: {{ .name }}
+              {{- else if and (eq .source "imageVolume") (ne .path "/") }}
+              subPath: {{ trimPrefix "/" .path }}
+              {{- end }}
+              readOnly: true
+            {{- else if eq $mode "auto" }}
+            - name: {{ .volume }}
+              mountPath: /opt/keycloak/providers/{{ .name }}.jar
+              subPath: {{ ternary (printf "%s.jar" .name) (trimPrefix "/" .path) (eq .source "copy") }}
+              readOnly: true
+            {{- end }}
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /etc/keycloak/tls
+              readOnly: true
+            {{- end }}
+            {{- if $dbTls }}
+            - name: db-ca
+              mountPath: /etc/keycloak/db-ca
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: tmp
+          {{- include "keycloak.emptyDir" .Values.tmpSizeLimit | nindent 10 }}
+        {{- if eq $mode "initContainer" }}
+        - name: keycloak-home
+          {{- include "keycloak.emptyDir" .Values.build.sizeLimit | nindent 10 }}
+        {{- else if eq $mode "prebuilt" }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+        {{- if $themesCopy }}
+        - name: themes
+          {{- include "keycloak.emptyDir" .Values.themes.sizeLimit | nindent 10 }}
+        {{- end }}
+        {{- range $themes }}
+        {{- if eq .source "imageVolume" }}
+        - name: {{ .volume }}
+          image:
+            reference: {{ .image.reference }}
+            pullPolicy: {{ .image.pullPolicy }}
+        {{- else if eq .source "configMap" }}
+        - name: {{ .volume }}
+          configMap:
+            name: {{ tpl .configMap.name $ }}
+            {{- with .configMap.items }}
+            items:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ tpl .Values.tls.secretName $ }}
+        {{- end }}
+        {{- if $dbTls }}
+        - name: db-ca
+          secret:
+            secretName: {{ include "keycloak.databaseCaSecretName" . }}
+            items:
+              - key: {{ include "keycloak.databaseCaSecretKey" . }}
+                path: ca.crt
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}

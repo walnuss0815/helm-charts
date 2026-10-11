@@ -1,0 +1,25 @@
+# TLS re-encrypt: Keycloak serves HTTPS only, the management interface uses
+# HTTPS as well. The certificate is a throw-away self-signed one.
+keycloak:
+  hostname: https://keycloak.example.test
+
+tls:
+  enabled: true
+  secretName: keycloak-ci-tls
+
+bootstrapAdmin:
+  user:
+    password:
+      value: ci-admin-password
+
+extraManifests:
+  - |
+    {{- $cert := genSelfSignedCert "keycloak.example.test" nil (list "keycloak.example.test") 7 }}
+    apiVersion: v1
+    kind: Secret
+    type: kubernetes.io/tls
+    metadata:
+      name: keycloak-ci-tls
+    data:
+      tls.crt: {{ $cert.Cert | b64enc }}
+      tls.key: {{ $cert.Key | b64enc }}

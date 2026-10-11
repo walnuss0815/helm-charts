@@ -1,0 +1,14 @@
+apiVersion: v2
+name: keycloak
+description: A Helm chart for Keycloak, the open source identity and access management solution, with an optional CloudNativePG database.
+type: application
+version: 0.1.0
+# renovate: image=quay.io/keycloak/keycloak
+appVersion: "26.8.0"
+home: https://www.keycloak.org
+sources:
+  - https://github.com/keycloak/keycloak
+maintainers:
+  - name: walnuss0815
+    email: walnuss0815@gmail.com
+    url: https://github.com/walnuss0815

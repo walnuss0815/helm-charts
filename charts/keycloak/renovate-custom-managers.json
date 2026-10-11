@@ -1,0 +1,40 @@
+{
+  "description": "Renovate preset for the Keycloak chart: PostgreSQL image version in values.yaml and the commit type of Keycloak minor upgrades.",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update values annotated with a `# renovate: datasource=... depName=...` comment in values.yaml",
+      "managerFilePatterns": [
+        "/(^|/)charts/keycloak/values\\.yaml$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\s*\\n(?:\\s*#.*\\n)*\\s*[\\w-]+:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "PostgreSQL major upgrades of the bundled CNPG cluster are a deliberate, manual change",
+      "matchFileNames": [
+        "charts/keycloak/values.yaml"
+      ],
+      "matchDepNames": [
+        "ghcr.io/cloudnative-pg/postgresql"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Keycloak minor upgrades migrate the database and cannot be rolled back: release them as a chart minor version (feat commit)",
+      "matchDepNames": [
+        "quay.io/keycloak/keycloak"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "semanticCommitType": "feat"
+    }
+  ]
+}

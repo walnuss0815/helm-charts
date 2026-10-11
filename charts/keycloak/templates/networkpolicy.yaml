@@ -1,0 +1,84 @@
+{{- if .Values.networkPolicy.enabled }}
+{{- $np := .Values.networkPolicy -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "keycloak.serverSelectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    {{- if $np.egress.enabled }}
+    - Egress
+    {{- end }}
+  ingress:
+    # HTTP(S) traffic, e.g. from the Ingress controller or the Gateway
+    - ports:
+        {{- if include "keycloak.httpEnabled" . }}
+        - port: http
+          protocol: TCP
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - port: https
+          protocol: TCP
+        {{- end }}
+      {{- with $np.ingressFrom }}
+      from:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+    # Cluster traffic between Keycloak pods
+    - ports:
+        - port: jgroups
+          protocol: TCP
+        - port: jgroups-fd
+          protocol: TCP
+      from:
+        - podSelector:
+            matchLabels:
+              {{- include "keycloak.serverSelectorLabels" . | nindent 14 }}
+    {{- with $np.managementFrom }}
+    # Health and metrics
+    - ports:
+        - port: management
+          protocol: TCP
+      from:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+    {{- end }}
+  {{- if $np.egress.enabled }}
+  egress:
+    # DNS
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # Cluster traffic between Keycloak pods
+    - ports:
+        - port: 7800
+          protocol: TCP
+        - port: 57800
+          protocol: TCP
+      to:
+        - podSelector:
+            matchLabels:
+              {{- include "keycloak.serverSelectorLabels" . | nindent 14 }}
+    {{- if .Values.postgres.enabled }}
+    # Bundled CNPG database
+    - ports:
+        - port: 5432
+          protocol: TCP
+      to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: {{ include "keycloak.databaseClusterName" . }}
+    {{- end }}
+    {{- with $np.egress.extraEgress }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,43 @@
+{{- if include "keycloak.backupObjectStoreCreate" . }}
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: {{ include "keycloak.backupObjectStoreName" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  configuration:
+    {{- toYaml .Values.postgres.backup.objectStore.configuration | nindent 4 }}
+  {{- with .Values.postgres.backup.objectStore.retentionPolicy }}
+  retentionPolicy: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.postgres.backup.objectStore.instanceSidecarConfiguration }}
+  instanceSidecarConfiguration:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- if and .Values.postgres.enabled .Values.postgres.backup.enabled }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ include "keycloak.databaseClusterName" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  schedule: {{ .Values.postgres.backup.schedule | quote }}
+  immediate: {{ .Values.postgres.backup.immediate }}
+  backupOwnerReference: self
+  cluster:
+    name: {{ include "keycloak.databaseClusterName" . }}
+  method: {{ .Values.postgres.backup.method }}
+  {{- if eq .Values.postgres.backup.method "plugin" }}
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
+  {{- end }}
+  {{- with .Values.postgres.backup.target }}
+  target: {{ . }}
+  {{- end }}
+{{- end }}

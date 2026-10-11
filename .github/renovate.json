@@ -2,7 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "customManagers:helmChartYamlAppVersions",
-    "local>walnuss0815/helm-charts//charts/immich/renovate-custom-managers"
+    "local>walnuss0815/helm-charts//charts/immich/renovate-custom-managers",
+    "local>walnuss0815/helm-charts//charts/keycloak/renovate-custom-managers"
   ],
   "baseBranchPatterns": [
     "main"

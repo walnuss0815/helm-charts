@@ -1,0 +1,80 @@
+{{- $kc := .Values.keycloak -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "keycloak.envConfigName" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+data:
+  # Build options. The build init container and Keycloak load the same values.
+  KC_DB: postgres
+  KC_HEALTH_ENABLED: "true"
+  KC_METRICS_ENABLED: {{ $kc.metricsEnabled | toString | quote }}
+  {{- with $kc.features }}
+  KC_FEATURES: {{ join "," . | quote }}
+  {{- end }}
+  {{- with $kc.featuresDisabled }}
+  KC_FEATURES_DISABLED: {{ join "," . | quote }}
+  {{- end }}
+  {{- with $kc.httpRelativePath }}
+  KC_HTTP_RELATIVE_PATH: {{ . | quote }}
+  {{- end }}
+  # Database
+  KC_DB_URL_HOST: {{ include "keycloak.databaseHost" . | quote }}
+  KC_DB_URL_PORT: {{ include "keycloak.databasePort" . | quote }}
+  KC_DB_URL_DATABASE: {{ .Values.postgres.database | quote }}
+  KC_DB_USERNAME: {{ .Values.postgres.username | quote }}
+  KC_DB_POOL_MAX_SIZE: {{ .Values.postgres.poolMaxSize | toString | quote }}
+  {{- with .Values.postgres.urlProperties }}
+  KC_DB_URL_PROPERTIES: {{ . | quote }}
+  {{- end }}
+  KC_DB_TLS_MODE: {{ include "keycloak.databaseTlsMode" . | quote }}
+  {{- if eq (include "keycloak.databaseTlsMode" .) "verify-server" }}
+  KC_DB_TLS_TRUST_STORE_FILE: /etc/keycloak/db-ca/ca.crt
+  {{- end }}
+  # HTTP and hostname
+  KC_HTTP_ENABLED: {{ include "keycloak.httpEnabled" . | default "false" | quote }}
+  {{- if .Values.tls.enabled }}
+  KC_HTTPS_CERTIFICATE_FILE: /etc/keycloak/tls/tls.crt
+  KC_HTTPS_CERTIFICATE_KEY_FILE: /etc/keycloak/tls/tls.key
+  {{- end }}
+  {{- with $kc.hostname }}
+  KC_HOSTNAME: {{ tpl . $ | quote }}
+  {{- end }}
+  {{- with $kc.hostnameAdmin }}
+  KC_HOSTNAME_ADMIN: {{ tpl . $ | quote }}
+  {{- end }}
+  KC_HOSTNAME_STRICT: {{ $kc.hostnameStrict | toString | quote }}
+  KC_HOSTNAME_BACKCHANNEL_DYNAMIC: {{ $kc.hostnameBackchannelDynamic | toString | quote }}
+  {{- with $kc.proxyHeaders }}
+  KC_PROXY_HEADERS: {{ . | quote }}
+  {{- end }}
+  {{- with $kc.proxyTrustedAddresses }}
+  KC_PROXY_TRUSTED_ADDRESSES: {{ join "," . | quote }}
+  {{- end }}
+  # Logging and JVM
+  KC_LOG_LEVEL: {{ $kc.logLevel | quote }}
+  KC_LOG_CONSOLE_OUTPUT: {{ $kc.logConsoleOutput | quote }}
+  {{- with $kc.javaOptsHeap }}
+  JAVA_OPTS_KC_HEAP: {{ . | quote }}
+  {{- end }}
+  {{- with $kc.javaOptsAppend }}
+  JAVA_OPTS_APPEND: {{ . | quote }}
+  {{- end }}
+  # Themes
+  {{- with .Values.themes.welcomeTheme }}
+  KC_SPI_THEME__WELCOME_THEME: {{ tpl . $ | quote }}
+  {{- end }}
+  {{- if not .Values.themes.cache }}
+  KC_SPI_THEME__CACHE_THEMES: "false"
+  KC_SPI_THEME__CACHE_TEMPLATES: "false"
+  KC_SPI_THEME__STATIC_MAX_AGE: "-1"
+  {{- end }}
+  {{- with $kc.config }}
+  # Additional options (keycloak.config)
+  {{- range $option, $value := . }}
+  {{- if not (kindIs "invalid" $value) }}
+  {{ include "keycloak.optionEnvName" $option }}: {{ tpl (toString $value) $ | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}

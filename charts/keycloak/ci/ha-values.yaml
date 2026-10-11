@@ -1,0 +1,48 @@
+# Two clustered replicas with rolling updates, a PodDisruptionBudget, a
+# NetworkPolicy with restricted egress and a relative path (`/auth`).
+keycloak:
+  hostname: http://keycloak.example.test/auth
+  hostnameBackchannelDynamic: true
+  httpRelativePath: /auth
+  metricsEnabled: true
+
+replicaCount: 2
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+
+podDisruptionBudget:
+  enabled: true
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/instance: '{{ .Release.Name }}'
+        app.kubernetes.io/component: server
+
+bootstrapAdmin:
+  user:
+    password:
+      value: ci-admin-password
+
+# 2 replicas x poolMaxSize (50) would reach the CNPG default max_connections (100)
+postgres:
+  parameters:
+    max_connections: 200
+
+networkPolicy:
+  enabled: true
+  # The Helm test pod checks the readiness endpoint
+  managementFrom:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/instance: '{{ .Release.Name }}'
+          app.kubernetes.io/component: test
+  egress:
+    enabled: true

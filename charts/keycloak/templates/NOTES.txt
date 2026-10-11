@@ -1,0 +1,33 @@
+Keycloak {{ .Chart.AppVersion }} is being deployed as "{{ include "keycloak.fullname" . }}".
+
+Public URL: {{ tpl (.Values.keycloak.hostname | default "<dynamic, keycloak.hostnameStrict is false>") . }}
+Internal URL: {{ ternary "https" "http" .Values.tls.enabled }}://{{ include "keycloak.fullname" . }}.{{ .Release.Namespace }}.svc:{{ include "keycloak.backendPort" . }}{{ .Values.keycloak.httpRelativePath | default "" | trimSuffix "/" }}
+{{- if .Values.postgres.enabled }}
+
+Database: CloudNativePG cluster "{{ include "keycloak.databaseClusterName" . }}". Keycloak becomes
+ready once the cluster is running. Check it with:
+  kubectl get cluster {{ include "keycloak.databaseClusterName" . }} -n {{ .Release.Namespace }}
+{{- end }}
+{{- if include "keycloak.bootstrapAdminSecretEnabled" . }}
+
+Temporary bootstrap admin credentials (only applied on the first start, when the
+master realm does not exist yet) are referenced from the Secret
+"{{ include "keycloak.bootstrapAdminSecretName" . }}".
+{{- if .Values.bootstrapAdmin.user.enabled }}
+  Username: kubectl get secret {{ include "keycloak.bootstrapAdminSecretName" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.username}' | base64 -d
+{{- end }}
+Replace the temporary accounts with permanent ones and remove them afterwards.
+{{- end }}
+{{- if include "keycloak.bootstrapAdminGenerate" . }}
+
+WARNING: bootstrap admin credentials are generated. This only works with the Helm
+CLI. Argo CD and `helm template` cannot look up the existing Secret and generate
+new credentials on every render, which no longer match the account Keycloak
+created on its first start. Use secretKeyRef with a GitOps-managed Secret instead.
+{{- end }}
+{{- if eq .Values.build.mode "prebuilt" }}
+
+build.mode is "prebuilt": the build options of the image must match the chart's
+values (KC_DB=postgres, KC_HEALTH_ENABLED=true, KC_METRICS_ENABLED={{ .Values.keycloak.metricsEnabled }}, features,
+http-relative-path), otherwise Keycloak refuses to start with --optimized.
+{{- end }}

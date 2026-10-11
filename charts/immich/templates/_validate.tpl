@@ -7,6 +7,11 @@ Deployment, which is always rendered.
 {{- fail "postgres.password (value or secretKeyRef) is required when postgres.enabled is false" }}
 {{- end }}
 {{- with .Values.postgres }}
+{{- range $field := list "nodeSelector" "tolerations" }}
+{{- if and (index $.Values.postgres $field) (index ($.Values.postgres.affinity | default dict) $field) }}
+{{- fail (printf "postgres.%s and postgres.affinity.%s are both set: set only one. postgres.%s is merged into the CloudNativePG spec.affinity" $field $field $field) }}
+{{- end }}
+{{- end }}
 {{- if and .enabled (not .bootstrapSecretOverride) .password.secretKeyRef.name .password.secretKeyRef.key (ne .password.secretKeyRef.key "password") }}
 {{- fail (printf "postgres.password.secretKeyRef.key must be \"password\" when postgres.enabled is true (got %q): CloudNativePG bootstraps the database from the keys `username` and `password` of the same Secret. Rename the key or set postgres.bootstrapSecretOverride" .password.secretKeyRef.key) }}
 {{- end }}

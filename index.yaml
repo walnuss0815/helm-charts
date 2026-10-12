@@ -1118,6 +1118,25 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/kavita-0.1.0/kavita-0.1.0.tgz
     version: 0.1.0
+  keycloak:
+  - apiVersion: v2
+    appVersion: 26.8.0
+    created: "2026-10-12T10:01:32.882149898Z"
+    description: A Helm chart for Keycloak, the open source identity and access management
+      solution, with an optional CloudNativePG database.
+    digest: 6d6a221e1bca62901942c0f64c3d4d34765d04eb01eeeae0641163375bdc0c8f
+    home: https://www.keycloak.org
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: keycloak
+    sources:
+    - https://github.com/keycloak/keycloak
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/keycloak-0.1.0/keycloak-0.1.0.tgz
+    version: 0.1.0
   linkwarden:
   - apiVersion: v2
     appVersion: 2.16.3
@@ -3379,4 +3398,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-11T18:11:36.901293143Z"
+generated: "2026-10-12T10:01:32.882464166Z"

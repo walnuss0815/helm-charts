@@ -1565,6 +1565,37 @@ entries:
     version: 0.1.0
   paperless-ngx:
   - apiVersion: v2
+    appVersion: 3.3.1
+    created: "2026-10-13T00:30:37.75200425Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.12.0
+    - condition: webdav.enabled
+      name: webdav
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.16
+    - condition: tika.enabled
+      name: tika
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.4
+    - condition: gotenberg.enabled
+      name: gotenberg
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.9
+    description: A Helm chart for Kubernetes
+    digest: 63e4df7db0ee95028ad39e6f8df419a142bf1938040e2da58b3834a414d1b4d1
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: paperless-ngx
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/paperless-ngx-2.0.1/paperless-ngx-2.0.1.tgz
+    version: 2.0.1
+  - apiVersion: v2
     appVersion: 3.3.0
     created: "2026-10-10T20:32:48.7625052Z"
     dependencies:
@@ -3398,4 +3429,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-12T10:01:32.882464166Z"
+generated: "2026-10-13T00:30:37.752712177Z"

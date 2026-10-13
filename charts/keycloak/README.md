@@ -1,6 +1,6 @@
 # keycloak
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 26.8.0](https://img.shields.io/badge/AppVersion-26.8.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 26.8.1](https://img.shields.io/badge/AppVersion-26.8.1-informational?style=flat-square)
 
 A Helm chart for Keycloak, the open source identity and access management solution, with an optional CloudNativePG database.
 
@@ -111,14 +111,14 @@ For `build.mode: prebuilt`, the build options of the image must match the
 chart's values, otherwise Keycloak refuses to start:
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.8.0 AS builder
+FROM quay.io/keycloak/keycloak:26.8.1 AS builder
 ENV KC_DB=postgres \
     KC_HEALTH_ENABLED=true \
     KC_METRICS_ENABLED=false
 # Providers, themes, KC_FEATURES, KC_HTTP_RELATIVE_PATH, ...
 RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:26.8.0
+FROM quay.io/keycloak/keycloak:26.8.1
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 ```
 

@@ -1134,6 +1134,24 @@ entries:
     version: 0.1.0
   keycloak:
   - apiVersion: v2
+    appVersion: 26.8.1
+    created: "2026-10-13T22:47:12.145392372Z"
+    description: A Helm chart for Keycloak, the open source identity and access management
+      solution, with an optional CloudNativePG database.
+    digest: 7ae1163525c52ca154c2cd9f2c0b2aa8924a876525f0594b804688830b826b9e
+    home: https://www.keycloak.org
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: keycloak
+    sources:
+    - https://github.com/keycloak/keycloak
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/keycloak-0.1.1/keycloak-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: 26.8.0
     created: "2026-10-12T10:01:32.882149898Z"
     description: A Helm chart for Keycloak, the open source identity and access management
@@ -3462,4 +3480,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-13T19:27:52.571056629Z"
+generated: "2026-10-13T22:47:12.145587812Z"

@@ -24,6 +24,6 @@ dependencies:
     repository: https://walnuss0815.github.io/helm-charts
     condition: tika.enabled
   - name: gotenberg
-    version: "0.1.9"
+    version: "0.1.10"
     repository: https://walnuss0815.github.io/helm-charts
     condition: gotenberg.enabled

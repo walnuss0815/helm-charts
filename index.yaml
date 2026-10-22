@@ -824,6 +824,20 @@ entries:
     version: 0.1.0
   immich-kiosk:
   - apiVersion: v2
+    appVersion: 0.45.2
+    created: "2026-10-22T17:07:24.018892672Z"
+    description: A Helm chart for Immich Kiosk
+    digest: d3663c963a77418b67ef4e81e8e31dea6e488693cc9bc0b3c554f2b007860f3e
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich-kiosk
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-kiosk-0.2.9/immich-kiosk-0.2.9.tgz
+    version: 0.2.9
+  - apiVersion: v2
     appVersion: 0.54.0
     created: "2026-10-13T11:32:19.235077938Z"
     description: A Helm chart for Immich Kiosk
@@ -3783,4 +3797,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-22T05:11:56.827327338Z"
+generated: "2026-10-22T17:07:24.01908352Z"

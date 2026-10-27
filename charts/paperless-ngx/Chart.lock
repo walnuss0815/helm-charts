@@ -1,7 +1,7 @@
 dependencies:
 - name: valkey
   repository: https://valkey.io/valkey-helm/
-  version: 0.12.0
+  version: 0.12.1
 - name: webdav
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.16
@@ -11,5 +11,5 @@ dependencies:
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.11
-digest: sha256:70c55583f3bb20a60d5720aaba30601e5d4487e9e634eb381f09c9c1e3270db7
-generated: "2026-10-27T12:36:24.691926543Z"
+digest: sha256:5b9b25c1c4be968a99e824e80f891b549aeeb71b85a86ea4ee9ca0c873e2bd8f
+generated: "2026-10-27T23:11:58.129622775Z"

@@ -2,7 +2,7 @@ apiVersion: v2
 name: immich
 description: A Helm chart for Immich, the high performance self-hosted photo and video management solution.
 type: application
-version: 1.0.4
+version: 1.0.5
 # renovate: image=ghcr.io/immich-app/immich-server
 appVersion: "v3.3.5"
 maintainers:
@@ -12,7 +12,7 @@ maintainers:
 
 dependencies:
   - name: valkey
-    version: "0.12.0"
+    version: "0.12.1"
     repository: https://valkey.io/valkey-helm/
     condition: valkey.enabled
   - name: immich-upload-optimizer

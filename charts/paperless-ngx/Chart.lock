@@ -10,6 +10,6 @@ dependencies:
   version: 0.1.5
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.10
-digest: sha256:54af79022224b0135bd71c1ce9eedcdc26c6263d62a9e885dd82dc68d30fb953
-generated: "2026-10-22T05:03:47.620778994Z"
+  version: 0.1.11
+digest: sha256:70c55583f3bb20a60d5720aaba30601e5d4487e9e634eb381f09c9c1e3270db7
+generated: "2026-10-27T12:36:24.691926543Z"

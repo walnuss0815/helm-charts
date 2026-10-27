@@ -30,6 +30,6 @@ jobs:
           helm repo add walnuss0815 https://walnuss0815.github.io/helm-charts
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@v1.8.0
         env:
           CR_TOKEN: "${{ secrets.ACTIONS_TOKEN }}"

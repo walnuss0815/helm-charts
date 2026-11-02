@@ -1657,6 +1657,25 @@ entries:
     version: 0.1.0
   openchamber:
   - apiVersion: v2
+    appVersion: v2.6.0
+    created: "2026-11-02T21:43:29.275907155Z"
+    description: A Helm chart for OpenChamber, a web workspace for running and reviewing
+      AI coding work with OpenCode
+    digest: 925e3a8b0cc54dee90631faf5dd717f435b7f40cbbb3f85534f6111deb3e41d5
+    home: https://openchamber.dev
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: openchamber
+    sources:
+    - https://github.com/openchamber/openchamber
+    - https://github.com/coyotle/openchamber
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/openchamber-0.1.10/openchamber-0.1.10.tgz
+    version: 0.1.10
+  - apiVersion: v2
     appVersion: v2.5.3
     created: "2026-10-29T19:21:00.855065867Z"
     description: A Helm chart for OpenChamber, a web workspace for running and reviewing
@@ -4076,4 +4095,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-31T09:46:25.573430725Z"
+generated: "2026-11-02T21:43:29.27621578Z"

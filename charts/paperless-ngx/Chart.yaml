@@ -27,3 +27,8 @@ dependencies:
     version: "0.1.11"
     repository: https://walnuss0815.github.io/helm-charts
     condition: gotenberg.enabled
+  - name: text-embeddings-inference
+    version: "0.1.0"
+    repository: https://walnuss0815.github.io/helm-charts
+    alias: embeddings
+    condition: embeddings.enabled

@@ -1,0 +1,16 @@
+persistence:
+  consumption:
+    # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
+    accessModes:
+      - ReadWriteOnce
+
+secretKey:
+  value: "ci-only-secret-key-not-for-production"
+
+ai:
+  enabled: true
+
+embeddings:
+  enabled: true
+  model:
+    id: sentence-transformers/all-MiniLM-L6-v2

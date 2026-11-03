@@ -74,3 +74,21 @@ valueFrom:
 value: {{ tpl .value . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Name of the embeddings subchart Service. Mirrors the text-embeddings-inference
+fullname helper, whose chart name is the "embeddings" alias.
+*/}}
+{{- define "paperless-ngx.embeddings.fullname" -}}
+{{- $values := .Values.embeddings }}
+{{- if $values.fullnameOverride }}
+{{- $values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default "embeddings" $values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}

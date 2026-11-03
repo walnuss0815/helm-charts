@@ -382,6 +382,15 @@ gotenberg:
   # -- Enable Gotenberg service
   enabled: true
 
+# -- Text Embeddings Inference subchart configuration (embeddings server for the AI features). Requires `ai.enabled`.
+# Wires the AI embeddings to this server through the `openai-like` backend, so the model stays out of the paperless
+# data volume and its backups and is not reloaded on every query. `embeddings.model.id` is the served model
+# (default `sentence-transformers/all-MiniLM-L6-v2`); for multilingual documents use e.g. `BAAI/bge-m3` with about
+# 3-4Gi memory (`embeddings.resources`). The model is downloaded on start; enable `embeddings.persistence.enabled` to cache it
+embeddings:
+  # -- Enable the Text Embeddings Inference server
+  enabled: false
+
 # -- AI features configuration (LLM-powered suggestions, RAG, and document chat)
 ai:
   # -- Enable AI features (master switch)
@@ -409,16 +418,20 @@ ai:
     contextSize: 8192
     # -- Timeout in seconds for requests to the AI backend
     requestTimeout: 120
-    # -- Allow AI endpoint URLs that resolve to private/loopback addresses
+    # -- Allow AI endpoint URLs that resolve to private/loopback addresses. Must stay `true` when using `embeddings`
     allowInternalEndpoints: true
     # -- Extra parameters passed to the LLM backend as JSON (`PAPERLESS_AI_LLM_EXTRA_PARAMS`), e.g. `{reasoning_effort: none}`
     extraParams: {}
     embedding:
-      # -- Embedding backend for RAG ("openai-like", "huggingface", or "ollama")
+      # -- Embedding backend for RAG ("openai-like", "huggingface", or "ollama"). Instead of "huggingface", consider
+      # `embeddings.enabled`: the model stays out of the paperless data volume and backups and is not reloaded on
+      # every query. Must stay unset when `embeddings.enabled` is `true`
       backend: ""
-      # -- Embedding model (defaults depend on backend)
+      # -- Embedding model (defaults depend on backend). With `embeddings.enabled`, defaults to `embeddings.model.id`;
+      # set it only to override the served-model name. Paperless rebuilds the LLM index when it changes
       model: ""
-      # -- Embedding endpoint URL (defaults to LLM endpoint if not set)
+      # -- Embedding endpoint URL (defaults to LLM endpoint if not set). Must stay unset when `embeddings.enabled` is
+      # `true`; the chart sets it to the embeddings server
       endpoint: ""
       # -- Chunk size when splitting document text for RAG embeddings
       chunkSize: 1024

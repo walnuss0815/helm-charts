@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.4.1](https://img.shields.io/badge/AppVersion-3.4.1-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.4.1](https://img.shields.io/badge/AppVersion-3.4.1-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -16,6 +16,7 @@ A Helm chart for Kubernetes
 |------------|------|---------|
 | https://valkey.io/valkey-helm/ | valkey | 0.12.1 |
 | https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.11 |
+| https://walnuss0815.github.io/helm-charts | embeddings(text-embeddings-inference) | 0.1.0 |
 | https://walnuss0815.github.io/helm-charts | tika | 0.1.5 |
 | https://walnuss0815.github.io/helm-charts | webdav | 0.1.16 |
 
@@ -27,7 +28,7 @@ A Helm chart for Kubernetes
 | ai | object | `{"enabled":false,"indexTaskCron":"10 2 * * *","llm":{"allowInternalEndpoints":true,"apiKey":{"secretKeyRef":{"key":"","name":""},"value":""},"backend":"","contextSize":8192,"embedding":{"backend":"","chunkSize":1024,"endpoint":"","model":""},"endpoint":"","extraParams":{},"model":"","outputLanguage":"","requestTimeout":120}}` | AI features configuration (LLM-powered suggestions, RAG, and document chat) |
 | ai.enabled | bool | `false` | Enable AI features (master switch) |
 | ai.indexTaskCron | string | `"10 2 * * *"` | Cron schedule for updating AI embeddings index |
-| ai.llm.allowInternalEndpoints | bool | `true` | Allow AI endpoint URLs that resolve to private/loopback addresses |
+| ai.llm.allowInternalEndpoints | bool | `true` | Allow AI endpoint URLs that resolve to private/loopback addresses. Must stay `true` when using `embeddings` |
 | ai.llm.apiKey | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | API key for the LLM backend (required for OpenAI-compatible backends) |
 | ai.llm.apiKey.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing the API key |
 | ai.llm.apiKey.secretKeyRef.key | string | `""` | Key within the secret |
@@ -35,10 +36,10 @@ A Helm chart for Kubernetes
 | ai.llm.apiKey.value | string | `""` | API key value (use secretKeyRef in production) |
 | ai.llm.backend | string | `""` | LLM backend to use ("openai-like" or "ollama") |
 | ai.llm.contextSize | int | `8192` | Context size for AI prompts and RAG retrieval |
-| ai.llm.embedding.backend | string | `""` | Embedding backend for RAG ("openai-like", "huggingface", or "ollama") |
+| ai.llm.embedding.backend | string | `""` | Embedding backend for RAG ("openai-like", "huggingface", or "ollama"). Instead of "huggingface", consider `embeddings.enabled`: the model stays out of the paperless data volume and backups and is not reloaded on every query. Must stay unset when `embeddings.enabled` is `true` |
 | ai.llm.embedding.chunkSize | int | `1024` | Chunk size when splitting document text for RAG embeddings |
-| ai.llm.embedding.endpoint | string | `""` | Embedding endpoint URL (defaults to LLM endpoint if not set) |
-| ai.llm.embedding.model | string | `""` | Embedding model (defaults depend on backend) |
+| ai.llm.embedding.endpoint | string | `""` | Embedding endpoint URL (defaults to LLM endpoint if not set). Must stay unset when `embeddings.enabled` is `true`; the chart sets it to the embeddings server |
+| ai.llm.embedding.model | string | `""` | Embedding model (defaults depend on backend). With `embeddings.enabled`, defaults to `embeddings.model.id`; set it only to override the served-model name. Paperless rebuilds the LLM index when it changes |
 | ai.llm.endpoint | string | `""` | Endpoint URL for the LLM backend (required for Ollama; optional for OpenAI-compatible) |
 | ai.llm.extraParams | object | `{}` | Extra parameters passed to the LLM backend as JSON (`PAPERLESS_AI_LLM_EXTRA_PARAMS`), e.g. `{reasoning_effort: none}` |
 | ai.llm.model | string | `""` | LLM model to use (defaults to "gpt-3.5-turbo" for OpenAI-compatible or "llama3.1" for Ollama) |
@@ -60,6 +61,8 @@ A Helm chart for Kubernetes
 | database.username.secretKeyRef.key | string | `""` | Key within the secret |
 | database.username.secretKeyRef.name | string | `""` | Name of the secret |
 | database.username.value | string | `"paperless"` | Database username value |
+| embeddings | object | `{"enabled":false}` | Text Embeddings Inference subchart configuration (embeddings server for the AI features). Requires `ai.enabled`. Wires the AI embeddings to this server through the `openai-like` backend, so the model stays out of the paperless data volume and its backups and is not reloaded on every query. `embeddings.model.id` is the served model (default `sentence-transformers/all-MiniLM-L6-v2`); for multilingual documents use e.g. `BAAI/bge-m3` with about 3-4Gi memory (`embeddings.resources`). The model is downloaded on start; enable `embeddings.persistence.enabled` to cache it |
+| embeddings.enabled | bool | `false` | Enable the Text Embeddings Inference server |
 | env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl` |
 | envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |

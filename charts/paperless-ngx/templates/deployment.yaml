@@ -114,6 +114,10 @@ spec:
               value: "1"
             - name: S6_READ_ONLY_ROOT
               value: "1"
+            {{- with .Values.workerTimeout }}
+            - name: PAPERLESS_WORKER_TIMEOUT
+              value: {{ . | int64 | quote }}
+            {{- end }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
               value: {{ (tpl $value $) | quote }}

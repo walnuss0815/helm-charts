@@ -1,0 +1,229 @@
+# Default values for text-embeddings-inference.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replicas. Each replica downloads and caches the model on its own
+replicaCount: 1
+
+image:
+  # -- Image repository. Tags are prefixed by hardware: `cpu-<version>` (amd64),
+  # `cpu-arm64-<version>` for arm64, and tags without `cpu-` (e.g. `89-<version>`)
+  # for NVIDIA GPUs
+  repository: ghcr.io/huggingface/text-embeddings-inference
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag. Defaults to the chart's `appVersion` if not set
+  tag: ""
+
+# -- Secrets for pulling images from a private registry
+imagePullSecrets: []
+# -- Override the chart name
+nameOverride: ""
+# -- Override the full resource name
+fullnameOverride: ""
+
+model:
+  # -- Hugging Face model ID or local path passed as `--model-id`. The small
+  # default suits tests; e.g. `BAAI/bge-m3` is a strong multilingual model
+  id: sentence-transformers/all-MiniLM-L6-v2
+  # -- Model revision (commit, branch or tag) passed as `--revision`. Empty uses
+  # the default branch
+  revision: ""
+
+# -- Additional arguments for `text-embeddings-router`, e.g. `--auto-truncate`
+# or `--tokenization-workers=2`
+extraArgs: []
+# - --max-client-batch-size=64
+
+# -- API key clients must send as `Authorization: Bearer <key>` (`API_KEY`).
+# Health and metrics endpoints stay public
+# @default -- not set
+apiKey:
+  # -- Plain-text value, stored in a chart-managed Secret. Ignored if
+  # `secretKeyRef.name` is set. Prefer `secretKeyRef`
+  value: ""
+  secretKeyRef:
+    # -- Name of an existing Secret
+    name: ""
+    # -- Key within the Secret
+    key: ""
+
+# -- Additional environment variables as a map of variable name to value.
+# Values are rendered with `tpl`. Overrides the chart-set `PORT`, `HF_HOME` and
+# `HUGGINGFACE_HUB_CACHE` (changing `PORT` breaks the probes).
+# `RAYON_NUM_THREADS` should match the CPU limit
+env:
+  RAYON_NUM_THREADS: "1"
+
+# -- Additional environment variables as a map of variable name to a Kubernetes
+# `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
+envFrom: {}
+# MY_VAR:
+#   secretKeyRef:
+#     name: my-secret
+#     key: my-key
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount the ServiceAccount's API credentials. Text
+  # Embeddings Inference does not need access to the Kubernetes API
+  automount: false
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- Name of the service account to use. If not set and `create` is `true`, a
+  # name is generated using the fullname template
+  name: ""
+
+# -- Annotations to add to the pod
+podAnnotations: {}
+# -- Labels to add to the pod
+podLabels: {}
+
+# -- Pod security context. Runs as a non-root user; `fsGroup` makes the model cache writable
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container security context. The root filesystem is read-only; the model
+# cache (`/data`) and `/tmp` are writable volumes
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port. Traffic is forwarded to container port 8080
+  port: 8080
+
+ingress:
+  # -- Enable an Ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations, e.g. `nginx.ingress.kubernetes.io/proxy-body-size: 10m`
+  annotations: {}
+  # -- Ingress hosts and paths
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- Ingress TLS configuration
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# -- Expose the service via a Gateway API HTTPRoute. Requires the Gateway API
+# CRDs and a suitable controller in the cluster
+# (see: https://gateway-api.sigs.k8s.io/guides/)
+httpRoute:
+  # -- Enable an HTTPRoute
+  enabled: false
+  # -- HTTPRoute annotations
+  annotations: {}
+  # -- Gateways this route is attached to
+  parentRefs:
+    - name: gateway
+      sectionName: http
+      # namespace: default
+  # -- Hostnames matching the HTTP Host header
+  hostnames:
+    - chart-example.local
+  # -- Routing rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+# -- Resource requests and limits sized for the default small model. Larger
+# models need more, e.g. about 3-4Gi memory for `BAAI/bge-m3`
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# -- Startup probe configuration. Empty disables the probe. The first start
+# downloads the model, so up to 10 minutes are allowed
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 60
+# -- Liveness probe configuration. Empty disables the probe
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+# -- Readiness probe configuration. Empty disables the probe
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+persistence:
+  # -- Store the model cache (`/data`) on a PVC so restarts skip the download.
+  # It only holds downloadable models and needs no backup. When disabled, an
+  # `emptyDir` is used
+  enabled: false
+  # -- Use an existing PVC instead of creating one
+  existingClaim: ""
+  # -- Annotations for the PVC
+  annotations: {}
+  # -- Storage class. Empty uses the cluster default; `-` sets `storageClassName: ""`
+  storageClass: ""
+  # -- Access modes
+  accessModes:
+    - ReadWriteOnce
+  # -- Size of the PVC
+  size: 5Gi
+  # -- Size limit of the `emptyDir` used when persistence is disabled
+  sizeLimit: ""
+
+# -- Additional volumes
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+
+# -- Additional volume mounts
+volumeMounts: []
+# - name: foo
+#   mountPath: /etc/foo
+#   readOnly: true
+
+# -- Node selector for the pod
+nodeSelector: {}
+# -- Tolerations for the pod
+tolerations: []
+# -- Affinity rules for the pod
+affinity: {}
+
+# -- Extra Kubernetes manifests to deploy alongside the chart. Each entry is
+# rendered with `tpl`
+extraManifests: []

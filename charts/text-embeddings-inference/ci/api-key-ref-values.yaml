@@ -1,0 +1,19 @@
+# API key from a pre-existing Secret, emptyDir with a size limit, extra args and env.
+apiKey:
+  secretKeyRef:
+    name: tei-ci-api-key
+    key: api-key
+persistence:
+  sizeLimit: 1Gi
+extraArgs:
+  - --auto-truncate
+env:
+  RAYON_NUM_THREADS: "2"
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: tei-ci-api-key
+    stringData:
+      api-key: "ci-api-key"

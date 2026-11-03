@@ -1,0 +1,38 @@
+Text Embeddings Inference {{ .Chart.AppVersion }} has been deployed.
+
+1. Get the application URL:
+{{- if .Values.httpRoute.enabled }}
+{{- range .Values.httpRoute.hostnames }}
+  http(s)://{{ . }}/
+{{- end }}
+{{- else if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "text-embeddings-inference.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "text-embeddings-inference.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "text-embeddings-inference.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "text-embeddings-inference.fullname" . }} 8080:{{ .Values.service.port }}
+{{- end }}
+
+2. Request an embedding (the example uses the port-forward above):
+  curl http://127.0.0.1:8080/v1/embeddings \
+    -H "Content-Type: application/json" \
+{{- if or .Values.apiKey.value .Values.apiKey.secretKeyRef.name }}
+    -H "Authorization: Bearer <api key>" \
+{{- end }}
+    -d '{"model": "{{ .Values.model.id }}", "input": "Hello world"}'
+{{- if not .Values.persistence.enabled }}
+
+NOTE: persistence.enabled is false, so the model is downloaded again on
+every pod start.
+{{- end }}

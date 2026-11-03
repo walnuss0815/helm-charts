@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "text-embeddings-inference.fullname" . }}-test-connection"
+  labels:
+    {{- include "text-embeddings-inference.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: wget
+      image: busybox:1.36.1
+      command: ['wget']
+      args:
+        - '-q'
+        - '-O'
+        - '/dev/null'
+        - '-T'
+        - '10'
+        - '{{ include "text-embeddings-inference.fullname" . }}:{{ .Values.service.port }}/health'
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+  restartPolicy: Never

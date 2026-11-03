@@ -202,6 +202,10 @@ env: {}
 # e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`
 envFrom: {}
 
+# -- (int) Celery task hard time limit in seconds (`PAPERLESS_WORKER_TIMEOUT`). Paperless defaults to 1800 s. It also limits
+# the LLM index build (`llmindex_index`); large embedding models on CPU can exceed it on the first build. Unset or `0` keeps the default
+workerTimeout: null
+
 # -- Persistence configuration for paperless-ngx volumes
 persistence:
   # -- Data directory persistence configuration

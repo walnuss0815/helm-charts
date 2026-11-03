@@ -50,6 +50,10 @@ only holds downloadable models and needs no backup. Without
 `persistence.enabled`, an `emptyDir` is used and the model is downloaded again
 on every pod start.
 
+Pods are replaced with the `Recreate` strategy, so a new pod never waits for a
+`ReadWriteOnce` cache volume that the old pod still holds. All replicas stop
+together during an update, so expect a short outage while the model loads.
+
 ## Image tags
 
 The default tag (`cpu-<version>`) runs on amd64 CPUs. For arm64, set

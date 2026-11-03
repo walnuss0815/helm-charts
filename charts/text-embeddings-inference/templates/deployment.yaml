@@ -6,6 +6,9 @@ metadata:
     {{- include "text-embeddings-inference.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  # A new pod would wait for the ReadWriteOnce model cache held by the old one
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "text-embeddings-inference.selectorLabels" . | nindent 6 }}

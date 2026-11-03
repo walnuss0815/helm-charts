@@ -1,6 +1,6 @@
 # text-embeddings-inference
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: cpu-1.9.4](https://img.shields.io/badge/AppVersion-cpu--1.9.4-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: cpu-1.9.4](https://img.shields.io/badge/AppVersion-cpu--1.9.4-informational?style=flat-square)
 
 A Helm chart for Hugging Face Text Embeddings Inference, a fast server for text embedding models with an OpenAI-compatible API
 
@@ -27,6 +27,10 @@ endpoint can use it, e.g. the `openai-like` embedding backend of paperless-ngx.
 model:
   id: BAAI/bge-m3
 
+# On CPU, long-context models need a lower batch limit, see "Long-context models on CPU"
+extraArgs:
+  - --max-batch-tokens=2048
+
 persistence:
   enabled: true
 
@@ -52,6 +56,10 @@ Models are downloaded from Hugging Face into `/data` on first start. The cache
 only holds downloadable models and needs no backup. Without
 `persistence.enabled`, an `emptyDir` is used and the model is downloaded again
 on every pod start.
+
+Pods are replaced with the `Recreate` strategy, so a new pod never waits for a
+`ReadWriteOnce` cache volume that the old pod still holds. All replicas stop
+together during an update, so expect a short outage while the model loads.
 
 ## Image tags
 
@@ -85,6 +93,22 @@ apiKey:
 Clients then send `Authorization: Bearer <key>`. `/health` and `/metrics` stay
 public.
 
+## Long-context models on CPU
+
+On CPU, TEI warms up by running one sequence of
+`min(the model's maximum input, --max-batch-tokens)` tokens. The default
+`--max-batch-tokens` is 16384, so a model like `BAAI/bge-m3` (8192 tokens) warms
+up with a full 8192-token sequence. Attention memory grows with the square of
+the sequence length, which together with the weights exceeds 6Gi and gets the
+container OOM-killed right after the "Warming up model" log line.
+
+Set `--max-batch-tokens` a little above the longest input your client sends.
+For example, paperless-ngx sends chunks of about 1024 tokens, and
+`--max-batch-tokens=2048` keeps `BAAI/bge-m3` at about 2 GiB of memory (3.3 GiB
+peak with file cache) on 2 CPU threads. Longer inputs are truncated, because
+`--auto-truncate` is on by default. The log line "Backend does not support a
+batch size > 8" is harmless.
+
 ## Resources
 
 TEI runs inference on all CPU cores it can see. Set `env.RAYON_NUM_THREADS` to
@@ -103,7 +127,7 @@ count.
 | apiKey.value | string | `""` | Plain-text value, stored in a chart-managed Secret. Ignored if `secretKeyRef.name` is set. Prefer `secretKeyRef` |
 | env | object | `{"RAYON_NUM_THREADS":"1"}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl`. Overrides the chart-set `PORT`, `HF_HOME` and `HUGGINGFACE_HUB_CACHE` (changing `PORT` breaks the probes). `RAYON_NUM_THREADS` should match the CPU limit |
 | envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
-| extraArgs | list | `[]` | Additional arguments for `text-embeddings-router`, e.g. `--auto-truncate` or `--tokenization-workers=2` |
+| extraArgs | list | `[]` | Additional arguments for `text-embeddings-router`, e.g. `--max-batch-tokens=2048` (see the README on long-context models), `--auto-truncate` or `--tokenization-workers=2` |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the full resource name |
 | httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}` | Expose the service via a Gateway API HTTPRoute. Requires the Gateway API CRDs and a suitable controller in the cluster (see: https://gateway-api.sigs.k8s.io/guides/) |
@@ -138,7 +162,7 @@ count.
 | podSecurityContext | object | `{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch","runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod security context. Runs as a non-root user; `fsGroup` makes the model cache writable |
 | readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/health","port":"http"},"periodSeconds":10,"timeoutSeconds":5}` | Readiness probe configuration. Empty disables the probe |
 | replicaCount | int | `1` | Number of replicas. Each replica downloads and caches the model on its own |
-| resources | object | `{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource requests and limits sized for the default small model. Larger models need more, e.g. about 3-4Gi memory for `BAAI/bge-m3` |
+| resources | object | `{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource requests and limits sized for the default small model. Larger models need more, e.g. about 3-4Gi memory for `BAAI/bge-m3` on CPU with `--max-batch-tokens=2048` (see the README) |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | Container security context. The root filesystem is read-only; the model cache (`/data`) and `/tmp` are writable volumes |
 | service.port | int | `8080` | Service port. Traffic is forwarded to container port 8080 |
 | service.type | string | `"ClusterIP"` | Service type |

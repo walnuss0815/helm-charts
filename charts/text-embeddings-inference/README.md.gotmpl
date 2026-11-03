@@ -1,0 +1,94 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+[Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference)
+(TEI) serves text embedding models behind an OpenAI-compatible API
+(`/v1/embeddings`). Any client that supports an OpenAI-style embeddings
+endpoint can use it, e.g. the `openai-like` embedding backend of paperless-ngx.
+
+## Quick start
+
+```yaml
+model:
+  id: BAAI/bge-m3
+
+persistence:
+  enabled: true
+
+resources:
+  limits:
+    memory: 4Gi
+```
+
+Inside the cluster, use the base URL
+`http://<release>-text-embeddings-inference:8080/v1`. To try it from your
+machine:
+
+```sh
+kubectl port-forward svc/<release>-text-embeddings-inference 8080:8080
+curl http://127.0.0.1:8080/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{"model": "BAAI/bge-m3", "input": "Hello world"}'
+```
+
+## Model cache
+
+Models are downloaded from Hugging Face into `/data` on first start. The cache
+only holds downloadable models and needs no backup. Without
+`persistence.enabled`, an `emptyDir` is used and the model is downloaded again
+on every pod start.
+
+## Image tags
+
+The default tag (`cpu-<version>`) runs on amd64 CPUs. For arm64, set
+`image.tag` to `cpu-arm64-<version>`. For NVIDIA GPUs, use a tag without the
+`cpu-` prefix that matches your GPU architecture (e.g. `89-<version>`) and
+request the GPU:
+
+```yaml
+image:
+  tag: 89-1.9.4
+
+resources:
+  limits:
+    nvidia.com/gpu: "1"
+```
+
+## API key
+
+Without an API key, anyone who can reach the service can use it. To require
+one, set `apiKey.value` (stored in a chart-managed Secret) or, preferably,
+reference an existing Secret:
+
+```yaml
+apiKey:
+  secretKeyRef:
+    name: tei-api-key
+    key: api-key
+```
+
+Clients then send `Authorization: Bearer <key>`. `/health` and `/metrics` stay
+public.
+
+## Resources
+
+TEI runs inference on all CPU cores it can see. Set `env.RAYON_NUM_THREADS` to
+match the CPU limit. On nodes with many cores, also limit the tokenizer threads,
+e.g. `extraArgs: ["--tokenization-workers=2"]`; the default is the node's core
+count.
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

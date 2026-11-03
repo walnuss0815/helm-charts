@@ -1,0 +1,8 @@
+# Chart-managed PVC for the model cache and an inline API key.
+persistence:
+  enabled: true
+  size: 1Gi
+  accessModes:
+    - ReadWriteOnce
+apiKey:
+  value: "ci-api-key"

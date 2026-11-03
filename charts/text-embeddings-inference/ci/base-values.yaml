@@ -1,0 +1,3 @@
+# Minimal install with the small default model, no persistence.
+model:
+  id: sentence-transformers/all-MiniLM-L6-v2

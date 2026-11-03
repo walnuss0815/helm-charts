@@ -30,8 +30,8 @@ model:
   # the default branch
   revision: ""
 
-# -- Additional arguments for `text-embeddings-router`, e.g. `--auto-truncate`
-# or `--tokenization-workers=2`
+# -- Additional arguments for `text-embeddings-router`, e.g. `--max-batch-tokens=2048`
+# (see the README on long-context models), `--auto-truncate` or `--tokenization-workers=2`
 extraArgs: []
 # - --max-client-batch-size=64
 
@@ -151,7 +151,8 @@ httpRoute:
             value: /
 
 # -- Resource requests and limits sized for the default small model. Larger
-# models need more, e.g. about 3-4Gi memory for `BAAI/bge-m3`
+# models need more, e.g. about 3-4Gi memory for `BAAI/bge-m3` on CPU with
+# `--max-batch-tokens=2048` (see the README)
 resources:
   requests:
     cpu: 100m

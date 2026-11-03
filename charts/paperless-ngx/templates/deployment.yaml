@@ -165,6 +165,35 @@ spec:
             - name: PAPERLESS_AI_LLM_EXTRA_PARAMS
               value: {{ mustToJson . | quote }}
             {{- end }}
+            {{- if .Values.embeddings.enabled }}
+            {{- if or .Values.ai.llm.embedding.backend .Values.ai.llm.embedding.endpoint }}
+            {{- fail "ai.llm.embedding.backend and ai.llm.embedding.endpoint must be unset when embeddings.enabled is true" }}
+            {{- end }}
+            {{- if not .Values.ai.llm.allowInternalEndpoints }}
+            {{- fail "ai.llm.allowInternalEndpoints must be true when embeddings.enabled is true" }}
+            {{- end }}
+            - name: PAPERLESS_AI_LLM_EMBEDDING_BACKEND
+              value: "openai-like"
+            - name: PAPERLESS_AI_LLM_EMBEDDING_MODEL
+              value: {{ .Values.ai.llm.embedding.model | default .Values.embeddings.model.id | quote }}
+            - name: PAPERLESS_AI_LLM_EMBEDDING_ENDPOINT
+              value: "http://{{ include "paperless-ngx.embeddings.fullname" . }}:{{ .Values.embeddings.service.port }}/v1"
+            {{- with .Values.embeddings.apiKey }}
+            {{- if .secretKeyRef.name }}
+            - name: PAPERLESS_AI_LLM_EMBEDDING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .secretKeyRef.name $ | quote }}
+                  key: {{ tpl (required "embeddings.apiKey.secretKeyRef.key is required when embeddings.apiKey.secretKeyRef.name is set" .secretKeyRef.key) $ | quote }}
+            {{- else if .value }}
+            - name: PAPERLESS_AI_LLM_EMBEDDING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "paperless-ngx.embeddings.fullname" $ | quote }}
+                  key: api-key
+            {{- end }}
+            {{- end }}
+            {{- else }}
             {{- if .Values.ai.llm.embedding.backend }}
             - name: PAPERLESS_AI_LLM_EMBEDDING_BACKEND
               value: {{ .Values.ai.llm.embedding.backend | quote }}
@@ -176,6 +205,7 @@ spec:
             {{- if .Values.ai.llm.embedding.endpoint }}
             - name: PAPERLESS_AI_LLM_EMBEDDING_ENDPOINT
               value: {{ .Values.ai.llm.embedding.endpoint | quote }}
+            {{- end }}
             {{- end }}
             - name: PAPERLESS_AI_LLM_EMBEDDING_CHUNK_SIZE
               value: {{ .Values.ai.llm.embedding.chunkSize | quote }}

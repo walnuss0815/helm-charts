@@ -24,6 +24,10 @@ endpoint can use it, e.g. the `openai-like` embedding backend of paperless-ngx.
 model:
   id: BAAI/bge-m3
 
+# On CPU, long-context models need a lower batch limit, see "Long-context models on CPU"
+extraArgs:
+  - --max-batch-tokens=2048
+
 persistence:
   enabled: true
 
@@ -85,6 +89,22 @@ apiKey:
 
 Clients then send `Authorization: Bearer <key>`. `/health` and `/metrics` stay
 public.
+
+## Long-context models on CPU
+
+On CPU, TEI warms up by running one sequence of
+`min(the model's maximum input, --max-batch-tokens)` tokens. The default
+`--max-batch-tokens` is 16384, so a model like `BAAI/bge-m3` (8192 tokens) warms
+up with a full 8192-token sequence. Attention memory grows with the square of
+the sequence length, which together with the weights exceeds 6Gi and gets the
+container OOM-killed right after the "Warming up model" log line.
+
+Set `--max-batch-tokens` a little above the longest input your client sends.
+For example, paperless-ngx sends chunks of about 1024 tokens, and
+`--max-batch-tokens=2048` keeps `BAAI/bge-m3` at about 2 GiB of memory (3.3 GiB
+peak with file cache) on 2 CPU threads. Longer inputs are truncated, because
+`--auto-truncate` is on by default. The log line "Backend does not support a
+batch size > 8" is harmless.
 
 ## Resources
 

@@ -157,6 +157,10 @@ spec:
               value: {{ .Values.ai.llm.requestTimeout | quote }}
             - name: PAPERLESS_AI_LLM_ALLOW_INTERNAL_ENDPOINTS
               value: {{ .Values.ai.llm.allowInternalEndpoints | quote }}
+            {{- with .Values.ai.llm.extraParams }}
+            - name: PAPERLESS_AI_LLM_EXTRA_PARAMS
+              value: {{ mustToJson . | quote }}
+            {{- end }}
             {{- if .Values.ai.llm.embedding.backend }}
             - name: PAPERLESS_AI_LLM_EMBEDDING_BACKEND
               value: {{ .Values.ai.llm.embedding.backend | quote }}

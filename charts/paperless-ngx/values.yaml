@@ -407,6 +407,8 @@ ai:
     requestTimeout: 120
     # -- Allow AI endpoint URLs that resolve to private/loopback addresses
     allowInternalEndpoints: true
+    # -- Extra parameters passed to the LLM backend as JSON (`PAPERLESS_AI_LLM_EXTRA_PARAMS`), e.g. `{reasoning_effort: none}`
+    extraParams: {}
     embedding:
       # -- Embedding backend for RAG ("openai-like", "huggingface", or "ollama")
       backend: ""

@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.4.1](https://img.shields.io/badge/AppVersion-3.4.1-informational?style=flat-square)
+![Version: 2.2.1](https://img.shields.io/badge/Version-2.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.4.1](https://img.shields.io/badge/AppVersion-3.4.1-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -61,7 +61,7 @@ A Helm chart for Kubernetes
 | database.username.secretKeyRef.key | string | `""` | Key within the secret |
 | database.username.secretKeyRef.name | string | `""` | Name of the secret |
 | database.username.value | string | `"paperless"` | Database username value |
-| embeddings | object | `{"enabled":false}` | Text Embeddings Inference subchart configuration (embeddings server for the AI features). Requires `ai.enabled`. Wires the AI embeddings to this server through the `openai-like` backend, so the model stays out of the paperless data volume and its backups and is not reloaded on every query. `embeddings.model.id` is the served model (default `sentence-transformers/all-MiniLM-L6-v2`); for multilingual documents use e.g. `BAAI/bge-m3` with about 3-4Gi memory (`embeddings.resources`). The model is downloaded on start; enable `embeddings.persistence.enabled` to cache it |
+| embeddings | object | `{"enabled":false}` | Text Embeddings Inference subchart configuration (embeddings server for the AI features). Requires `ai.enabled`. Wires the AI embeddings to this server through the `openai-like` backend, so the model stays out of the paperless data volume and its backups and is not reloaded on every query. `embeddings.model.id` is the served model (default `sentence-transformers/all-MiniLM-L6-v2`); for multilingual documents use e.g. `BAAI/bge-m3` with `embeddings.extraArgs: [--max-batch-tokens=2048]` and about 4Gi memory (`embeddings.resources`). Without the batch limit, the CPU warm-up of `BAAI/bge-m3` is OOM-killed even at 6Gi. The model is downloaded on start; enable `embeddings.persistence.enabled` to cache it |
 | embeddings.enabled | bool | `false` | Enable the Text Embeddings Inference server |
 | env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl` |
 | envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |

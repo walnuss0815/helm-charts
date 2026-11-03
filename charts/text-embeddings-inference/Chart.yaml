@@ -2,7 +2,7 @@ apiVersion: v2
 name: text-embeddings-inference
 description: A Helm chart for Hugging Face Text Embeddings Inference, a fast server for text embedding models with an OpenAI-compatible API
 type: application
-version: 0.1.0
+version: 0.1.1
 # renovate: image=ghcr.io/huggingface/text-embeddings-inference
 appVersion: "cpu-1.9.4"
 home: https://huggingface.co/docs/text-embeddings-inference

@@ -3746,6 +3746,25 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/postgres-0.1.1/postgres-0.1.1.tgz
     version: 0.1.1
+  text-embeddings-inference:
+  - apiVersion: v2
+    appVersion: cpu-1.9.4
+    created: "2026-11-03T16:03:41.70784409Z"
+    description: A Helm chart for Hugging Face Text Embeddings Inference, a fast server
+      for text embedding models with an OpenAI-compatible API
+    digest: d7d70b3071f24323ec989a72eebc2885efda0a042a20cff7d083d936d6fe0f4e
+    home: https://huggingface.co/docs/text-embeddings-inference
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: text-embeddings-inference
+    sources:
+    - https://github.com/huggingface/text-embeddings-inference
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/text-embeddings-inference-0.1.0/text-embeddings-inference-0.1.0.tgz
+    version: 0.1.0
   tika:
   - apiVersion: v2
     appVersion: 3.3.3.0-full
@@ -4126,4 +4145,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-03T15:11:18.086312089Z"
+generated: "2026-11-03T16:03:41.708111369Z"

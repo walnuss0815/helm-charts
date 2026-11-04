@@ -2,7 +2,7 @@ apiVersion: v2
 name: paperless-ngx
 description: A Helm chart for Kubernetes
 type: application
-version: 2.2.1
+version: 2.2.2
 # renovate: image=ghcr.io/paperless-ngx/paperless-ngx
 appVersion: "3.4.1"
 maintainers:
@@ -28,7 +28,7 @@ dependencies:
     repository: https://walnuss0815.github.io/helm-charts
     condition: gotenberg.enabled
   - name: text-embeddings-inference
-    version: "0.1.0"
+    version: "0.1.1"
     repository: https://walnuss0815.github.io/helm-charts
     alias: embeddings
     condition: embeddings.enabled

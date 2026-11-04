@@ -437,6 +437,31 @@ entries:
     version: 0.1.0
   immich:
   - apiVersion: v2
+    appVersion: v3.3.6
+    created: "2026-11-04T21:58:13.315562918Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.12.1
+    - alias: upload-optimizer
+      condition: upload-optimizer.enabled
+      name: immich-upload-optimizer
+      repository: https://walnuss0815.github.io/helm-charts
+      version: 0.1.1
+    description: A Helm chart for Immich, the high performance self-hosted photo and
+      video management solution.
+    digest: c801bc49a2430f4b7d178ea90b9513e9824b5c538600fe39e3cd9ba480e5ecb7
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-1.0.6/immich-1.0.6.tgz
+    version: 1.0.6
+  - apiVersion: v2
     appVersion: v3.3.5
     created: "2026-10-27T23:28:15.231862695Z"
     dependencies:
@@ -4321,4 +4346,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-04T09:29:41.35816812Z"
+generated: "2026-11-04T21:58:13.315702649Z"

@@ -2,7 +2,7 @@ apiVersion: v2
 name: immich-kiosk
 description: A Helm chart for Immich Kiosk
 type: application
-version: 0.2.10
+version: 0.2.11
 # renovate: image=ghcr.io/damongolding/immich-kiosk
 appVersion: "0.47.0"
 maintainers:

@@ -10,9 +10,9 @@ dependencies:
   version: 0.1.5
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.11
+  version: 0.1.12
 - name: text-embeddings-inference
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.1
-digest: sha256:54a4933cbd700c416a77538eb5474db672beb45c1276114b651bd2fb1b78eaf6
-generated: "2026-11-04T01:02:11.397121442Z"
+digest: sha256:1180566cf01eb1c34cb066ba60839e2f83083fa283a13ad5d7f5131a606bda43
+generated: "2026-11-06T12:12:39.016004331Z"

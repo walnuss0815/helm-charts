@@ -1,6 +1,6 @@
 # gotenberg
 
-![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 8.39](https://img.shields.io/badge/AppVersion-8.39-informational?style=flat-square)
+![Version: 0.1.12](https://img.shields.io/badge/Version-0.1.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 8.40](https://img.shields.io/badge/AppVersion-8.40-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 

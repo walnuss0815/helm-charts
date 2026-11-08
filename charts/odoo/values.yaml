@@ -154,6 +154,11 @@ extraManifests: []
 persistence:
   # -- Odoo data directory persistence configuration
   data:
+    # -- Keep the data PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # filestore (attachments and sessions). Delete it manually with
+    # `kubectl delete pvc <fullname>-data`
+    keep: true
     # -- Annotations for the Odoo data PVC
     annotations: {}
     # -- Storage class for the Odoo data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
@@ -165,6 +170,10 @@ persistence:
       - ReadWriteOnce
   # -- Odoo addons directory persistence configuration
   addons:
+    # -- Keep the addons PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # custom addons. Delete it manually with `kubectl delete pvc <fullname>-addons`
+    keep: true
     # -- Annotations for the Odoo addons PVC
     annotations: {}
     # -- Storage class for the Odoo addons PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning

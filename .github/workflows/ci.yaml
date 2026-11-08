@@ -4,6 +4,10 @@ on: pull_request
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   list-changed:
     name: List changed Helm Charts
@@ -31,6 +35,43 @@ jobs:
           changed=$(ct list-changed --config ct.yaml --target-branch "$GITHUB_BASE_REF")
           charts_json=$(echo "${changed#"charts/"}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(split("/")[-1])')
           echo "changed-charts=$charts_json" >> "$GITHUB_OUTPUT"
+
+  update-docs:
+    name: Update Helm documentation
+    needs: list-changed
+    # Forks get no secrets, so the push to the PR branch cannot work there
+    if: ${{ needs.list-changed.outputs.changed-charts != '[]' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          # A push with GITHUB_TOKEN would not run CI for the new commit
+          token: ${{ secrets.ACTIONS_TOKEN }}
+
+      - name: Run helm-docs
+        uses: losisin/helm-docs-github-action@v2
+        with:
+          chart-search-root: charts
+          version: v1.14.2
+
+      # Stages only the changed charts, like the release workflow
+      - name: Commit and push
+        env:
+          CHARTS: ${{ needs.list-changed.outputs.changed-charts }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          jq -r '.[] | "charts/\(.)/README.md"' <<<"$CHARTS" | xargs -r git add --
+          if git diff --staged --quiet; then
+            echo "No changes to commit, skipping."
+            exit 0
+          fi
+          git commit -m "docs: update Helm documentation"
+          git push
 
   lint-test:
     name: Test and lint Helm Charts
@@ -79,14 +120,16 @@ jobs:
 
   check:
     name: Check CI status
+    # Also runs in cancelled runs: a red check on a superseded commit is expected
     if: always()
     needs:
       - list-changed
+      - update-docs
       - lint-test
     runs-on: ubuntu-latest
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
         with:
-          allowed-skips: lint-test
+          allowed-skips: update-docs,lint-test
           jobs: ${{ toJSON(needs) }}

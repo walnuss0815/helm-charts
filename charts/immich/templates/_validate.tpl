@@ -39,6 +39,11 @@ Deployment, which is always rendered.
 {{- fail (printf "config.env.%s must set either value, secretKeyRef or configMapRef" $token) }}
 {{- end }}
 {{- end }}
+{{- with .Values.persistence.media }}
+{{- if not (or .enabled .existingClaim) }}
+{{- fail "persistence.media.existingClaim is required when persistence.media.enabled is false: the server and microservices always mount the media volume" }}
+{{- end }}
+{{- end }}
 {{- with .Values.persistence.modelCache }}
 {{- if not (has .type (list "pvc" "emptyDir")) }}
 {{- fail (printf "persistence.modelCache.type must be \"pvc\" or \"emptyDir\" (got %q)" (toString .type)) }}

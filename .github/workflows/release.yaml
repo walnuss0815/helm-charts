@@ -43,6 +43,7 @@ jobs:
         uses: losisin/helm-docs-github-action@v2
         with:
           chart-search-root: charts
+          version: v1.14.2
 
       # A rejected push fails the run: the run queued for the newer push redoes it
       - name: Commit and push

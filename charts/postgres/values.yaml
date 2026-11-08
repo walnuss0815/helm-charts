@@ -66,14 +66,15 @@ service:
   # credentials Secret (`port` key and `uri`)
   port: 5432
 
-# -- Resource requests and limits for the PostgreSQL container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
-resources: {}
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+# -- Resource requests and limits for the PostgreSQL container. The memory limit
+# covers the default `shared_buffers` (128MB) plus a few connections; raise it
+# for larger databases. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
 
 # -- Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 livenessProbe:

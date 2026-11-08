@@ -313,6 +313,10 @@ template. Usage: include "immich.configFileInitContainer" (dict "root" $ "worklo
       {{- include "immich.configEnvVar" (dict "root" $root "entry" $entry) | nindent 6 }}
     {{- end }}
   {{- end }}
+  {{- with $root.Values.config.initResources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   volumeMounts:
     - name: config-template
       mountPath: /config.template

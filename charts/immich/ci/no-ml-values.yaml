@@ -4,6 +4,11 @@
 machineLearning:
   enabled: false
 
+# Bootstraps the bundled CNPG Cluster from the chart-managed Secret
+postgres:
+  password:
+    value: immich-ci-password
+
 persistence:
   media:
     # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI

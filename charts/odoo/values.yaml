@@ -105,8 +105,8 @@ httpRoute:
             type: PathPrefix
             value: /headers
 
-# -- Configuration of init containers
-initContainer: []
+# -- Additional init containers, run after the init container that renders `odoo.conf`. Rendered with `tpl`
+initContainers: []
 
 # -- Additional environment variables as a map of variable name to value. Values are rendered with `tpl`
 env: {}

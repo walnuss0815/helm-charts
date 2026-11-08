@@ -1,6 +1,6 @@
 # odoo
 
-![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
+![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
 
 A Helm chart for Odoo
 
@@ -62,15 +62,17 @@ A Helm chart for Odoo
 | logLevel | string | `"info"` | Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/developer/reference/cli.html#cmdoption-odoo-bin-log-level) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
-| persistence | object | `{"addons":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}}` | Persistence configuration for Odoo volumes |
-| persistence.addons | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Odoo addons directory persistence configuration |
+| persistence | object | `{"addons":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}}` | Persistence configuration for Odoo volumes |
+| persistence.addons | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}` | Odoo addons directory persistence configuration |
 | persistence.addons.accessModes | list | `["ReadWriteOnce"]` | Access modes for the Odoo addons PVC |
 | persistence.addons.annotations | object | `{}` | Annotations for the Odoo addons PVC |
+| persistence.addons.keep | bool | `true` | Keep the addons PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the custom addons. Delete it manually with `kubectl delete pvc <fullname>-addons` |
 | persistence.addons.size | string | `"1Gi"` | Size of the Odoo addons PVC |
 | persistence.addons.storageClass | string | `""` | Storage class for the Odoo addons PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Odoo data directory persistence configuration |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}` | Odoo data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the Odoo data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the Odoo data PVC |
+| persistence.data.keep | bool | `true` | Keep the data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the filestore (attachments and sessions). Delete it manually with `kubectl delete pvc <fullname>-data` |
 | persistence.data.size | string | `"1Gi"` | Size of the Odoo data PVC |
 | persistence.data.storageClass | string | `""` | Storage class for the Odoo data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the Odoo pod |

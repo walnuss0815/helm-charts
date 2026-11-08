@@ -464,8 +464,18 @@ from the rendered manifests (e.g. `postgres.enabled: false`). To protect
 against that, add `argocd.argoproj.io/sync-options: Prune=false` through
 `persistence.media.annotations` and `postgres.annotations`.
 
-A kept `Cluster` keeps running, but its `ScheduledBackup` and `ObjectStore` are
-deleted with the release, so backups stop.
+A kept `Cluster` keeps running, but the `ScheduledBackup` is deleted with the
+release, and so is the `ObjectStore` if the chart created it
+(`postgres.backup.objectStore.create`). While WAL archiving is enabled
+(`postgres.backup.enabled` with `method: plugin`, or with an object store for
+`method: volumeSnapshot`), the kept `Cluster` still archives into that deleted
+`ObjectStore`. Every attempt fails, and PostgreSQL keeps the WAL files on the
+database volume until it is full. To avoid this, set
+`postgres.backup.enabled: false` and upgrade before uninstalling, or archive
+into an `ObjectStore` managed outside the release
+(`postgres.backup.objectStore.create: false` and
+`postgres.backup.objectStore.name`). Otherwise reinstall or delete the kept
+`Cluster` promptly.
 
 Delete both manually once they are no longer needed:
 

@@ -31,7 +31,8 @@ jobs:
   update-files:
     name: Update files
     needs: list-changed
-    if: ${{ needs.list-changed.outputs.changed-charts != '[]' }}
+    # Forks get no secrets, so the push to the PR branch cannot work there
+    if: ${{ needs.list-changed.outputs.changed-charts != '[]' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     strategy:
       matrix:

@@ -127,6 +127,10 @@ spec:
               valueFrom: {{ toYaml $value | nindent 16 }}
             {{- end }}
             {{- if .Values.sso.enabled }}
+            {{- if not (or (hasKey (.Values.env | default dict) "PAPERLESS_APPS") (hasKey (.Values.envFrom | default dict) "PAPERLESS_APPS")) }}
+            - name: PAPERLESS_APPS
+              value: allauth.socialaccount.providers.openid_connect
+            {{- end }}
             - name: PAPERLESS_SOCIAL_AUTO_SIGNUP
               value: {{ .Values.sso.autoSignup | quote }}
             - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS

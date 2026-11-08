@@ -12,6 +12,22 @@ bootstrapAdmin:
     password:
       value: ci-admin-password
 
+# No Ingress controller is needed: the Ingress is only created, which checks
+# its schema and the HTTPS backend port.
+ingress:
+  enabled: true
+  hosts:
+    - host: keycloak.example.test
+      paths:
+        - path: /
+          pathType: Prefix
+
+# No metrics-server is needed: the HPA keeps the Deployment at minReplicas.
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 2
+
 extraManifests:
   - |
     {{- $cert := genSelfSignedCert "keycloak.example.test" nil (list "keycloak.example.test") 7 }}

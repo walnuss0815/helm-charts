@@ -903,6 +903,20 @@ entries:
   immich-kiosk:
   - apiVersion: v2
     appVersion: 0.47.0
+    created: "2026-11-08T20:56:31.309112971Z"
+    description: A Helm chart for Immich Kiosk
+    digest: 606fa8a7e0e1ba02890076a9d2a93f102ade07c3bc2f381f014e3b1a2bc97c62
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich-kiosk
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-kiosk-0.2.12/immich-kiosk-0.2.12.tgz
+    version: 0.2.12
+  - apiVersion: v2
+    appVersion: 0.47.0
     created: "2026-11-05T13:36:53.135394144Z"
     description: A Helm chart for Immich Kiosk
     digest: 2d9e446fc7bea109d36f9816292b0cd8e614d947018899e293b36ca9eaa11de0
@@ -1257,6 +1271,20 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/immich-upload-optimizer-0.1.0/immich-upload-optimizer-0.1.0.tgz
     version: 0.1.0
   kavita:
+  - apiVersion: v2
+    appVersion: 0.9.1
+    created: "2026-11-08T20:56:31.482849545Z"
+    description: A Helm chart for Kavita
+    digest: de4a476056baee48678ab31eb20ce31efeca35b9bf5cd97b5e48ff842376723a
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: kavita
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/kavita-1.0.1/kavita-1.0.1.tgz
+    version: 1.0.1
   - apiVersion: v2
     appVersion: 0.9.1
     created: "2026-10-09T22:28:47.213969198Z"
@@ -1989,6 +2017,20 @@ entries:
     - https://github.com/walnuss0815/helm-charts/releases/download/openchamber-0.1.0/openchamber-0.1.0.tgz
     version: 0.1.0
   paperless-ai:
+  - apiVersion: v2
+    appVersion: 3.0.9
+    created: "2026-11-08T20:56:31.646323263Z"
+    description: A Helm chart for Kubernetes
+    digest: 0ce1475ba79f81d8c385b413312d6bf5320019c16ac67baf949bf680fccd623c
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: paperless-ai
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/paperless-ai-1.0.1/paperless-ai-1.0.1.tgz
+    version: 1.0.1
   - apiVersion: v2
     appVersion: 3.0.9
     created: "2026-10-09T22:28:47.657582875Z"
@@ -4466,4 +4508,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-08T13:38:31.708782945Z"
+generated: "2026-11-08T20:56:31.646747824Z"

@@ -77,10 +77,8 @@ spec:
             - name: IMMICH_API_METRICS_PORT
               value: {{ .Values.monitoring.apiMetricsPort | toString | quote }}
             {{- end }}
-            {{- if or .Values.postgres.enabled (include "immich.databasePasswordProvided" .) }}
             - name: DB_PASSWORD
               {{- include "immich.databasePasswordEnv" . | nindent 14 }}
-            {{- end }}
             {{- if include "immich.secretConfigured" .Values.redis.password }}
             - name: REDIS_PASSWORD
               {{- include "immich.secretEnvVar" (dict "root" $ "entry" .Values.redis.password "secret" (include "immich.redisPasswordName" .) "key" "password") | nindent 14 }}

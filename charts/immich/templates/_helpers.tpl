@@ -98,17 +98,6 @@ explicit host is given, the subchart service name (<release>-valkey) is used.
 {{- end }}
 
 {{/*
-Resolve the Redis/Valkey port.
-*/}}
-{{- define "immich.redisPort" -}}
-{{- if .Values.redis.port -}}
-{{- .Values.redis.port | toString -}}
-{{- else -}}
-{{- "6379" -}}
-{{- end -}}
-{{- end }}
-
-{{/*
 Resolve the PostgreSQL host. When the bundled CNPG cluster is enabled, the cluster's
 read-write service (<fullname>-postgresql-rw) is used; otherwise the external host
 configured via `postgres.host` is required.
@@ -132,20 +121,6 @@ Resolve the PostgreSQL port.
 {{- else -}}
 {{- "5432" -}}
 {{- end -}}
-{{- end }}
-
-{{/*
-Resolve the PostgreSQL username.
-*/}}
-{{- define "immich.databaseUser" -}}
-{{- .Values.postgres.user | default "immich" -}}
-{{- end }}
-
-{{/*
-Resolve the PostgreSQL database name.
-*/}}
-{{- define "immich.databaseName" -}}
-{{- .Values.postgres.database | default "immich" -}}
 {{- end }}
 
 {{/*

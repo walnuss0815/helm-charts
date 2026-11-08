@@ -1,6 +1,6 @@
 # openchamber
 
-![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.6.1](https://img.shields.io/badge/AppVersion-v2.6.1-informational?style=flat-square)
+![Version: 0.1.12](https://img.shields.io/badge/Version-0.1.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.6.1](https://img.shields.io/badge/AppVersion-v2.6.1-informational?style=flat-square)
 
 A Helm chart for OpenChamber, a web workspace for running and reviewing AI coding work with OpenCode
 
@@ -173,7 +173,7 @@ ssh:
 | env | list | `[]` | Additional environment variables, e.g. model provider settings |
 | envFrom | list | `[]` | Additional environment variables from Secrets or ConfigMaps, e.g. model provider API keys such as `ANTHROPIC_API_KEY` |
 | extraInitContainers | list | `[]` | Additional init containers |
-| extraManifests | list | `[]` | Additional Kubernetes manifests to deploy. Each entry is a string that is rendered with `tpl`. |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | extraVolumeMounts | list | `[]` | Additional volume mounts for the OpenChamber container |
 | extraVolumes | list | `[]` | Additional volumes for the pod |
 | fullnameOverride | string | `""` | Override the full resource name |

@@ -555,6 +555,15 @@ config:
   # are written to an in-memory volume and never stored in a ConfigMap
   # @section -- Configuration file
   env: {}
+  # -- Resource requests and limits of the init container that renders the
+  # configuration file
+  # @section -- Configuration file
+  initResources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
 
 ## @section Persistence
 
@@ -758,9 +767,17 @@ postgres:
   # -- Number of PostgreSQL instances in the CNPG cluster
   # @section -- PostgreSQL
   instances: 1
-  # -- Resource requests and limits for the PostgreSQL instances
+  # -- Resource requests and limits of the PostgreSQL pod. The memory limit
+  # leaves room for index builds; CloudNativePG recommends equal memory
+  # requests and limits for production. Set `limits` to `null` to remove the
+  # memory limit
   # @section -- PostgreSQL
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 2Gi
   # -- Pod-level security context for the PostgreSQL instances. Empty applies the
   # CloudNativePG defaults (UID/GID `26`)
   # @section -- PostgreSQL
@@ -879,6 +896,15 @@ valkey:
     # -- Enable ACL-based authentication. Requires `aclUsers` and the password in `redis.password`
     # @section -- Valkey
     enabled: false
+  # -- Resource requests and limits of the Valkey container. Queues grow
+  # during a large first import; raise the limit for big libraries
+  # @section -- Valkey
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 512Mi
   replica:
     # -- Deploy Valkey replicas (master-replica mode). Requires `replica.persistence.size`, and `auth.aclUsers` when authentication is enabled
     # @section -- Valkey

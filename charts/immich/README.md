@@ -1,6 +1,6 @@
 # immich
 
-![Version: 1.0.6](https://img.shields.io/badge/Version-1.0.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.6](https://img.shields.io/badge/AppVersion-v3.3.6-informational?style=flat-square)
+![Version: 1.0.7](https://img.shields.io/badge/Version-1.0.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.3.6](https://img.shields.io/badge/AppVersion-v3.3.6-informational?style=flat-square)
 
 A Helm chart for Immich, the high performance self-hosted photo and video management solution.
 
@@ -635,7 +635,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with the Helm template engine, so it can reference chart values such as `.Release.Namespace`. Only trusted manifests should be used here. |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 
 ### Global
 

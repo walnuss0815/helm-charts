@@ -1,6 +1,6 @@
 # linkwarden
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.16.3](https://img.shields.io/badge/AppVersion-2.16.3-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.16.3](https://img.shields.io/badge/AppVersion-2.16.3-informational?style=flat-square)
 
 A Helm chart for Linkwarden
 
@@ -85,7 +85,7 @@ A Helm chart for Linkwarden
 | postgres | object | `{"enabled":false,"secret":{"create":true,"name":"{{ .Release.Name }}-db"}}` | Bundled PostgreSQL subchart configuration (disabled by default; mainly intended for testing/CI - see [postgres chart](../postgres) for all available options). When enabled, this takes precedence over `database.*` for wiring the DATABASE_* env vars. |
 | postgres.enabled | bool | `false` | Enable the bundled PostgreSQL subchart instead of an external database via `database.*` |
 | postgres.secret | object | `{"create":true,"name":"{{ .Release.Name }}-db"}` | Secret configuration for database credentials, also used by this chart to know which secret to read DATABASE_* env vars from |
-| postgres.secret.create | bool | `true` | Create a new secret for database credentials |
+| postgres.secret.create | bool | `true` | Create a new secret for database credentials. Its random password is regenerated on every render, so use it for CI only. For GitOps set `false` and point `name` at a Secret with the keys `host`, `port`, `database`, `username` and `password` |
 | postgres.secret.name | string | `"{{ .Release.Name }}-db"` | Name of the secret (supports Helm templating) |
 | readinessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10}` | Readiness probe configuration |
 | replicaCount | int | `1` | Number of replicas for the linkwarden deployment |

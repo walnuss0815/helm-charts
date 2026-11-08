@@ -76,18 +76,14 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
-          {{- range $key, $value := .Values.persistence }}
-            - name: {{ $key }}
-              mountPath: {{ $value.mountPath | default (printf "/%s" $key) }}
-          {{- end }}
+            - name: video
+              mountPath: {{ .Values.persistence.video.mountPath | default "/video" }}
       volumes:
         - name: tmp
           emptyDir: {}
-        {{- range $key, $value := .Values.persistence }}
-        - name: {{ $key }}
+        - name: video
           persistentVolumeClaim:
-            claimName: '{{ include "handbrake-web.fullname" $ }}-{{ $key }}'
-        {{- end }}
+            claimName: '{{ include "handbrake-web.fullname" . }}-video'
       {{- with .Values.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

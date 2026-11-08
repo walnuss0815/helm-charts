@@ -86,7 +86,7 @@ httpRoute:
 # string or a map and is rendered with `tpl`
 extraManifests: []
 
-# -- Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart)
+# -- Persistence configuration. The server mounts every volume; the worker and the optional webdav subchart mount only `video`
 persistence:
   # -- Config/data directory persistence configuration
   data:
@@ -101,7 +101,7 @@ persistence:
     storageClass: ""
     # -- Size of the data PVC
     size: "1Gi"
-    # -- Mount path for this volume within the server/worker containers
+    # -- Mount path for this volume within the server container
     mountPath: /data
     # -- Access modes for the data PVC
     accessModes:

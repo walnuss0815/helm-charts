@@ -6,6 +6,9 @@ metadata:
     {{- include "linkwarden.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  # A new pod would wait for the ReadWriteOnce data volume held by the old one
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "linkwarden.selectorLabels" . | nindent 6 }}

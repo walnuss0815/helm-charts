@@ -25,8 +25,8 @@ fullnameOverride: ""
 serviceAccount:
   # -- Specifies whether a service account should be created
   create: true
-  # -- Automatically mount the ServiceAccount's API credentials into the pod
-  automount: true
+  # -- Automatically mount the ServiceAccount's API credentials into the pod. Kavita does not need access to the Kubernetes API
+  automount: false
   # -- Annotations to add to the service account
   annotations: {}
   # -- Name of the service account to use. If not set and `create` is `true`, a name is generated using the fullname template
@@ -37,18 +37,14 @@ podAnnotations: {}
 # -- Labels to add to the pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
 podLabels: {}
 
-# -- Pod-level security context
-podSecurityContext: {}
-  # fsGroup: 2000
+# -- Pod-level security context. The image runs as root and existing config volumes are owned by root, so the user is not changed. To run as non-root, set `runAsUser`, `runAsGroup` and `fsGroup` (e.g. `1000`) and make sure the config volume belongs to that user; `fsGroup` does not change ownership on hostPath or NFS volumes
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
 
-# -- Container-level security context
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+# -- Container-level security context. Capabilities are kept so that root can still write to volumes owned by other users
+securityContext:
+  allowPrivilegeEscalation: false
 
 # -- Kubernetes Service configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/services-networking/service/)
 service:
@@ -116,14 +112,13 @@ httpRoute:
   #     - name: version
   #       value: v2
 
-# -- Resource requests and limits for the Kavita container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
-resources: {}
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+# -- Resource requests and limits for the Kavita container. Library scans and cover generation are memory heavy; raise the limit for large libraries. Helm merges maps: set `limits` to `null` to remove the memory limit. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 2Gi
 
 # -- Liveness probe configuration. Empty disables the probe. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 livenessProbe:

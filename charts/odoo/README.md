@@ -1,6 +1,6 @@
 # odoo
 
-![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
+![Version: 2.0.1](https://img.shields.io/badge/Version-2.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 19.0](https://img.shields.io/badge/AppVersion-19.0-informational?style=flat-square)
 
 A Helm chart for Odoo
 
@@ -38,14 +38,14 @@ A Helm chart for Odoo
 | env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl` |
 | envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
 | extraConfig | string | `""` | Extra content appended to the Odoo config file. Supports multiline INI-style options |
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the full chart name |
-| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Expose the service via Gateway API HTTPRoute. Requires Gateway API resources and a suitable controller installed within the cluster (see: https://gateway-api.sigs.k8s.io/guides/) |
+| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}` | Expose the service via Gateway API HTTPRoute. Requires Gateway API resources and a suitable controller installed within the cluster (see: https://gateway-api.sigs.k8s.io/guides/) |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations |
 | httpRoute.enabled | bool | `false` | Enable HTTPRoute |
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames matching HTTP header |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Gateways this Route is attached to |
-| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | List of routing rules and filters |
+| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | List of routing rules and filters |
 | image | object | `{"pullPolicy":"IfNotPresent","repository":"odoo","tag":""}` | Odoo container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"odoo"` | Image repository |

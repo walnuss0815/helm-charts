@@ -435,6 +435,6 @@ extraVolumeMounts: []
 # -- Additional init containers
 extraInitContainers: []
 
-# -- Additional Kubernetes manifests to deploy. Each entry is a string that is
-# rendered with `tpl`.
+# -- Extra Kubernetes manifests to deploy alongside the chart. Each entry is a
+# string or a map and is rendered with `tpl`
 extraManifests: []

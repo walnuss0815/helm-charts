@@ -6,6 +6,9 @@ metadata:
     {{- include "kavita.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  # RWO volumes and the SQLite database must not be shared by two pods
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "kavita.selectorLabels" . | nindent 6 }}

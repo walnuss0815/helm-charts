@@ -60,7 +60,7 @@ spec:
               value: {{ .Values.filterFormKey | quote }}
             {{- range $key, $value := .Values.extraEnv }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
             {{- range $key, $valueFrom := .Values.extraEnvFrom }}
             - name: {{ $key | quote }}

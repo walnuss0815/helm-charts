@@ -197,8 +197,8 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# -- Extra environment variables, rendered with `tpl`. Values must be strings (e.g. quote numbers) and
-# may reference chart values (e.g. `{{ .Release.Namespace }}`); a literal `{{`/`}}` in a value will be
+# -- Extra environment variables, rendered with `tpl`. Values may reference chart values
+# (e.g. `{{ .Release.Namespace }}`); a literal `{{`/`}}` in a value will be
 # parsed as a Go template and must be escaped (e.g. `{{ "{{" }}`) or it will fail to render.
 extraEnv: {}
 

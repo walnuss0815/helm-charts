@@ -99,7 +99,7 @@ httpRoute:
   - matches:
     - path:
         type: PathPrefix
-        value: /headers
+        value: /
   #   filters:
   #   - type: RequestHeaderModifier
   #     requestHeaderModifier:
@@ -158,7 +158,8 @@ tolerations: []
 # -- Affinity rules for pod scheduling
 affinity: {}
 
-# -- Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with `tpl`
+# -- Extra Kubernetes manifests to deploy alongside the chart. Each entry is a
+# string or a map and is rendered with `tpl`
 extraManifests: []
 
 # -- Persistence configuration for the Kavita volumes. Both PVCs are always created

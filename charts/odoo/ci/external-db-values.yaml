@@ -1,5 +1,8 @@
 # External PostgreSQL (no postgres subchart). A throw-away PostgreSQL is
 # deployed through extraManifests so `ct install` can start Odoo.
+adminPassword:
+  value: ci-admin-password
+
 postgres:
   enabled: false
 

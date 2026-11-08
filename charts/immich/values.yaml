@@ -564,7 +564,8 @@ persistence:
   # The volume must support sharing across pods (`ReadWriteMany`).
   # @section -- Persistence
   media:
-    # -- Enable dynamic provisioning of the media volume. Set to `false` when using an `existingClaim`
+    # -- Enable dynamic provisioning of the media volume. Set to `false` when using an `existingClaim`.
+    # `existingClaim` is required when `false`
     # @section -- Persistence
     enabled: true
     # -- Name of an existing PVC to use instead of creating a new one

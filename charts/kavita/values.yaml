@@ -165,6 +165,11 @@ extraManifests: []
 persistence:
   # -- Config directory, mounted at `/kavita/config` (database, settings, covers)
   config:
+    # -- Keep the config PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # database, settings and covers. Delete it manually with
+    # `kubectl delete pvc <fullname>-config`
+    keep: true
     # -- Annotations for the config PVC
     annotations: {}
     # -- Storage class for config PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
@@ -176,6 +181,11 @@ persistence:
       - ReadWriteOnce
   # -- Library directory, mounted at `/library` (books, comics, manga)
   library:
+    # -- Keep the library PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # books, comics and manga. Delete it manually with
+    # `kubectl delete pvc <fullname>-library`
+    keep: true
     # -- Annotations for the library PVC
     annotations: {}
     # -- Storage class for library PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning

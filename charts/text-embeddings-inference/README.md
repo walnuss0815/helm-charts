@@ -1,6 +1,6 @@
 # text-embeddings-inference
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: cpu-1.9.4](https://img.shields.io/badge/AppVersion-cpu--1.9.4-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: cpu-1.9.4](https://img.shields.io/badge/AppVersion-cpu--1.9.4-informational?style=flat-square)
 
 A Helm chart for Hugging Face Text Embeddings Inference, a fast server for text embedding models with an OpenAI-compatible API
 
@@ -128,7 +128,7 @@ count.
 | env | object | `{"RAYON_NUM_THREADS":"1"}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl`. Overrides the chart-set `PORT`, `HF_HOME` and `HUGGINGFACE_HUB_CACHE` (changing `PORT` breaks the probes). `RAYON_NUM_THREADS` should match the CPU limit |
 | envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
 | extraArgs | list | `[]` | Additional arguments for `text-embeddings-router`, e.g. `--max-batch-tokens=2048` (see the README on long-context models), `--auto-truncate` or `--tokenization-workers=2` |
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with `tpl` |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the full resource name |
 | httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}` | Expose the service via a Gateway API HTTPRoute. Requires the Gateway API CRDs and a suitable controller in the cluster (see: https://gateway-api.sigs.k8s.io/guides/) |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations |

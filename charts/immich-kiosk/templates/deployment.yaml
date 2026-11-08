@@ -69,7 +69,7 @@ spec:
               value: {{ .Values.timeZone }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
             {{- range $key, $value := .Values.envFrom }}
             - name: {{ $key | quote }}

@@ -1,6 +1,6 @@
 # openchamber
 
-![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.6.1](https://img.shields.io/badge/AppVersion-v2.6.1-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.6.1](https://img.shields.io/badge/AppVersion-v2.6.1-informational?style=flat-square)
 
 A Helm chart for OpenChamber, a web workspace for running and reviewing AI coding work with OpenCode
 
@@ -215,12 +215,14 @@ ssh:
 | persistence.data.annotations | object | `{}` | Annotations for the PVC |
 | persistence.data.enabled | bool | `false` | Persist application state: `~/.config/openchamber` (settings, logins, paired devices, GitHub/Linear tokens), `~/.config/opencode` (OpenCode config), `~/.local/share/opencode` (provider credentials, session history), `~/.local/state/opencode` and `~/.ssh`. When disabled, an `emptyDir` is used and everything is lost when the pod is replaced. |
 | persistence.data.existingClaim | string | `""` | Use an existing PVC instead of creating one |
+| persistence.data.keep | bool | `true` | Keep the data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the settings, logins and credentials. Ignored if `existingClaim` is set. Delete it manually with `kubectl delete pvc <fullname>-data` |
 | persistence.data.size | string | `"5Gi"` | Size of the PVC |
 | persistence.data.storageClass | string | `""` | Storage class. Empty uses the cluster default; `-` sets `storageClassName: ""`. |
 | persistence.workspaces.accessModes | list | `["ReadWriteOnce"]` | Access modes |
 | persistence.workspaces.annotations | object | `{}` | Annotations for the PVC |
 | persistence.workspaces.enabled | bool | `false` | Persist `~/workspaces`, where repositories, worktrees and build output live. When disabled, an `emptyDir` is used. |
 | persistence.workspaces.existingClaim | string | `""` | Use an existing PVC instead of creating one |
+| persistence.workspaces.keep | bool | `true` | Keep the workspaces PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the repositories, worktrees and build output. Ignored if `existingClaim` is set. Delete it manually with `kubectl delete pvc <fullname>-workspaces` |
 | persistence.workspaces.size | string | `"20Gi"` | Size of the PVC |
 | persistence.workspaces.storageClass | string | `""` | Storage class. Empty uses the cluster default; `-` sets `storageClassName: ""`. |
 | podAnnotations | object | `{}` | Annotations to add to the pod |

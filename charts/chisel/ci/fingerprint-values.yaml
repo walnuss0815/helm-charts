@@ -1,0 +1,10 @@
+server:
+  host: localhost
+  fingerprint: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+
+rules:
+  - local:
+      port: 8080
+    remote:
+      host: localhost
+      port: 80

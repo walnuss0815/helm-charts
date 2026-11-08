@@ -92,6 +92,10 @@ server:
   host: ""
   # -- Port Chisel is using on the remote server
   port: 8000
+  # -- Fingerprint of the server's public key (44 characters, ends with `=`),
+  # passed as `--fingerprint`. Strongly recommended: if empty, the client
+  # accepts any server
+  fingerprint: ""
   # -- Authentication string for the Chisel remote server
   auth:
     # -- Plain-text auth value (takes precedence if set)

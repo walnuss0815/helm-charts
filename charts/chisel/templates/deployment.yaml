@@ -40,6 +40,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - client
+            {{- with .Values.server.fingerprint }}
+            - {{ printf "--fingerprint=%s" . | quote }}
+            {{- end }}
             - $(CHISEL_SERVER_HOST):$(CHISEL_SERVER_PORT)
             {{- if not .Values.rules }}
             {{- fail "rules is required: set at least one reverse port-forwarding rule" }}

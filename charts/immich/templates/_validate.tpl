@@ -3,6 +3,13 @@ Fail fast on invalid or removed values. Included once from the server
 Deployment, which is always rendered.
 */}}
 {{- define "immich.validateValues" -}}
+{{- range $path, $entry := dict "postgres.password" .Values.postgres.password "redis.password" .Values.redis.password }}
+{{- with ($entry | default dict).secretKeyRef }}
+{{- if and (or .name .key) (not (and .name .key)) }}
+{{- fail (printf "%s.secretKeyRef requires both name and key (got name %q, key %q)" $path (toString .name) (toString .key)) }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- if and (not .Values.postgres.enabled) (not (include "immich.databasePasswordProvided" .)) }}
 {{- fail "postgres.password (value or secretKeyRef) is required when postgres.enabled is false" }}
 {{- end }}

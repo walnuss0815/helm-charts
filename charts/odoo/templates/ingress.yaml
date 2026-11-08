@@ -38,7 +38,7 @@ spec:
                 name: {{ include "odoo.fullname" $ }}
                 port:
                   number: {{ $.Values.ports.http }}
-          - path: {{ trimSuffix .path "/" }}/websocket
+          - path: {{ trimSuffix "/" .path }}/websocket
             {{- with .pathType }}
             pathType: {{ . }}
             {{- end }}

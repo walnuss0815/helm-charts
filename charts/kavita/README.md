@@ -1,6 +1,6 @@
 # kavita
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.1](https://img.shields.io/badge/AppVersion-0.9.1-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.1](https://img.shields.io/badge/AppVersion-0.9.1-informational?style=flat-square)
 
 A Helm chart for Kavita
 
@@ -50,17 +50,17 @@ A Helm chart for Kavita
 | persistence.library.storageClass | string | `""` | Storage class for library PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | podLabels | object | `{}` | Labels to add to the pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
-| podSecurityContext | object | `{}` | Pod-level security context |
+| podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | Pod-level security context. The image runs as root and existing config volumes are owned by root, so the user is not changed. To run as non-root, set `runAsUser`, `runAsGroup` and `fsGroup` (e.g. `1000`) and make sure the config volume belongs to that user; `fsGroup` does not change ownership on hostPath or NFS volumes |
 | readinessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Readiness probe configuration. Empty disables the probe |
 | replicaCount | int | `1` | Number of replicas for the Kavita deployment. See [Kubernetes docs](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/) |
-| resources | object | `{}` | Resource requests and limits for the Kavita container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
-| securityContext | object | `{}` | Container-level security context |
+| resources | object | `{"limits":{"memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource requests and limits for the Kavita container. Library scans and cover generation are memory heavy; raise the limit for large libraries. Helm merges maps: set `limits` to `null` to remove the memory limit. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
+| securityContext | object | `{"allowPrivilegeEscalation":false}` | Container-level security context. Capabilities are kept so that root can still write to volumes owned by other users |
 | service | object | `{"port":5000,"type":"ClusterIP"}` | Kubernetes Service configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/services-networking/service/) |
 | service.port | int | `5000` | Service port. Also used as the container port, so it must match the port Kavita listens on (`5000`) |
 | service.type | string | `"ClusterIP"` | Service type. See [service types](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
+| serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount the ServiceAccount's API credentials into the pod |
+| serviceAccount.automount | bool | `false` | Automatically mount the ServiceAccount's API credentials into the pod. Kavita does not need access to the Kubernetes API |
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | Name of the service account to use. If not set and `create` is `true`, a name is generated using the fullname template |
 | tolerations | list | `[]` | Tolerations for pod scheduling |

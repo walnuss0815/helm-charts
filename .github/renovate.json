@@ -24,6 +24,19 @@
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
+    },
+    {
+      "description": "Minor updates of stateful apps can run database migrations: merge them manually",
+      "matchFileNames": [
+        "charts/immich/**",
+        "charts/keycloak/**",
+        "charts/odoo/**",
+        "charts/paperless-ngx/**"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "automerge": false
     }
   ]
 }

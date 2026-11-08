@@ -50,7 +50,7 @@ spec:
             - name: CHISEL_SERVER_PORT
               value: {{ .Values.server.port | quote }}
             - name: AUTH
-              {{- include "chisel.secretEnvVar" .Values.server.auth | indent 14 }}
+              {{- include "chisel.secretEnvVar" (dict "root" $ "secret" .Values.server.auth) | indent 14 }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

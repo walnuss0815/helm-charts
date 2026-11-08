@@ -12,5 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/component: server
     {{- include "handbrake-web.server.selectorLabels" . | nindent 4 }}

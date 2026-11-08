@@ -55,10 +55,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
             - name: WORKER_ID
               value: "$(POD_NAME)@$(NODE_NAME)"
             - name: SERVER_URL

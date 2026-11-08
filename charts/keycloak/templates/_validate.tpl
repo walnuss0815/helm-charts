@@ -22,6 +22,12 @@ Fail the render on invalid or incomplete values. Included once by deployment.yam
 {{- fail "keycloak.httpRelativePath must start with /" -}}
 {{- end -}}
 
+{{- range $name, $entry := dict "bootstrapAdmin.user.password" .Values.bootstrapAdmin.user.password "bootstrapAdmin.client.clientSecret" .Values.bootstrapAdmin.client.clientSecret "postgres.password" .Values.postgres.password -}}
+{{- $ref := ($entry | default dict).secretKeyRef | default dict -}}
+{{- if ne (empty $ref.name) (empty $ref.key) -}}
+{{- fail (printf "%s.secretKeyRef: set both name and key" $name) -}}
+{{- end -}}
+{{- end -}}
 {{- range $name, $entry := dict "bootstrapAdmin.user.password" .Values.bootstrapAdmin.user.password "bootstrapAdmin.client.clientSecret" .Values.bootstrapAdmin.client.clientSecret -}}
 {{- $sources := 0 -}}
 {{- if $entry.value }}{{ $sources = add1 $sources }}{{ end -}}

@@ -251,7 +251,9 @@ postgres:
 
   # -- Secret configuration for database credentials
   secret:
-    # -- Create a new secret for database credentials
+    # -- Create a new secret for database credentials. Its random password is regenerated
+    # on every render, so use it for CI only. For GitOps set `false` and point `name` at a
+    # Secret with the keys `host`, `port`, `username` and `password`
     create: true
     # -- Name of the secret (supports Helm templating)
     name: '{{ .Release.Name }}-db'

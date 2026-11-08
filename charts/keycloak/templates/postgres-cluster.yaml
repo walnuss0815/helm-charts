@@ -9,9 +9,14 @@ metadata:
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
     app.kubernetes.io/component: postgresql
-  {{- with $pg.annotations }}
+  {{- if or $pg.keep $pg.annotations }}
   annotations:
+    {{- if $pg.keep }}
+    helm.sh/resource-policy: keep
+    {{- end }}
+    {{- with $pg.annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   description: Keycloak PostgreSQL cluster

@@ -72,7 +72,7 @@ securityContext:
 service:
   # -- Service type (ClusterIP, NodePort, LoadBalancer)
   type: ClusterIP
-  # -- Service port (WebDAV default port)
+  # -- Service port. The container listens on `config.port`
   port: 6060
 
 # -- Ingress configuration
@@ -220,7 +220,8 @@ user:
       # -- Key within the secret
       key: ""
 
-# -- WebDAV server configuration
+# -- WebDAV server configuration, rendered as the server's `config.yml`.
+# `config.port` is the container's listen port
 config:
   port: 6060
   debug: false

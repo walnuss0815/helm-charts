@@ -47,8 +47,18 @@ spec:
               protocol: TCP
           env:
             - name: USER_USERNAME
+              {{- with .Values.user.username }}
+              {{- if and (contains "{env}USER_USERNAME" (toYaml $.Values.config.users)) (not (or .value (and .secretKeyRef.name .secretKeyRef.key))) }}
+              {{- fail "user.username is required: set user.username.value or user.username.secretKeyRef.name and user.username.secretKeyRef.key" }}
+              {{- end }}
+              {{- end }}
               {{- include "webdav.secretEnvVar" .Values.user.username | indent 14 }}
             - name: USER_PASSWORD
+              {{- with .Values.user.password }}
+              {{- if and (contains "{env}USER_PASSWORD" (toYaml $.Values.config.users)) (not (or .value (and .secretKeyRef.name .secretKeyRef.key))) }}
+              {{- fail "user.password is required: set user.password.value or user.password.secretKeyRef.name and user.password.secretKeyRef.key" }}
+              {{- end }}
+              {{- end }}
               {{- include "webdav.secretEnvVar" .Values.user.password | indent 14 }}
           {{- with .Values.livenessProbe }}
           livenessProbe:

@@ -1,6 +1,6 @@
 # paperless-ngx
 
-![Version: 2.2.4](https://img.shields.io/badge/Version-2.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.4.2](https://img.shields.io/badge/AppVersion-3.4.2-informational?style=flat-square)
+![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.4.2](https://img.shields.io/badge/AppVersion-3.4.2-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -97,20 +97,23 @@ A Helm chart for Kubernetes
 | ocr.languages | list | `["eng"]` | OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) |
 | parser | object | `{"datetime":["en"]}` | Document parser configuration |
 | parser.datetime | list | `["en"]` | Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html) |
-| persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":""},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":""}}` | Persistence configuration for paperless-ngx volumes |
-| persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"size":"512Mi","storageClass":""}` | Consumption directory persistence configuration |
+| persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"keep":true,"size":"512Mi","storageClass":""},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"8Gi","storageClass":""}}` | Persistence configuration for paperless-ngx volumes |
+| persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"keep":true,"size":"512Mi","storageClass":""}` | Consumption directory persistence configuration |
 | persistence.consumption.accessModes | list | `["ReadWriteMany"]` | Access modes for consumption PVC |
 | persistence.consumption.annotations | object | `{}` | Annotations for the consumption PVC |
+| persistence.consumption.keep | bool | `true` | Keep the consumption PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the documents waiting to be consumed. Delete it manually with `kubectl delete pvc <fullname>-consumption` |
 | persistence.consumption.size | string | `"512Mi"` | Size of the consumption PVC |
 | persistence.consumption.storageClass | string | `""` | Storage class for consumption PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Data directory persistence configuration |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}` | Data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
+| persistence.data.keep | bool | `true` | Keep the data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the search index, classification model and settings. Delete it manually with `kubectl delete pvc <fullname>-data` |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `""` | Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
-| persistence.media | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"8Gi","storageClass":""}` | Media directory persistence configuration |
+| persistence.media | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"8Gi","storageClass":""}` | Media directory persistence configuration |
 | persistence.media.accessModes | list | `["ReadWriteOnce"]` | Access modes for media PVC |
 | persistence.media.annotations | object | `{}` | Annotations for the media PVC |
+| persistence.media.keep | bool | `true` | Keep the media PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the archived documents and thumbnails. Delete it manually with `kubectl delete pvc <fullname>-media` |
 | persistence.media.size | string | `"8Gi"` | Size of the media PVC |
 | persistence.media.storageClass | string | `""` | Storage class for media PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |

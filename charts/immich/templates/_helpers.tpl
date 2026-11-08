@@ -106,7 +106,7 @@ configured via `postgres.host` is required.
 {{- if .Values.postgres.enabled -}}
 {{- printf "%s-postgresql-rw" (include "immich.fullname" .) -}}
 {{- else -}}
-{{- .Values.postgres.host | default "postgres" -}}
+{{- required "postgres.host is required when postgres.enabled is false" .Values.postgres.host -}}
 {{- end -}}
 {{- end }}
 

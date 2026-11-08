@@ -668,7 +668,7 @@ postgres:
   # -- Annotations to add to the CNPG Cluster
   # @section -- PostgreSQL
   annotations: {}
-  # -- Host of an external database. Only used when `enabled` is `false`
+  # -- Host of an external database. Required when `enabled` is `false`
   # @section -- PostgreSQL
   host: ""
   # -- Port of an external database. Only used when `enabled` is `false`

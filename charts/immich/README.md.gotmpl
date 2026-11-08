@@ -450,13 +450,27 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 ## Persistence
 
 The media volume (`persistence.media`, mounted at `/data`) holds the original
-photos and videos. It is annotated with `helm.sh/resource-policy: keep`
-(`persistence.media.keep: true`), so Helm keeps the PVC on `helm uninstall` and
-Argo CD treats it like `Delete=false` when the Application is deleted. A
-reinstall with the same release name adopts the kept PVC again. Delete it
-manually once it is no longer needed:
+photos and videos. The media PVC and the PostgreSQL `Cluster` are both
+annotated with `helm.sh/resource-policy: keep` by default
+(`persistence.media.keep`, `postgres.keep`), so Helm skips deleting them on
+`helm uninstall` and Argo CD (>= 2.7) treats the annotation like
+`argocd.argoproj.io/sync-options: Delete=false` when the Application is
+deleted. The PVCs of the CloudNativePG cluster are owned by the `Cluster` and
+stay with it. A reinstall with the same release name and namespace adopts both
+again.
+
+The annotation does not cover Argo CD auto-prune when a resource disappears
+from the rendered manifests (e.g. `postgres.enabled: false`). To protect
+against that, add `argocd.argoproj.io/sync-options: Prune=false` through
+`persistence.media.annotations` and `postgres.annotations`.
+
+A kept `Cluster` keeps running, but its `ScheduledBackup` and `ObjectStore` are
+deleted with the release, so backups stop.
+
+Delete both manually once they are no longer needed:
 
 ```sh
+kubectl delete cluster.postgresql.cnpg.io <fullname>-postgresql   # its PVCs go with it
 kubectl delete pvc <fullname>-media
 ```
 
@@ -558,7 +572,8 @@ With `method: volumeSnapshot` the chart schedules CSI volume snapshots instead
 object store is enabled for point-in-time recovery.
 
 To restore, bootstrap a new cluster from the backup. Recovery only applies when
-the `Cluster` is created, so delete the existing `Cluster` (and its PVCs) first
+the `Cluster` is created, so delete the existing `Cluster` first (its PVCs go
+with it; `helm uninstall` alone keeps it while `postgres.keep` is `true`)
 or install a new release. Archive the new cluster's WAL to a different
 `serverName`, because CloudNativePG refuses to write into a non-empty archive:
 

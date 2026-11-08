@@ -22,7 +22,7 @@ spec:
   securityContext:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- $preload := uniq (concat (list "vchord.so") .Values.postgres.extraSharedPreloadLibraries) }}
+  {{- $preload := uniq (concat (list "vchord.so") (.Values.postgres.extraSharedPreloadLibraries | default list)) }}
   postgresql:
     shared_preload_libraries:
       {{- toYaml $preload | nindent 6 }}

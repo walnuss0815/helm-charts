@@ -6,9 +6,14 @@ metadata:
   name: {{ include "handbrake-web.fullname" $ }}-{{ $key }}
   labels:
     {{- include "handbrake-web.labels" $ | nindent 4 }}
-  {{- with $value.annotations }}
+  {{- if or $value.keep $value.annotations }}
   annotations:
+    {{- if $value.keep }}
+    helm.sh/resource-policy: keep
+    {{- end }}
+    {{- with $value.annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   accessModes:

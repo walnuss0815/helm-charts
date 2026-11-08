@@ -393,7 +393,7 @@ webdav:
       # (including its 63-character truncation) from the release name. Set it
       # to `<fullname>-consumption` when `nameOverride` or `fullnameOverride`
       # is set
-      # @default -- <fullname>-consumption
+      # @default -- `<fullname>-consumption`
       claimName: '{{ ternary .Release.Name (printf "%s-paperless-ngx" .Release.Name) (contains "paperless-ngx" .Release.Name) | trunc 63 | trimSuffix "-" }}-consumption'
 
 # -- Apache Tika subchart configuration (for document parsing)

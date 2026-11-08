@@ -53,7 +53,7 @@ Contributions are welcome! Please follow these steps:
    helm lint --strict charts/<chart-name>
    ```
 
-4. **Open a Pull Request** against `main`. Use a [Conventional Commits](https://www.conventionalcommits.org/) title; if a related issue exists, append it, e.g. `(#123)`. The CI pipeline lints and installs all changed charts, regenerates their `README.md` and bumps the chart version. Do not bump `version` yourself.
+4. **Open a Pull Request** against `main`. Use a [Conventional Commits](https://www.conventionalcommits.org/) title; if a related issue exists, append it, e.g. `(#123)`. The CI pipeline lints and installs all changed charts. For branches in this repository it also regenerates their `README.md` and bumps the chart version, so do not bump `version` yourself. CI cannot push to forks: in a pull request from a fork, bump `version` in `Chart.yaml` (major for breaking changes, minor for `feat`, otherwise patch) and run `helm-docs`.
 
 ### Commit Style
 

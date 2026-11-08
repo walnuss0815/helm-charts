@@ -58,7 +58,7 @@ securityContext: {}
 service:
   # -- Service type (ClusterIP, NodePort, LoadBalancer)
   type: ClusterIP
-  # -- Service port (Apache Tika default port)
+  # -- Service port. Traffic is forwarded to container port 9998
   port: 9998
 
 # -- Resource limits and requests for the Apache Tika container

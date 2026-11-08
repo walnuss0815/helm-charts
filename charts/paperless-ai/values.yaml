@@ -28,8 +28,9 @@ fullnameOverride: ""
 serviceAccount:
   # -- Specifies whether a service account should be created
   create: true
-  # -- Automatically mount a ServiceAccount's API credentials
-  automount: true
+  # -- Automatically mount a ServiceAccount's API credentials. paperless-ai does
+  # not need access to the Kubernetes API
+  automount: false
   # -- Annotations to add to the service account
   annotations: {}
   # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
@@ -41,18 +42,18 @@ podAnnotations: {}
 # -- Labels to add to the pod
 podLabels: {}
 
-# -- Pod security context configuration
-podSecurityContext: {}
-  # fsGroup: 2000
+# -- Pod security context. The image runs as root (no USER in its Dockerfile)
+# and existing data volumes are owned by root, so the user is not changed. To
+# run as non-root, set `runAsUser`, `runAsGroup` and `fsGroup` and make sure
+# the data volume belongs to that user
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
 
-# -- Container security context configuration
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+# -- Container security context. Capabilities are kept so that root can still
+# write to volumes owned by other users
+securityContext:
+  allowPrivilegeEscalation: false
 
 # -- Service configuration
 service:
@@ -123,18 +124,15 @@ httpRoute:
   #     - name: version
   #       value: v2
 
-# -- Resource limits and requests for the paperless-ai container
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+# -- Resource requests and limits for the paperless-ai container. Runs Node.js
+# and a Python RAG service with torch and sentence-transformers. Set `limits`
+# to `null` to remove the memory limit
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    memory: 3Gi
 
 # -- Liveness probe configuration
 livenessProbe:

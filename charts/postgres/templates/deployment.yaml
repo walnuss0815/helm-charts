@@ -54,7 +54,7 @@ spec:
                   name: {{ include "postgres.secretName" . }}
                   key: password
             - name: POSTGRES_DB
-              value: {{ .Values.database }}
+              value: {{ tpl .Values.database . | quote }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

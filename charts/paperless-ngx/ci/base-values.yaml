@@ -5,4 +5,4 @@ persistence:
       - ReadWriteOnce
 
 secretKey:
-  value: "ci-only-secret-key-not-for-production"
+  value: "ci-only: secret-key-not-for-production"

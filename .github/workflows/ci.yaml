@@ -24,7 +24,8 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --config ct.yaml --target-branch ${{ github.event.repository.default_branch }})
+          # The PR base, so a stacked PR lists only its own charts
+          changed=$(ct list-changed --config ct.yaml --target-branch "$GITHUB_BASE_REF")
           charts_json=$(echo "${changed#"charts/"}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(split("/")[-1])')
           echo "changed-charts=$charts_json" >> "$GITHUB_OUTPUT"
 
@@ -117,6 +118,7 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.9.0
 
+      # Checks the bump against main: a stacked PR shares its parent's bump
       # Fails until update-files pushes the version bump; the next run passes
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts charts/${{ matrix.chart }}

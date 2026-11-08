@@ -33,6 +33,7 @@ bootstrapAdmin:
 
 # 2 replicas x poolMaxSize (50) would reach the CNPG default max_connections (100)
 postgres:
+  keep: false
   parameters:
     max_connections: 200
 

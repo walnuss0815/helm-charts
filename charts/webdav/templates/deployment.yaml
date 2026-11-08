@@ -47,9 +47,9 @@ spec:
               protocol: TCP
           env:
             - name: USER_USERNAME
-              {{- include "webdav.secretEnvVar" .Values.user.username | indent 14 }}
+              {{- include "webdav.secretEnvVar" (dict "root" $ "secret" .Values.user.username) | indent 14 }}
             - name: USER_PASSWORD
-              {{- include "webdav.secretEnvVar" .Values.user.password | indent 14 }}
+              {{- include "webdav.secretEnvVar" (dict "root" $ "secret" .Values.user.password) | indent 14 }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

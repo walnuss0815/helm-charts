@@ -375,6 +375,11 @@ persistence:
     enabled: false
     # -- Use an existing PVC instead of creating one
     existingClaim: ""
+    # -- Keep the data PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # settings, logins and credentials. Ignored if `existingClaim` is set.
+    # Delete it manually with `kubectl delete pvc <fullname>-data`
+    keep: true
     # -- Annotations for the PVC
     annotations: {}
     # -- Storage class. Empty uses the cluster default; `-` sets `storageClassName: ""`.
@@ -390,6 +395,11 @@ persistence:
     enabled: false
     # -- Use an existing PVC instead of creating one
     existingClaim: ""
+    # -- Keep the workspaces PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # repositories, worktrees and build output. Ignored if `existingClaim` is
+    # set. Delete it manually with `kubectl delete pvc <fullname>-workspaces`
+    keep: true
     # -- Annotations for the PVC
     annotations: {}
     # -- Storage class. Empty uses the cluster default; `-` sets `storageClassName: ""`.

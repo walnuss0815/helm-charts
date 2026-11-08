@@ -190,7 +190,8 @@ persistence:
     accessModes:
       - ReadWriteOnce
 
-# -- WebDAV user authentication configuration
+# -- Credentials for the `{env}USER_USERNAME` / `{env}USER_PASSWORD` user in
+# `config.users`. Required while `config.users` references them
 user:
   # -- Username configuration
   username:

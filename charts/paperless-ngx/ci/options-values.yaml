@@ -1,5 +1,8 @@
 persistence:
   consumption:
+    keep: false
+    annotations:
+      example.com/ci: "true"
     # Workaround: The PVC cannot be created in ReadWriteMany mode in the CI
     accessModes:
       - ReadWriteOnce

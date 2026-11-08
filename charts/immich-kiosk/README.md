@@ -1,6 +1,6 @@
 # immich-kiosk
 
-![Version: 0.2.11](https://img.shields.io/badge/Version-0.2.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.47.0](https://img.shields.io/badge/AppVersion-0.47.0-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.47.0](https://img.shields.io/badge/AppVersion-0.47.0-informational?style=flat-square)
 
 A Helm chart for Immich Kiosk
 
@@ -57,17 +57,17 @@ A Helm chart for Immich Kiosk
 | password.value | string | `""` | Password value (plaintext). Use `secretKeyRef` instead for production. |
 | podAnnotations | object | `{}` | Annotations to add to the pod. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | podLabels | object | `{}` | Labels to add to the pod. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
-| podSecurityContext | object | `{}` | Pod-level security context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
+| podSecurityContext | object | `{"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod-level security context. Runs as the image's distroless nonroot user (65532). Set keys or the whole value to `null` to opt out. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
 | readinessProbe | object | `{"exec":{"command":["/kiosk","--healthcheck"]}}` | Readiness probe configuration. |
 | replicaCount | int | `1` | Number of replicas for the deployment. |
-| resources | object | `{}` | Resource requests and limits for the container. ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| securityContext | object | `{}` | Container-level security context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container |
+| resources | object | `{"limits":{"memory":"512Mi"},"requests":{"cpu":"25m","memory":"64Mi"}}` | Resource requests and limits for the container. Kiosk processes images in memory; raise the limit for high-resolution photos. ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532}` | Container-level security context. The root filesystem stays writable. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container |
 | service | object | `{"port":3000,"type":"ClusterIP"}` | Kubernetes Service configuration. ref: https://kubernetes.io/docs/concepts/services-networking/service/ |
 | service.port | int | `3000` | Service port. |
 | service.type | string | `"ClusterIP"` | Service type. |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. ref: https://kubernetes.io/docs/concepts/security/service-accounts/ |
+| serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account configuration. ref: https://kubernetes.io/docs/concepts/security/service-accounts/ |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account. |
-| serviceAccount.automount | bool | `true` | Automatically mount the ServiceAccount's API credentials into the pod. |
+| serviceAccount.automount | bool | `false` | Automatically mount the ServiceAccount's API credentials into the pod. Immich Kiosk does not need access to the Kubernetes API. |
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created. |
 | serviceAccount.name | string | `""` | Name of the service account to use. If not set and `create` is true, a name is generated using the fullname template. |
 | timeZone | string | `"UTC"` | Time zone for Immich Kiosk. ref: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List |

@@ -52,7 +52,7 @@ spec:
               {{- if not (or .Values.nextauth.secret.value (and .Values.nextauth.secret.secretKeyRef.name .Values.nextauth.secret.secretKeyRef.key)) }}
               {{- fail "nextauth.secret is required: set nextauth.secret.value or nextauth.secret.secretKeyRef.name and nextauth.secret.secretKeyRef.key" }}
               {{- end }}
-              {{- include "linkwarden.secretEnvVar" .Values.nextauth.secret | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.nextauth.secret) | indent 14 }}
             - name: NEXT_PUBLIC_DISABLE_REGISTRATION
               value: {{ .Values.auth.disableRegistration | quote }}
             {{- if .Values.postgres.enabled }}
@@ -99,14 +99,14 @@ spec:
             - name: DATABASE_NAME
               value: {{ .Values.database.name }}
             - name: DATABASE_USER
-              {{- include "linkwarden.secretEnvVar" .Values.database.username | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.database.username) | indent 14 }}
             - name: DATABASE_PASSWORD
-              {{- include "linkwarden.secretEnvVar" .Values.database.password | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.database.password) | indent 14 }}
             # Note: DATABASE_URL must come after the vars it references via
             # $(...) - Kubernetes only resolves $(VAR) references to
             # variables defined earlier in the same env list.
             - name: DATABASE_URL
-              {{- include "linkwarden.secretEnvVar" .Values.database.url | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.database.url) | indent 14 }}
             {{- else if not (or .Values.env.DATABASE_URL .Values.envFrom) }}
             {{- fail "a database is required: set postgres.enabled=true or database.enabled=true (or provide DATABASE_URL via env or envFrom)" }}
             {{- end }}
@@ -116,7 +116,7 @@ spec:
               value: {{ .Values.securityContext.runAsGroup | default 1000 | quote }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
           {{- with .Values.envFrom }}
           envFrom:

@@ -63,14 +63,15 @@ Create the name of the service account to use
 
 {{/*
 Create environment variable for secret value
+Usage: include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.<secret>)
 */}}
 {{- define "linkwarden.secretEnvVar" -}}
-{{- if and .secretKeyRef.name .secretKeyRef.key }}
+{{- if and .secret.secretKeyRef.name .secret.secretKeyRef.key }}
 valueFrom:
   secretKeyRef:
-    name: {{ tpl .secretKeyRef.name . }}
-    key: {{ tpl .secretKeyRef.key . }}
+    name: {{ tpl (toString .secret.secretKeyRef.name) .root | quote }}
+    key: {{ tpl (toString .secret.secretKeyRef.key) .root | quote }}
 {{- else }}
-value: {{ tpl .value . }}
+value: {{ tpl (toString .secret.value) .root | quote }}
 {{- end }}
 {{- end }}

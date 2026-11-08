@@ -1,2 +1,2 @@
-database: foo
+database: "{{ .Release.Name }}db"
 username: bar

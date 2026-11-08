@@ -1,6 +1,6 @@
 # immich-kiosk
 
-![Version: 0.2.11](https://img.shields.io/badge/Version-0.2.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.47.0](https://img.shields.io/badge/AppVersion-0.47.0-informational?style=flat-square)
+![Version: 0.2.12](https://img.shields.io/badge/Version-0.2.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.47.0](https://img.shields.io/badge/AppVersion-0.47.0-informational?style=flat-square)
 
 A Helm chart for Immich Kiosk
 
@@ -19,14 +19,14 @@ A Helm chart for Immich Kiosk
 | customCSS | string | `""` | Custom CSS injected into the kiosk UI. |
 | env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl`. |
 | envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}`. |
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the full chart name. |
-| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Expose the service via Gateway API HTTPRoute. Requires Gateway API resources and a suitable controller installed in the cluster. ref: https://gateway-api.sigs.k8s.io/guides/ |
+| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}` | Expose the service via Gateway API HTTPRoute. Requires Gateway API resources and a suitable controller installed in the cluster. ref: https://gateway-api.sigs.k8s.io/guides/ |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations. |
 | httpRoute.enabled | bool | `false` | Enable HTTPRoute. |
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames matching the HTTP host header. |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Gateways this route is attached to. |
-| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | List of routing rules and filters applied to matched requests. |
+| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | List of routing rules and filters applied to matched requests. |
 | image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/damongolding/immich-kiosk","tag":""}` | Container image configuration. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
 | image.repository | string | `"ghcr.io/damongolding/immich-kiosk"` | Image repository. |

@@ -1,6 +1,6 @@
 # webdav
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.3](https://img.shields.io/badge/AppVersion-v5.17.3-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.3](https://img.shields.io/badge/AppVersion-v5.17.3-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -42,11 +42,12 @@ A Helm chart for Kubernetes
 | livenessProbe | object | `{}` | Liveness probe configuration. Empty disables the probe |
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":""}}` | Persistence configuration for WebDAV |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","size":"1Gi","storageClass":""}` | Data directory persistence configuration |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","keep":true,"size":"1Gi","storageClass":""}}` | Persistence configuration for WebDAV |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"claimName":"","keep":true,"size":"1Gi","storageClass":""}` | Data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
 | persistence.data.claimName | string | `""` | Existing PVC claim name to use (if empty, creates new PVC) |
+| persistence.data.keep | bool | `true` | Keep the data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the served files. Ignored if `claimName` is set. Delete it manually with `kubectl delete pvc <fullname>-data` |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `""` | Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |

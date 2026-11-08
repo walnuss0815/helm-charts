@@ -41,12 +41,15 @@ spec:
           args:
             - client
             - $(CHISEL_SERVER_HOST):$(CHISEL_SERVER_PORT)
+            {{- if not .Values.rules }}
+            {{- fail "rules is required: set at least one reverse port-forwarding rule" }}
+            {{- end }}
             {{- range .Values.rules }}
             - 'R:{{ .local.interface | default "0.0.0.0" }}:{{ .local.port }}:{{ .remote.host }}:{{ .remote.port }}/{{ .protocol | default "tcp" }}'
             {{- end }}
           env:
             - name: CHISEL_SERVER_HOST
-              value: {{ .Values.server.host | quote }}
+              value: {{ required "server.host is required: set it to the address of the chisel server" .Values.server.host | quote }}
             - name: CHISEL_SERVER_PORT
               value: {{ .Values.server.port | quote }}
             - name: AUTH

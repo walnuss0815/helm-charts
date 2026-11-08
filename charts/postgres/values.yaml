@@ -54,7 +54,8 @@ securityContext: {}
 service:
   # -- Service type. See [service types](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)
   type: ClusterIP
-  # -- Service port
+  # -- Service port. PostgreSQL in the container always listens on 5432. Also written to the
+  # credentials Secret (`port` key and `uri`)
   port: 5432
 
 # -- Resource requests and limits for the PostgreSQL container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
@@ -110,9 +111,6 @@ username: app
 
 # -- PostgreSQL database name
 database: app
-
-# -- Port written to the credentials Secret (`port` key and `uri`). The container and Service listen on `service.port`, so keep both in sync
-port: 5432
 
 # -- Persistence configuration for PostgreSQL volumes
 persistence:

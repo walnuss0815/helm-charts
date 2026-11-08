@@ -21,8 +21,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "immich.labels" . | nindent 6 }}
-      app.kubernetes.io/component: server
+      {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "server") | nindent 6 }}
   endpoints:
     - port: metrics-api
       path: /metrics
@@ -52,8 +51,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "immich.labels" . | nindent 6 }}
-      app.kubernetes.io/component: microservices
+      {{- include "immich.componentSelectorLabels" (dict "root" $ "component" "microservices") | nindent 6 }}
   endpoints:
     - port: metrics-ms
       path: /metrics

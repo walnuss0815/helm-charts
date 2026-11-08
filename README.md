@@ -53,7 +53,7 @@ Contributions are welcome! Please follow these steps:
    helm lint --strict charts/<chart-name>
    ```
 
-4. **Open a Pull Request** against `main`. Use a [Conventional Commits](https://www.conventionalcommits.org/) title; if a related issue exists, append it, e.g. `(#123)`. The CI pipeline lints and installs all changed charts. For branches in this repository it also regenerates their `README.md` and bumps the chart version, so do not bump `version` yourself. CI cannot push to forks: in a pull request from a fork, bump `version` in `Chart.yaml` (major for breaking changes, minor for `feat`, otherwise patch) and run `helm-docs`.
+4. **Open a Pull Request** against `main`. Use a [Conventional Commits](https://www.conventionalcommits.org/) title; if a related issue exists, append it, e.g. `(#123)`. The CI pipeline lints and installs all changed charts. Do not bump `version`. For branches in this repository, CI regenerates the chart `README.md` in the pull request and may push a `docs:` commit to your branch, so pull before pushing again; for forks this happens after the merge. After the merge, CI on `main` bumps the chart version from the commit messages since the chart's last release (major for `!` or `BREAKING CHANGE`, minor for `feat`, otherwise patch) and releases the chart. Commits of pull requests land on `main` as they are, so every commit message counts. A `version` set by hand in `Chart.yaml` is released as is. A chart that depends on a new version of a sibling chart can only be updated once that sibling is released.
 
 ### Commit Style
 
@@ -74,7 +74,7 @@ All `values.yaml` parameters must be documented with [`helm-docs`-style](https:/
 replicaCount: 1
 ```
 
-Regenerate docs after changes:
+To preview the generated `README.md` locally, run:
 
 ```bash
 helm-docs

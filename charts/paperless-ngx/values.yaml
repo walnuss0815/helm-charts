@@ -366,18 +366,18 @@ valkey:
       memory: 256Mi
 
 # -- WebDAV configuration for document consumption
+# @default -- See the webdav.* rows
 webdav:
   # -- Enable WebDAV integration
   enabled: false
-  # -- WebDAV persistence configuration
   persistence:
-    # -- Data directory configuration
     data:
       # -- Name of the consumption PVC mounted into WebDAV. Rendered with
       # `tpl` in the webdav subchart, so it mirrors this chart's fullname
       # (including its 63-character truncation) from the release name. Set it
       # to `<fullname>-consumption` when `nameOverride` or `fullnameOverride`
       # is set
+      # @default -- <fullname>-consumption
       claimName: '{{ ternary .Release.Name (printf "%s-paperless-ngx" .Release.Name) (contains "paperless-ngx" .Release.Name) | trunc 63 | trimSuffix "-" }}-consumption'
 
 # -- Apache Tika subchart configuration (for document parsing)

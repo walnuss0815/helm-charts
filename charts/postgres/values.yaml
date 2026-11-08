@@ -39,8 +39,9 @@ podLabels: {}
 
 # -- Pod-level security context. Runs as the image's `postgres` user (UID 999 in
 # the Debian image, 70 in Alpine tags); `fsGroup` makes the data volume writable.
-# On storage that ignores `fsGroup`, set this and `securityContext` to `{}` to
-# start as root and let the entrypoint switch users
+# On storage that ignores `fsGroup`, set this and `securityContext` to `null` to
+# start as root and let the entrypoint switch users. `{}` keeps the defaults, and
+# both must go because the entrypoint needs the capabilities dropped there
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 999

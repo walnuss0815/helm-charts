@@ -81,6 +81,11 @@ spec:
             - name: DB_PASSWORD
               {{- include "odoo.secretEnvVar" (dict "root" $ "secret" .Values.database.password) | nindent 14 }}
             {{- end }}
+            - name: ADMIN_PASSWD
+              {{- if not (or .Values.adminPassword.value (and .Values.adminPassword.secretKeyRef.name .Values.adminPassword.secretKeyRef.key)) }}
+              {{- fail "adminPassword is required: set adminPassword.value or adminPassword.secretKeyRef.name and adminPassword.secretKeyRef.key" }}
+              {{- end }}
+              {{- include "odoo.secretEnvVar" (dict "root" $ "secret" .Values.adminPassword) | nindent 14 }}
             - name: LOG_LEVEL
               value: {{ .Values.logLevel }}
             {{- range $key, $value := .Values.env }}

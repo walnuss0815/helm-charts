@@ -221,6 +221,19 @@ database:
 # -- Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/developer/reference/cli.html#cmdoption-odoo-bin-log-level)
 logLevel: info
 
+# -- Odoo master password, protects creating, backing up and deleting databases in the database manager.
+# Required: set `value` or `secretKeyRef`, otherwise rendering fails. Used by the default `config`
+# through `admin_passwd = $ADMIN_PASSWD`; keep that line when overriding `config`
+adminPassword:
+  # -- Plain-text value. Ignored if `secretKeyRef.name` and `secretKeyRef.key` are set. Prefer `secretKeyRef`
+  value: ""
+  # -- Reference to an existing secret containing the master password
+  secretKeyRef:
+    # -- Name of an existing Secret
+    name: ""
+    # -- Key within the Secret
+    key: ""
+
 # -- Odoo configuration file content (supports Helm templating)
 config: |-
   [options]
@@ -233,6 +246,8 @@ config: |-
   db_port = $DB_PORT
   db_user = $DB_USER
   db_password = $DB_PASSWORD
+
+  admin_passwd = $ADMIN_PASSWD
 
   log_level = $LOG_LEVEL
 

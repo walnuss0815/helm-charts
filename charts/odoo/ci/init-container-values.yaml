@@ -1,3 +1,6 @@
+adminPassword:
+  value: ci-admin-password
+
 configDir: /etc/odoo
 configFilePath: '{{ .Values.configDir }}/odoo.conf'
 

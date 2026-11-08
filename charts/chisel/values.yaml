@@ -98,7 +98,8 @@ server:
   fingerprint: ""
   # -- Authentication string for the Chisel remote server
   auth:
-    # -- Plain-text auth value (takes precedence if set)
+    # -- Plain-text auth value in the form `<user>:<pass>`. Ignored if
+    # `secretKeyRef.name` and `secretKeyRef.key` are set
     value: ""
     # -- Reference to a Kubernetes Secret key containing the auth value
     secretKeyRef:
@@ -107,17 +108,10 @@ server:
       # -- Key within the secret
       key: ""
 
-# -- Chisel reverse port-forwarding rules. Each rule maps a port on the remote Chisel server to a host/port inside the cluster.
-# Example:
-# ```yaml
-# rules:
-#   - local:
-#       interface: 0.0.0.0
-#       port: 80
-#     remote:
-#       host: traefik-external.traefik-external.svc.cluster.local
-#       port: 80
-# ```
+# -- Reverse port-forwarding rules, at least one required. Each maps a port
+# on the chisel server to a host and port in the cluster, e.g.
+# `{local: {port: 80}, remote: {host: traefik.traefik.svc, port: 80}}`.
+# `local.interface` defaults to `0.0.0.0`, `protocol` to `tcp`
 rules: []
   # - local:
   #     port: 80

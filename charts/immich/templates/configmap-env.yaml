@@ -9,13 +9,13 @@ data:
   IMMICH_LOG_LEVEL: {{ .Values.logLevel }}
   DB_HOSTNAME: {{ include "immich.databaseHost" . }}
   DB_PORT: {{ include "immich.databasePort" . | quote }}
-  DB_USERNAME: {{ include "immich.databaseUser" . }}
-  DB_DATABASE_NAME: {{ include "immich.databaseName" . }}
+  DB_USERNAME: {{ .Values.postgres.user }}
+  DB_DATABASE_NAME: {{ .Values.postgres.database }}
   {{- with .Values.postgres.sslMode }}
   DB_SSL_MODE: {{ . | quote }}
   {{- end }}
   REDIS_HOSTNAME: {{ include "immich.redisHost" . }}
-  REDIS_PORT: {{ include "immich.redisPort" . | quote }}
+  REDIS_PORT: {{ .Values.redis.port | toString | quote }}
   REDIS_DBINDEX: {{ .Values.redis.dbindex | toString | quote }}
   {{- with .Values.redis.username }}
   REDIS_USERNAME: {{ . | quote }}

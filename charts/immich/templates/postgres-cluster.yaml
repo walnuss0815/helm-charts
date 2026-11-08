@@ -42,7 +42,7 @@ spec:
     {{- end }}
   managed:
     roles:
-      - name: {{ include "immich.databaseUser" . }}
+      - name: {{ .Values.postgres.user }}
         ensure: present
         login: true
         superuser: {{ .Values.postgres.superuser }}
@@ -98,8 +98,8 @@ spec:
       {{- else }}
       source: backup-source
       {{- end }}
-      database: {{ include "immich.databaseName" . }}
-      owner: {{ include "immich.databaseUser" . }}
+      database: {{ .Values.postgres.database }}
+      owner: {{ .Values.postgres.user }}
       {{- if include "immich.databasePasswordProvided" . }}
       secret:
         name: {{ include "immich.bootstrapSecretName" . }}
@@ -110,8 +110,8 @@ spec:
       {{- end }}
     {{- else }}
     initdb:
-      database: {{ include "immich.databaseName" . }}
-      owner: {{ include "immich.databaseUser" . }}
+      database: {{ .Values.postgres.database }}
+      owner: {{ .Values.postgres.user }}
       {{- if include "immich.databasePasswordProvided" . }}
       secret:
         name: {{ include "immich.bootstrapSecretName" . }}

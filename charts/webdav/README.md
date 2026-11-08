@@ -1,6 +1,6 @@
 # webdav
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.3](https://img.shields.io/badge/AppVersion-v5.17.3-informational?style=flat-square)
+![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.3](https://img.shields.io/badge/AppVersion-v5.17.3-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -15,7 +15,7 @@ A Helm chart for Kubernetes
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment |
-| config | object | `{"behindProxy":true,"cors":{"enabled":false},"debug":false,"directory":"/data","log":{"format":"json"},"noSniff":false,"permissions":"CRUD","port":6060,"users":[{"password":"{env}USER_PASSWORD","username":"{env}USER_USERNAME"}]}` | WebDAV server configuration |
+| config | object | `{"behindProxy":true,"cors":{"enabled":false},"debug":false,"directory":"/data","log":{"format":"json"},"noSniff":false,"permissions":"CRUD","port":6060,"users":[{"password":"{env}USER_PASSWORD","username":"{env}USER_USERNAME"}]}` | WebDAV server configuration, rendered as the server's `config.yml`. `config.port` is the container's listen port |
 | extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
 | httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Gateway API HTTPRoute configuration (requires Gateway API CRDs installed) |
@@ -66,7 +66,7 @@ A Helm chart for Kubernetes
 | securityContext.runAsUser | int | `1000` | User ID to run the container as |
 | securityContext.seccompProfile | object | `{"type":"RuntimeDefault"}` | Seccomp profile configuration |
 | service | object | `{"port":6060,"type":"ClusterIP"}` | Service configuration |
-| service.port | int | `6060` | Service port (WebDAV default port) |
+| service.port | int | `6060` | Service port. The container listens on `config.port` |
 | service.type | string | `"ClusterIP"` | Service type (ClusterIP, NodePort, LoadBalancer) |
 | serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
@@ -74,7 +74,7 @@ A Helm chart for Kubernetes
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | The name of the service account to use (if not set and create is true, a name is generated using the fullname template) |
 | tolerations | list | `[]` | Tolerations for pod assignment |
-| user | object | `{"password":{"secretKeyRef":{"key":"","name":""},"value":""},"username":{"secretKeyRef":{"key":"","name":""},"value":""}}` | WebDAV user authentication configuration |
+| user | object | `{"password":{"secretKeyRef":{"key":"","name":""},"value":""},"username":{"secretKeyRef":{"key":"","name":""},"value":""}}` | Credentials for the `{env}USER_USERNAME` / `{env}USER_PASSWORD` user in `config.users`. Required while `config.users` references them |
 | user.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Password configuration |
 | user.password.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing password |
 | user.password.secretKeyRef.key | string | `""` | Key within the secret |

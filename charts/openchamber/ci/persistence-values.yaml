@@ -5,6 +5,7 @@ auth:
 persistence:
   data:
     enabled: true
+    keep: false
     size: 1Gi
   workspaces:
     enabled: true

@@ -274,7 +274,8 @@ replace the credentials. Note the consequences:
 - The Secret outlives the release. If you also remove the database (the
   bundled CNPG cluster is kept on uninstall while `postgres.keep` is `true`;
   deleting it also deletes its volumes), the kept credentials belong to an
-  account that no longer exists. Delete the Secret manually before reinstalling, so that new credentials are generated.
+  account that no longer exists. Delete the Secret manually before
+  reinstalling, so that new credentials are generated.
 - Reinstalling under the same release name and namespace adopts the Secret.
   Under another name that resolves to the same Secret name (e.g. with
   `fullnameOverride`), the install fails because the Secret already exists.
@@ -371,8 +372,18 @@ release name and namespace adopts the Cluster again.
 - It does not protect against Argo CD auto-prune when the Cluster disappears
   from the rendered manifests (e.g. `postgres.enabled: false`). Add
   `argocd.argoproj.io/sync-options: Prune=false` through `postgres.annotations`.
-- A kept Cluster keeps running, but its `ScheduledBackup` and `ObjectStore` are
-  deleted with the release, so backups stop.
+- A kept `Cluster` keeps running, but the `ScheduledBackup` is deleted with the
+  release, and so is the `ObjectStore` if the chart created it
+  (`postgres.backup.objectStore.create`). While WAL archiving is enabled
+  (`postgres.backup.enabled` with `method: plugin`, or with an object store for
+  `method: volumeSnapshot`), the kept `Cluster` still archives into that
+  deleted `ObjectStore`. Every attempt fails, and PostgreSQL keeps the WAL
+  files on the database volume until it is full. To avoid this, set
+  `postgres.backup.enabled: false` and upgrade before uninstalling, or archive
+  into an `ObjectStore` managed outside the release
+  (`postgres.backup.objectStore.create: false` and
+  `postgres.backup.objectStore.name`). Otherwise reinstall or delete the kept
+  `Cluster` promptly.
 - Delete the Cluster manually when it is no longer needed:
   `kubectl delete cluster.postgresql.cnpg.io <fullname>-postgresql`.
 
@@ -449,8 +460,8 @@ postgres:
 To restore, the CNPG cluster must be created again: delete the kept `Cluster`
 (`kubectl delete cluster.postgresql.cnpg.io <fullname>-postgresql`; its PVCs go
 with it), because an uninstall alone keeps it while `postgres.keep` is `true`.
-Then install with `postgres.recovery` enabled. A WAL archive must start empty, so the restored cluster has to archive
-into a new folder:
+Then install with `postgres.recovery` enabled. A WAL archive must start
+empty, so the restored cluster has to archive into a new folder:
 
 ```yaml
 postgres:

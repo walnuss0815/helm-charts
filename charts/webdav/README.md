@@ -1,6 +1,6 @@
 # webdav
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.3](https://img.shields.io/badge/AppVersion-v5.17.3-informational?style=flat-square)
+![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v5.17.3](https://img.shields.io/badge/AppVersion-v5.17.3-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -16,14 +16,14 @@ A Helm chart for Kubernetes
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment |
 | config | object | `{"behindProxy":true,"cors":{"enabled":false},"debug":false,"directory":"/data","log":{"format":"json"},"noSniff":false,"permissions":"CRUD","port":6060,"users":[{"password":"{env}USER_PASSWORD","username":"{env}USER_USERNAME"}]}` | WebDAV server configuration |
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
-| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Gateway API HTTPRoute configuration (requires Gateway API CRDs installed) |
+| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}` | Gateway API HTTPRoute configuration (requires Gateway API CRDs installed) |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations |
 | httpRoute.enabled | bool | `false` | Enable HTTPRoute |
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames for HTTP header matching |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Parent gateway references to attach this route to |
-| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules and filters |
+| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | Routing rules and filters |
 | image | object | `{"pullPolicy":"IfNotPresent","repository":"hacdias/webdav","tag":""}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"hacdias/webdav"` | Container image repository |

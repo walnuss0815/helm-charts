@@ -23,21 +23,16 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.httpRoute.rules }}
+    {{- /*
+    All rule fields except backendRefs (e.g. matches, filters, timeouts)
+    are passed through so newer Gateway API fields work without changes.
+    */}}
     - backendRefs:
         - name: {{ $fullName }}
           port: {{ $svcPort }}
           weight: 1
-      {{- with .matches }}
-      matches:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .filters }}
-      filters:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .timeouts }}
-      timeouts:
-        {{- toYaml . | nindent 8 }}
+      {{- with omit . "backendRefs" }}
+      {{- toYaml . | nindent 6 }}
       {{- end }}
     {{- end }}
 {{- end }}

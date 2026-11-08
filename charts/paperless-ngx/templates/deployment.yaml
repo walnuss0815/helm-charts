@@ -51,7 +51,7 @@ spec:
               {{- if not (or .Values.secretKey.value (and .Values.secretKey.secretKeyRef.name .Values.secretKey.secretKeyRef.key)) }}
               {{- fail "secretKey is required: set secretKey.value or secretKey.secretKeyRef.name and secretKey.secretKeyRef.key" }}
               {{- end }}
-              {{- include "paperless-ngx.secretEnvVar" .Values.secretKey | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (dict "root" $ "secret" .Values.secretKey) | indent 14 }}
             - name: PAPERLESS_DATA_DIR
               value: /volumes/data
             - name: PAPERLESS_MEDIA_ROOT
@@ -68,12 +68,12 @@ spec:
             - name: PAPERLESS_DBNAME
               value: {{ .Values.database.name }}
             - name: PAPERLESS_DBUSER
-              {{- include "paperless-ngx.secretEnvVar" .Values.database.username | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (dict "root" $ "secret" .Values.database.username) | indent 14 }}
             - name: PAPERLESS_DBPASS
-              {{- include "paperless-ngx.secretEnvVar" .Values.database.password | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (dict "root" $ "secret" .Values.database.password) | indent 14 }}
             {{- end }}
             - name: PAPERLESS_REDIS
-              {{- include "paperless-ngx.secretEnvVar" (merge .Values.valkeyKV.url $) | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (dict "root" $ "secret" .Values.valkeyKV.url) | indent 14 }}
             {{- if .Values.smtp.enabled }}
             - name: PAPERLESS_EMAIL_HOST
               value: {{ .Values.smtp.host }}
@@ -86,9 +86,9 @@ spec:
             - name: PAPERLESS_EMAIL_FROM
               value: {{ .Values.smtp.emailFrom }}
             - name: PAPERLESS_EMAIL_HOST_USER
-              {{- include "paperless-ngx.secretEnvVar" .Values.smtp.username | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (dict "root" $ "secret" .Values.smtp.username) | indent 14 }}
             - name: PAPERLESS_EMAIL_HOST_PASSWORD
-              {{- include "paperless-ngx.secretEnvVar" .Values.smtp.password | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (dict "root" $ "secret" .Values.smtp.password) | indent 14 }}
             {{- end }}
             - name: PAPERLESS_OCR_LANGUAGE
               value: {{ join "+" .Values.ocr.languages | quote }}
@@ -120,7 +120,7 @@ spec:
             {{- end }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
             {{- range $key, $value := .Values.envFrom }}
             - name: {{ $key | quote }}
@@ -145,7 +145,7 @@ spec:
             {{- end }}
             {{- if or .Values.ai.llm.apiKey.value .Values.ai.llm.apiKey.secretKeyRef.name }}
             - name: PAPERLESS_AI_LLM_API_KEY
-              {{- include "paperless-ngx.secretEnvVar" .Values.ai.llm.apiKey | indent 14 }}
+              {{- include "paperless-ngx.secretEnvVar" (dict "root" $ "secret" .Values.ai.llm.apiKey) | indent 14 }}
             {{- end }}
             {{- if .Values.ai.llm.endpoint }}
             - name: PAPERLESS_AI_LLM_ENDPOINT

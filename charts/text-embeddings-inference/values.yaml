@@ -225,6 +225,6 @@ tolerations: []
 # -- Affinity rules for the pod
 affinity: {}
 
-# -- Extra Kubernetes manifests to deploy alongside the chart. Each entry is
-# rendered with `tpl`
+# -- Extra Kubernetes manifests to deploy alongside the chart. Each entry is a
+# string or a map and is rendered with `tpl`
 extraManifests: []

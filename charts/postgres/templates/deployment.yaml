@@ -40,7 +40,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: psql
-              containerPort: {{ .Values.service.port }}
+              containerPort: 5432
               protocol: TCP
           env:
             - name: POSTGRES_USER

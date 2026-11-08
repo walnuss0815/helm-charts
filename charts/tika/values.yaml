@@ -28,8 +28,9 @@ fullnameOverride: ""
 serviceAccount:
   # -- Specifies whether a service account should be created
   create: true
-  # -- Automatically mount a ServiceAccount's API credentials
-  automount: true
+  # -- Automatically mount a ServiceAccount's API credentials. Apache Tika does
+  # not need access to the Kubernetes API
+  automount: false
   # -- Annotations to add to the service account
   annotations: {}
   # -- The name of the service account to use (if not set and create is true, a name is generated using the fullname template)
@@ -41,18 +42,25 @@ podAnnotations: {}
 # -- Labels to add to the pod
 podLabels: {}
 
-# -- Pod security context configuration
-podSecurityContext: {}
-  # fsGroup: 2000
+# -- Pod security context. Runs as the image's non-root user `35002`. Helm
+# merges maps: set a key to `null` to remove it, or the whole value to `null`
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 35002
+  runAsGroup: 35002
+  seccompProfile:
+    type: RuntimeDefault
 
-# -- Container security context configuration
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+# -- Container security context. The root filesystem stays writable because
+# Tika and Tesseract write temporary files to `/tmp`
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 35002
+  runAsGroup: 35002
 
 # -- Service configuration
 service:
@@ -61,18 +69,15 @@ service:
   # -- Service port. Traffic is forwarded to container port 9998
   port: 9998
 
-# -- Resource limits and requests for the Apache Tika container
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+# -- Resource requests and limits for the Apache Tika container. The JVM sizes
+# its heap from the memory limit; raise it for large or OCR-heavy documents.
+# Set `limits` to `null` to remove the memory limit
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    memory: 2Gi
 
 # -- Liveness probe configuration
 livenessProbe:

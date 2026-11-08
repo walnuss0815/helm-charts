@@ -180,6 +180,11 @@ persistence:
   data:
     # -- Existing PVC claim name to use (if empty, creates new PVC)
     claimName: ""
+    # -- Keep the data PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # served files. Ignored if `claimName` is set. Delete it manually with
+    # `kubectl delete pvc <fullname>-data`
+    keep: true
     # -- Annotations for the data PVC
     annotations: {}
     # -- Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning

@@ -5,9 +5,14 @@ metadata:
   name: {{ include "odoo.fullname" $ }}-data
   labels:
     {{- include "odoo.labels" $ | nindent 4 }}
-  {{- with .annotations }}
+  {{- if or .keep .annotations }}
   annotations:
+    {{- if .keep }}
+    helm.sh/resource-policy: keep
+    {{- end }}
+    {{- with .annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   accessModes:

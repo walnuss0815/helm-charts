@@ -251,9 +251,11 @@ persistence:
     storageClass: ""
     # -- Size of the consumption PVC
     size: "512Mi"
-    # -- Access modes for consumption PVC
+    # -- Access modes for consumption PVC. Use `ReadWriteMany` when
+    # `webdav.enabled` and the webdav and paperless-ngx pods may run on
+    # different nodes
     accessModes:
-      - ReadWriteMany
+      - ReadWriteOnce
 
 # -- OCR (Optical Character Recognition) configuration
 ocr:

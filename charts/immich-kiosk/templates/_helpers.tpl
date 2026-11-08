@@ -62,20 +62,6 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Create environment variable for secret value
-*/}}
-{{- define "immich-kiosk.secretEnvVar" -}}
-{{- if and .secretKeyRef.name .secretKeyRef.key }}
-valueFrom:
-  secretKeyRef:
-    name: {{ tpl .secretKeyRef.name . }}
-    key: {{ tpl .secretKeyRef.key . }}
-{{- else }}
-value: {{ tpl .value . }}
-{{- end }}
-{{- end }}
-
-{{/*
 Returns "true" when a secret entry is configured, i.e. an inline `value` is set
 or a fully populated `secretKeyRef` is provided.
 Usage: include "immich-kiosk.secretConfigured" .Values.password

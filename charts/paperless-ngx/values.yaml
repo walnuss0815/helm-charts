@@ -210,6 +210,11 @@ workerTimeout: null
 persistence:
   # -- Data directory persistence configuration
   data:
+    # -- Keep the data PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # search index, classification model and settings. Delete it manually with
+    # `kubectl delete pvc <fullname>-data`
+    keep: true
     # -- Annotations for the data PVC
     annotations: {}
     # -- Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
@@ -221,6 +226,11 @@ persistence:
       - ReadWriteOnce
   # -- Media directory persistence configuration
   media:
+    # -- Keep the media PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # archived documents and thumbnails. Delete it manually with
+    # `kubectl delete pvc <fullname>-media`
+    keep: true
     # -- Annotations for the media PVC
     annotations: {}
     # -- Storage class for media PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning
@@ -232,6 +242,11 @@ persistence:
       - ReadWriteOnce
   # -- Consumption directory persistence configuration
   consumption:
+    # -- Keep the consumption PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # documents waiting to be consumed. Delete it manually with
+    # `kubectl delete pvc <fullname>-consumption`
+    keep: true
     # -- Annotations for the consumption PVC
     annotations: {}
     # -- Storage class for consumption PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning

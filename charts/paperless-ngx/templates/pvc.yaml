@@ -5,9 +5,14 @@ metadata:
   name: {{ include "paperless-ngx.fullname" $ }}-{{ $key }}
   labels:
     {{- include "paperless-ngx.labels" $ | nindent 4 }}
-  {{- with $value.annotations }}
+  {{- if or $value.keep $value.annotations }}
   annotations:
+    {{- if $value.keep }}
+    helm.sh/resource-policy: keep
+    {{- end }}
+    {{- with $value.annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   accessModes:

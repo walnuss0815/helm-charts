@@ -1,6 +1,6 @@
 # chisel
 
-![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.13.0](https://img.shields.io/badge/AppVersion-1.13.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.13.0](https://img.shields.io/badge/AppVersion-1.13.0-informational?style=flat-square)
 
 A Helm chart for Chisel
 
@@ -26,12 +26,12 @@ A Helm chart for Chisel
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
 | podAnnotations | object | `{}` | Annotations to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | podLabels | object | `{}` | Labels to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
-| podSecurityContext | object | `{}` | Pod-level security context (e.g. fsGroup) |
+| podSecurityContext | object | `{"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod-level security context. The image runs as root; the chart runs it as UID 65532 instead. Helm merges maps: set a key to `null` to remove it, or the whole value to `null` |
 | readinessProbe | object | `{}` | Readiness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | replicaCount | int | `1` | Number of replica pods to run. See [ReplicaSet docs](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/) |
-| resources | object | `{}` | CPU/memory resource requests and limits. Leaving empty is recommended to keep charts portable across environments like Minikube |
+| resources | object | `{"limits":{"memory":"128Mi"},"requests":{"cpu":"10m","memory":"32Mi"}}` | CPU/memory resource requests and limits. Raise the limit for many concurrent tunnelled connections. Set `limits` to `null` to remove the memory limit |
 | rules | list | `[]` | Chisel reverse port-forwarding rules. Each rule maps a port on the remote Chisel server to a host/port inside the cluster. Example: ```yaml rules:   - local:       interface: 0.0.0.0       port: 80     remote:       host: traefik-external.traefik-external.svc.cluster.local       port: 80 ``` |
-| securityContext | object | `{}` | Container-level security context |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532}` | Container-level security context. The client only opens network connections and writes no files, so the root filesystem is read-only |
 | server | object | `{"auth":{"secretKeyRef":{"key":"","name":""},"value":""},"host":"","port":8000}` | Remote Chisel server connection configuration |
 | server.auth | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Authentication string for the Chisel remote server |
 | server.auth.secretKeyRef | object | `{"key":"","name":""}` | Reference to a Kubernetes Secret key containing the auth value |
@@ -40,9 +40,9 @@ A Helm chart for Chisel
 | server.auth.value | string | `""` | Plain-text auth value (takes precedence if set) |
 | server.host | string | `""` | IP address or domain name of a remote server running Chisel |
 | server.port | int | `8000` | Port Chisel is using on the remote server |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
+| serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount the ServiceAccount API credentials into the pod |
+| serviceAccount.automount | bool | `false` | Automatically mount the ServiceAccount API credentials into the pod. The Chisel client does not need access to the Kubernetes API |
 | serviceAccount.create | bool | `true` | Whether to create a service account |
 | serviceAccount.name | string | `""` | Name of the service account to use. If empty and `create` is true, a name is generated from the fullname template |
 | tolerations | list | `[]` | Tolerations for pod scheduling |

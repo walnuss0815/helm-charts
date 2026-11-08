@@ -5,7 +5,6 @@ user:
     value: "my-password"
 
 persistence:
-  enabled: true
   data:
     claimName: "my-data"
 

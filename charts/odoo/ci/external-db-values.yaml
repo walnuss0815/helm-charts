@@ -1,0 +1,64 @@
+# External PostgreSQL (no postgres subchart). A throw-away PostgreSQL is
+# deployed through extraManifests so `ct install` can start Odoo.
+postgres:
+  enabled: false
+
+database:
+  host: odoo-ci-db
+  # Odoo refuses to run as the `postgres` user
+  username:
+    value: odoo
+  password:
+    value: ci-db-password
+
+extraManifests:
+  - |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: odoo-ci-db
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: odoo-ci-db
+      template:
+        metadata:
+          labels:
+            app: odoo-ci-db
+        spec:
+          containers:
+            - name: postgres
+              image: postgres:18
+              env:
+                - name: POSTGRES_USER
+                  value: odoo
+                - name: POSTGRES_DB
+                  value: postgres
+                - name: POSTGRES_PASSWORD
+                  value: ci-db-password
+              ports:
+                - name: postgres
+                  containerPort: 5432
+              readinessProbe:
+                exec:
+                  command: ["pg_isready", "-U", "odoo"]
+                periodSeconds: 5
+              volumeMounts:
+                - name: data
+                  mountPath: /var/lib/postgresql
+          volumes:
+            - name: data
+              emptyDir: {}
+  - |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: odoo-ci-db
+    spec:
+      selector:
+        app: odoo-ci-db
+      ports:
+        - name: postgres
+          port: 5432
+          targetPort: postgres

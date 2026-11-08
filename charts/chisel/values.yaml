@@ -88,7 +88,7 @@ affinity: {}
 
 # -- Remote Chisel server connection configuration
 server:
-  # -- IP address or domain name of a remote server running Chisel
+  # -- IP address or domain name of a remote server running Chisel. Required
   host: ""
   # -- Port Chisel is using on the remote server
   port: 8000

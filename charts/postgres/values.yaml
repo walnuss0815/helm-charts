@@ -110,9 +110,15 @@ extraManifests: []
 
 # -- Secret configuration for database credentials
 secret:
-  # -- Create a secret containing database credentials and connection details
+  # -- Create a Secret with the connection details and a random password. The password
+  # is regenerated on every render (`helm upgrade`, Argo CD sync) while PostgreSQL keeps
+  # the one from its first start, so use this for CI and one-off `helm install` only.
+  # For GitOps set `false` and provide the Secret via `name`
   create: true
-  # -- Name of the secret containing `username` and `password`. Auto-generated if `create` is `true`
+  # -- Name of the credentials Secret (supports Helm templating). Defaults to the fullname
+  # if `create` is `true`. Required if `create` is `false`; the Secret needs the keys
+  # `username` and `password`, plus `host` and `port` for odoo and `host`, `port` and
+  # `database` for linkwarden when used as their subchart
   name: ""
 
 # -- PostgreSQL username

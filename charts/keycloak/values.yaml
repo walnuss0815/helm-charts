@@ -562,6 +562,12 @@ postgres:
   # -- Deploy a CloudNativePG `Cluster`. Set to `false` to use an external database
   # @section -- PostgreSQL
   enabled: true
+  # -- Keep the CNPG Cluster and the database PVCs it owns when the release is
+  # uninstalled or the Argo CD Application is deleted
+  # (`helm.sh/resource-policy: keep`). The cluster keeps running until it is
+  # deleted manually, see Database in the README
+  # @section -- PostgreSQL
+  keep: true
   # -- Annotations to add to the CNPG Cluster
   # @section -- PostgreSQL
   annotations: {}

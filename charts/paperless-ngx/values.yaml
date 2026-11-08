@@ -256,7 +256,8 @@ parser:
 
 # -- Single Sign-On (SSO) configuration
 sso:
-  # -- Enable SSO authentication
+  # -- Enable SSO authentication. Sets `PAPERLESS_APPS` to the OpenID Connect
+  # provider app unless `PAPERLESS_APPS` is set in `env` or `envFrom`
   enabled: false
   # -- Automatically create user accounts on first SSO login
   autoSignup: false

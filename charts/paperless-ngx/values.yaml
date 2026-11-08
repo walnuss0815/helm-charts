@@ -385,8 +385,11 @@ webdav:
   persistence:
     # -- Data directory configuration
     data:
-      # -- PVC claim name for WebDAV consumption
-      claimName: "{{ .Release.Name }}-consumption"
+      # -- Name of the consumption PVC mounted into WebDAV. Rendered with
+      # `tpl` in the webdav subchart, so it mirrors this chart's fullname from
+      # the release name. Set it to `<fullname>-consumption` when
+      # `nameOverride` or `fullnameOverride` is set
+      claimName: '{{ if contains "paperless-ngx" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-paperless-ngx{{ end }}-consumption'
 
 # -- Apache Tika subchart configuration (for document parsing)
 tika:

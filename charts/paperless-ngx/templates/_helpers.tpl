@@ -93,3 +93,19 @@ fullname helper, whose chart name is the "embeddings" alias.
 {{- end }}
 {{- end }}
 {{- end }}
+
+{{/*
+Validate that webdav.persistence.data.claimName matches the consumption PVC.
+That value is rendered via `tpl` inside the webdav subchart's own template
+context, which cannot see this (parent) chart's nameOverride or
+fullnameOverride. If an override changes the fullname and the value still
+equals its untouched default expression, fail loudly rather than let webdav
+silently mount a PVC that doesn't exist.
+*/}}
+{{- define "paperless-ngx.validateWebdavClaimName" -}}
+{{- $defaultClaimName := `{{ if contains "paperless-ngx" .Release.Name }}{{ .Release.Name }}{{ else }}{{ .Release.Name }}-paperless-ngx{{ end }}-consumption` -}}
+{{- $claimName := printf "%s-consumption" (include "paperless-ngx.fullname" .) -}}
+{{- if and .Values.webdav.enabled (eq .Values.webdav.persistence.data.claimName $defaultClaimName) (ne (tpl $defaultClaimName .) $claimName) }}
+{{- fail (printf "webdav.persistence.data.claimName must be set to %q when nameOverride or fullnameOverride is set" $claimName) }}
+{{- end }}
+{{- end }}

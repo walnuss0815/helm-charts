@@ -3,3 +3,4 @@ validate-maintainers: false
 chart-repos:
   - valkey=https://valkey.io/valkey-helm/
   - walnuss0815=https://walnuss0815.github.io/helm-charts
+check-version-increment: false

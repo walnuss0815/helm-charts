@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -14,22 +21,64 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: main
           fetch-depth: 0
+          token: ${{ secrets.ACTIONS_TOKEN }}
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump chart versions
+        id: bump
+        run: |
+          charts=$(.github/scripts/bump-versions.sh)
+          if [[ -n $charts ]]; then
+            { echo 'charts<<EOF'; echo "$charts"; echo EOF; } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run helm-docs
+        if: ${{ steps.bump.outputs.charts != '' }}
+        uses: losisin/helm-docs-github-action@v2
+        with:
+          chart-search-root: charts
+
+      # A rejected push fails the run: the run queued for the newer push redoes it
+      - name: Commit and push
+        if: ${{ steps.bump.outputs.charts != '' }}
+        env:
+          CHARTS: ${{ steps.bump.outputs.charts }}
+        run: |
+          # shellcheck disable=SC2086
+          git add -- $CHARTS
+          if git diff --staged --quiet; then
+            echo "No changes to commit, skipping."
+            exit 0
+          fi
+          {
+            echo "chore(release): update chart versions [skip ci]"
+            echo
+            for dir in $CHARTS; do
+              echo "${dir#charts/} $(sed -n 's/^version: *//p' "$dir/Chart.yaml")"
+            done
+          } | git commit -F -
+          git push
 
       - name: Set up Helm
+        if: ${{ steps.bump.outputs.charts != '' }}
         uses: azure/setup-helm@v5.0.1
 
       - name: Add Helm repositories
+        if: ${{ steps.bump.outputs.charts != '' }}
         run: |
           helm repo add valkey https://valkey.io/valkey-helm/
           helm repo add walnuss0815 https://walnuss0815.github.io/helm-charts
 
       - name: Run chart-releaser
+        if: ${{ steps.bump.outputs.charts != '' }}
         uses: helm/chart-releaser-action@v1.9.0
+        with:
+          charts: ${{ steps.bump.outputs.charts }}
         env:
           CR_TOKEN: "${{ secrets.ACTIONS_TOKEN }}"

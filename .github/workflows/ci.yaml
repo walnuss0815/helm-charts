@@ -18,6 +18,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Test release scripts
+        run: bash .github/scripts/bump-versions.test.sh
+
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.9.0
 
@@ -28,67 +31,6 @@ jobs:
           changed=$(ct list-changed --config ct.yaml --target-branch "$GITHUB_BASE_REF")
           charts_json=$(echo "${changed#"charts/"}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(split("/")[-1])')
           echo "changed-charts=$charts_json" >> "$GITHUB_OUTPUT"
-
-  update-files:
-    name: Update files
-    needs: list-changed
-    # Forks get no secrets, so the push to the PR branch cannot work there
-    if: ${{ needs.list-changed.outputs.changed-charts != '[]' && github.event.pull_request.head.repo.full_name == github.repository }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        chart: ${{ fromJson(needs.list-changed.outputs.changed-charts) }}
-      # All jobs push to the same branch, so run them one at a time
-      max-parallel: 1
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.ACTIONS_TOKEN }}
-
-      - name: Compute next version for ${{ matrix.chart }}
-        id: semver
-        uses: paulhatch/semantic-version@v6.0.7
-        with:
-          tag_prefix: "${{ matrix.chart }}-"
-          change_path: "charts/${{ matrix.chart }}"
-          major_pattern: "/(BREAKING CHANGE|!:)/"
-          minor_pattern: "/^feat/"
-          version_format: "${major}.${minor}.${patch}"
-          bump_each_commit: false
-
-      - name: Update version in Chart.yaml
-        if: steps.semver.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          sed -i "s/^version:.*/version: ${{ steps.semver.outputs.version }}/" \
-            charts/${{ matrix.chart }}/Chart.yaml
-
-          git add charts/${{ matrix.chart }}/Chart.yaml
-
-          if git diff --staged --quiet; then
-            echo "No changes to commit, skipping."
-          else
-            git commit -m "chore(${{ matrix.chart }}): bump version to ${{ steps.semver.outputs.version }}"
-          fi
-
-      - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@v2
-        with:
-          git-push: true
-          git-push-user-name: "github-actions[bot]"
-          git-push-user-email: "41898282+github-actions[bot]@users.noreply.github.com"
-          chart-search-root: charts/${{ matrix.chart }}
-          git-commit-message: "chore(${{ matrix.chart }}): update Helm documentation"
-
-      - name: Push changes
-        if: steps.semver.outputs.changed == 'true'
-        run: |
-          git push
 
   lint-test:
     name: Test and lint Helm Charts
@@ -118,10 +60,8 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.9.0
 
-      # Checks the bump against main: a stacked PR shares its parent's bump
-      # Fails until update-files pushes the version bump; the next run passes
       - name: Run chart-testing (lint)
-        run: ct lint --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts charts/${{ matrix.chart }}
+        run: ct lint --config ct.yaml --target-branch "$GITHUB_BASE_REF" --charts charts/${{ matrix.chart }}
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.15.2
@@ -135,19 +75,18 @@ jobs:
           kubectl wait --for=condition=Available --timeout=180s -n cnpg-system deploy/cnpg-cloudnative-pg
 
       - name: Run chart-testing (install)
-        run: ct install --config ct.yaml --target-branch ${{ github.event.repository.default_branch }} --charts charts/${{ matrix.chart }}
+        run: ct install --config ct.yaml --target-branch "$GITHUB_BASE_REF" --charts charts/${{ matrix.chart }}
 
   check:
     name: Check CI status
     if: always()
     needs:
       - list-changed
-      - update-files
       - lint-test
     runs-on: ubuntu-latest
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
         with:
-          allowed-skips: update-files,lint-test
+          allowed-skips: lint-test
           jobs: ${{ toJSON(needs) }}

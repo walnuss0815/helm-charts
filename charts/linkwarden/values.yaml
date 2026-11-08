@@ -179,6 +179,11 @@ envFrom: []
 # -- Persistence configuration for the linkwarden data directory
 persistence:
   data:
+    # -- Keep the data PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # archived pages, screenshots and uploads. Delete it manually with
+    # `kubectl delete pvc <fullname>-data`
+    keep: true
     # -- Annotations for the data PVC
     annotations: {}
     # -- Storage class for the data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning

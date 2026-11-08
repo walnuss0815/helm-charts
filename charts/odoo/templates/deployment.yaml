@@ -73,15 +73,15 @@ spec:
             - name: DB_PORT
               value: {{ .Values.database.port | quote }}
             - name: DB_USER
-              {{- include "odoo.secretEnvVar" .Values.database.user | nindent 14 }}
+              {{- include "odoo.secretEnvVar" (dict "root" $ "secret" .Values.database.user) | nindent 14 }}
             - name: DB_PASSWORD
-              {{- include "odoo.secretEnvVar" .Values.database.password | nindent 14 }}
+              {{- include "odoo.secretEnvVar" (dict "root" $ "secret" .Values.database.password) | nindent 14 }}
             {{- end }}
             - name: LOG_LEVEL
               value: {{ .Values.logLevel }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
             {{- range $key, $value := .Values.envFrom }}
             - name: {{ $key | quote }}
@@ -117,7 +117,7 @@ spec:
           env:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
             {{- range $key, $value := .Values.envFrom }}
             - name: {{ $key | quote }}

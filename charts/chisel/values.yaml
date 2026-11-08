@@ -25,8 +25,8 @@ fullnameOverride: ""
 serviceAccount:
   # -- Whether to create a service account
   create: true
-  # -- Automatically mount the ServiceAccount API credentials into the pod
-  automount: true
+  # -- Automatically mount the ServiceAccount API credentials into the pod. The Chisel client does not need access to the Kubernetes API
+  automount: false
   # -- Annotations to add to the service account
   annotations: {}
   # -- Name of the service account to use. If empty and `create` is true, a name is generated from the fullname template
@@ -37,27 +37,32 @@ podAnnotations: {}
 # -- Labels to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
 podLabels: {}
 
-# -- Pod-level security context (e.g. fsGroup)
-podSecurityContext: {}
-  # fsGroup: 2000
+# -- Pod-level security context. The image runs as root; the chart runs it as UID 65532 instead. Helm merges maps: set a key to `null` to remove it, or the whole value to `null`
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
 
-# -- Container-level security context
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+# -- Container-level security context. The client only opens network connections and writes no files, so the root filesystem is read-only
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
 
-# -- CPU/memory resource requests and limits. Leaving empty is recommended to keep charts portable across environments like Minikube
-resources: {}
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+# -- CPU/memory resource requests and limits. Raise the limit for many concurrent tunnelled connections. Set `limits` to `null` to remove the memory limit
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 128Mi
 
 # -- Liveness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 livenessProbe: {}

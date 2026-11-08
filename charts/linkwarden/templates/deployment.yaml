@@ -46,7 +46,7 @@ spec:
             - name: NEXTAUTH_URL
               value: {{ .Values.nextauth.url }}
             - name: NEXTAUTH_SECRET
-              {{- include "linkwarden.secretEnvVar" .Values.nextauth.secret | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.nextauth.secret) | indent 14 }}
             - name: NEXT_PUBLIC_DISABLE_REGISTRATION
               value: {{ .Values.auth.disableRegistration | quote }}
             {{- if .Values.postgres.enabled }}
@@ -93,14 +93,14 @@ spec:
             - name: DATABASE_NAME
               value: {{ .Values.database.name }}
             - name: DATABASE_USER
-              {{- include "linkwarden.secretEnvVar" .Values.database.username | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.database.username) | indent 14 }}
             - name: DATABASE_PASSWORD
-              {{- include "linkwarden.secretEnvVar" .Values.database.password | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.database.password) | indent 14 }}
             # Note: DATABASE_URL must come after the vars it references via
             # $(...) - Kubernetes only resolves $(VAR) references to
             # variables defined earlier in the same env list.
             - name: DATABASE_URL
-              {{- include "linkwarden.secretEnvVar" .Values.database.url | indent 14 }}
+              {{- include "linkwarden.secretEnvVar" (dict "root" $ "secret" .Values.database.url) | indent 14 }}
             {{- end }}
             - name: UID
               value: {{ .Values.securityContext.runAsUser | default 1000 | quote }}
@@ -108,7 +108,7 @@ spec:
               value: {{ .Values.securityContext.runAsGroup | default 1000 | quote }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key | quote }}
-              value: {{ (tpl $value $) | quote }}
+              value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
           {{- with .Values.envFrom }}
           envFrom:

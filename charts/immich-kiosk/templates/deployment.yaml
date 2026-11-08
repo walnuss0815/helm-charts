@@ -45,8 +45,6 @@ spec:
           env:
             - name: KIOSK_IMMICH_URL
               value: {{ .Values.immich.url }}
-            - name: KIOSK_IMMICH_API_KEY
-              {{- include "immich-kiosk.secretEnvVar" .Values.immich.apiKey | indent 14 }}
             {{- if .Values.immich.externalURL }}
             - name: KIOSK_IMMICH_EXTERNAL_URL
               value: {{ .Values.immich.externalURL }}

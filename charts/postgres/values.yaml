@@ -117,6 +117,10 @@ port: 5432
 persistence:
   # -- PostgreSQL data directory persistence configuration
   pgdata:
+    # -- Keep the PostgreSQL data PVC when the release is uninstalled or the Argo CD
+    # Application is deleted (`helm.sh/resource-policy: keep`). It holds the
+    # database files. Delete it manually with `kubectl delete pvc <fullname>-pgdata`
+    keep: true
     # -- Annotations for the PostgreSQL data PVC
     annotations: {}
     # -- Storage class for the PostgreSQL data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning

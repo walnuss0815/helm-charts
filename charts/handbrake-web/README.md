@@ -1,6 +1,6 @@
 # handbrake-web
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.1](https://img.shields.io/badge/AppVersion-0.8.1-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.1](https://img.shields.io/badge/AppVersion-0.8.1-informational?style=flat-square)
 
 A Helm chart for HandBrake Web
 
@@ -36,11 +36,11 @@ A Helm chart for HandBrake Web
 | ingress.hosts | list | `[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Ingress hosts configuration |
 | ingress.tls | list | `[]` | TLS configuration |
 | nameOverride | string | `""` | Override the name of the chart |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":""},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":""}}` | Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart) |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":""},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":""}}` | Persistence configuration. The server mounts every volume; the worker and the optional webdav subchart mount only `video` |
 | persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":""}` | Config/data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
-| persistence.data.mountPath | string | `"/data"` | Mount path for this volume within the server/worker containers |
+| persistence.data.mountPath | string | `"/data"` | Mount path for this volume within the server container |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `""` | Storage class for the data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | persistence.video | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":""}` | Video library persistence configuration |

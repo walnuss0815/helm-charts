@@ -244,7 +244,11 @@ persistence:
 
 # -- OCR (Optical Character Recognition) configuration
 ocr:
-  # -- OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
+  # -- OCR languages to use (`PAPERLESS_OCR_LANGUAGE`, Tesseract codes such as
+  # `deu`). The image includes `eng`, `deu`, `fra`, `ita` and `spa`; other
+  # languages need a custom image, as `PAPERLESS_OCR_LANGUAGES` cannot install
+  # them in this rootless, read-only container. See
+  # [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
   languages:
     - eng
 

@@ -104,6 +104,8 @@ spec:
             # variables defined earlier in the same env list.
             - name: DATABASE_URL
               {{- include "linkwarden.secretEnvVar" .Values.database.url | indent 14 }}
+            {{- else if not (or .Values.env.DATABASE_URL .Values.envFrom) }}
+            {{- fail "a database is required: set postgres.enabled=true or database.enabled=true (or provide DATABASE_URL via env or envFrom)" }}
             {{- end }}
             - name: UID
               value: {{ .Values.securityContext.runAsUser | default 1000 | quote }}

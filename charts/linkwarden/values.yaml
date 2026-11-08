@@ -237,7 +237,9 @@ postgres:
 
 # -- External database connection configuration. Only used if `postgres.enabled` is `false` and `database.enabled` is `true`
 database:
-  # -- Enable configuring an external database connection
+  # -- Enable configuring an external database connection. One of
+  # `postgres.enabled` or `database.enabled` must be `true` unless
+  # `DATABASE_URL` is set via `env` or `envFrom`
   enabled: false
   # -- Full database connection URL configuration. Defaults to composing the URL from the individual host/port/name/username/password fields below via Kubernetes env var interpolation
   url:

@@ -30,7 +30,8 @@ serviceAccount:
   # -- Specifies whether a service account should be created.
   create: true
   # -- Automatically mount the ServiceAccount's API credentials into the pod.
-  automount: true
+  # Immich Kiosk does not need access to the Kubernetes API.
+  automount: false
   # -- Annotations to add to the service account.
   annotations: {}
   # -- Name of the service account to use.
@@ -46,19 +47,27 @@ podAnnotations: {}
 podLabels: {}
 
 # -- Pod-level security context.
+# Runs as the image's distroless nonroot user (65532).
+# Set keys or the whole value to `null` to opt out.
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
 
 # -- Container-level security context.
+# The root filesystem stays writable.
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
 
 # -- Kubernetes Service configuration.
 # ref: https://kubernetes.io/docs/concepts/services-networking/service/
@@ -115,14 +124,14 @@ httpRoute:
         value: /
 
 # -- Resource requests and limits for the container.
+# Kiosk processes images in memory; raise the limit for high-resolution photos.
 # ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-resources: {}
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    memory: 512Mi
 
 # -- Liveness probe configuration.
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/

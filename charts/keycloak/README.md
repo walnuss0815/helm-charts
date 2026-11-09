@@ -274,10 +274,11 @@ The Secret is annotated with `helm.sh/resource-policy: keep`, so that a
 `helm uninstall` followed by an install against a kept database does not
 replace the credentials. Note the consequences:
 
-- The Secret outlives the release. If you also remove the database (an
-  uninstall deletes the bundled CNPG cluster and, by default, its volumes), the
-  kept credentials belong to an account that no longer exists. Delete the
-  Secret manually before reinstalling, so that new credentials are generated.
+- The Secret outlives the release. If you also remove the database (the
+  bundled CNPG cluster is kept on uninstall while `postgres.keep` is `true`;
+  deleting it also deletes its volumes), the kept credentials belong to an
+  account that no longer exists. Delete the Secret manually before
+  reinstalling, so that new credentials are generated.
 - Reinstalling under the same release name and namespace adopts the Secret.
   Under another name that resolves to the same Secret name (e.g. with
   `fullnameOverride`), the install fails because the Secret already exists.
@@ -362,6 +363,33 @@ are released as a minor version of this chart.
 
 ## Database
 
+### Retention
+
+The bundled CNPG `Cluster` is annotated with `helm.sh/resource-policy: keep`
+(`postgres.keep`, default `true`), so that the database survives a
+`helm uninstall` or the deletion of the Argo CD Application. Argo CD (>= 2.7)
+treats the annotation like `argocd.argoproj.io/sync-options: Delete=false`.
+The PVCs belong to the Cluster and stay with it. Reinstalling under the same
+release name and namespace adopts the Cluster again.
+
+- It does not protect against Argo CD auto-prune when the Cluster disappears
+  from the rendered manifests (e.g. `postgres.enabled: false`). Add
+  `argocd.argoproj.io/sync-options: Prune=false` through `postgres.annotations`.
+- A kept `Cluster` keeps running, but the `ScheduledBackup` is deleted with the
+  release, and so is the `ObjectStore` if the chart created it
+  (`postgres.backup.objectStore.create`). While WAL archiving is enabled
+  (`postgres.backup.enabled` with `method: plugin`, or with an object store for
+  `method: volumeSnapshot`), the kept `Cluster` still archives into that
+  deleted `ObjectStore`. Every attempt fails, and PostgreSQL keeps the WAL
+  files on the database volume until it is full. To avoid this, set
+  `postgres.backup.enabled: false` and upgrade before uninstalling, or archive
+  into an `ObjectStore` managed outside the release
+  (`postgres.backup.objectStore.create: false` and
+  `postgres.backup.objectStore.name`). Otherwise reinstall or delete the kept
+  `Cluster` promptly.
+- Delete the Cluster manually when it is no longer needed:
+  `kubectl delete cluster.postgresql.cnpg.io <fullname>-postgresql`.
+
 ### Bundled CloudNativePG cluster
 
 By default the chart creates the CNPG `Cluster` `<fullname>-postgresql` and
@@ -432,10 +460,11 @@ postgres:
           compression: gzip
 ```
 
-To restore, the CNPG cluster must be created again: uninstall the release (or
-delete the `Cluster` and its PVCs), then install with `postgres.recovery`
-enabled. A WAL archive must start empty, so the restored cluster has to archive
-into a new folder:
+To restore, the CNPG cluster must be created again: delete the kept `Cluster`
+(`kubectl delete cluster.postgresql.cnpg.io <fullname>-postgresql`; its PVCs go
+with it), because an uninstall alone keeps it while `postgres.keep` is `true`.
+Then install with `postgres.recovery` enabled. A WAL archive must start
+empty, so the restored cluster has to archive into a new folder:
 
 ```yaml
 postgres:
@@ -634,6 +663,7 @@ SMTP or an external database with `networkPolicy.egress.extraEgress`.
 | postgres.image.tag | string | `"18.6-standard-trixie"` | PostgreSQL image tag. Keycloak supports PostgreSQL 14 to 18. Changing the major version triggers a CNPG major upgrade |
 | postgres.initdb | object | `{}` | Additional fields of the CNPG `bootstrap.initdb` section, e.g. `localeCollate`, `localeCType` or `postInitApplicationSQL`. `database`, `owner` and `secret` are set by the chart |
 | postgres.instances | int | `1` | Number of PostgreSQL instances in the CNPG cluster. Use 2+ for high availability |
+| postgres.keep | bool | `true` | Keep the CNPG Cluster and the database PVCs it owns when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). The cluster keeps running until it is deleted manually, see Database in the README |
 | postgres.parameters | object | `{}` | PostgreSQL parameters (`postgresql.parameters` of the Cluster), e.g. `max_connections: "200"` |
 | postgres.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | PostgreSQL password of `username`. If no source is set and `enabled` is `true`, CloudNativePG generates a random password in the `<fullname>-postgresql-app` Secret. Required when `enabled` is `false` |
 | postgres.password.secretKeyRef.key | string | `""` | Key within the Secret |

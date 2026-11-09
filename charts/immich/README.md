@@ -655,6 +655,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 |-----|------|---------|-------------|
 | config.content | object | `{}` | Config file content as a YAML map (same structure as the Immich default config). When set, the file is mounted into the server and microservices workloads at `/config/immich.yaml` and `IMMICH_CONFIG_FILE` is set, which makes the admin settings UI read-only. Write sensitive values as `${UPPER_SNAKE_CASE}` placeholders (an entire YAML scalar, e.g. `clientSecret: ${OAUTH_CLIENT_SECRET}`) and provide them via `config.env` |
 | config.env | object | `{}` | Values substituted for the `${TOKEN}` placeholders in `content` at pod start. Map of placeholder name to a value source: `value` (plain text, testing only), `secretKeyRef` or `configMapRef` (each with `name` and `key`). Resolved values are written to an in-memory volume and never stored in a ConfigMap |
+| config.initResources | object | `{"limits":{"memory":"128Mi"},"requests":{"cpu":"10m","memory":"64Mi"}}` | Resource requests and limits of the init container that renders the configuration file |
 
 ### Other
 
@@ -783,7 +784,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | persistence.media | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"enabled":true,"existingClaim":"","keep":true,"size":"100Gi","storageClass":""}` | Shared library media volume mounted by the server and microservices workloads at the fixed container path `/data` (the Immich `IMMICH_MEDIA_LOCATION` default). The volume must support sharing across pods (`ReadWriteMany`). |
 | persistence.media.accessModes | list | `["ReadWriteMany"]` | Access modes for the media volume |
 | persistence.media.annotations | object | `{}` | Annotations for the media volume PVC |
-| persistence.media.enabled | bool | `true` | Enable dynamic provisioning of the media volume. Set to `false` when using an `existingClaim` |
+| persistence.media.enabled | bool | `true` | Enable dynamic provisioning of the media volume. Set to `false` when using an `existingClaim`. `existingClaim` is required when `false` |
 | persistence.media.existingClaim | string | `""` | Name of an existing PVC to use instead of creating a new one |
 | persistence.media.keep | bool | `true` | Keep the media PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the original photos and videos |
 | persistence.media.size | string | `"100Gi"` | Size of the media volume |
@@ -818,7 +819,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | postgres.enabled | bool | `true` | Deploy a CloudNativePG `Cluster`. Set to `false` to use an external database |
 | postgres.extraExtensions | list | `[]` | Additional ImageVolume extensions in the CNPG `ExtensionConfiguration` format. See [CNPG docs](https://cloudnative-pg.io/docs/1.30/imagevolume_extensions) |
 | postgres.extraSharedPreloadLibraries | list | `[]` | Additional shared preload libraries. `vchord.so` is always preloaded |
-| postgres.host | string | `""` | Host of an external database. Only used when `enabled` is `false` |
+| postgres.host | string | `""` | Host of an external database. Required when `enabled` is `false` |
 | postgres.image.repository | string | `"ghcr.io/cloudnative-pg/postgresql"` | PostgreSQL image repository for the CNPG cluster instances |
 | postgres.image.tag | string | `"18.6-standard-trixie"` | PostgreSQL image tag. Must start with the PostgreSQL major version (e.g. `18.6-standard-trixie`), which selects the matching `vchord` image and paths. Changing the major version triggers a CNPG major upgrade |
 | postgres.instances | int | `1` | Number of PostgreSQL instances in the CNPG cluster |
@@ -837,7 +838,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | postgres.recovery.recoveryTarget | object | `{}` | Point-in-time recovery target in the CNPG `recoveryTarget` format (e.g. `targetTime: "2026-01-01 00:00:00+00"`). Empty restores the latest state |
 | postgres.recovery.serverName | string | `""` | Folder name of the source cluster inside the object store. Defaults to the Cluster name |
 | postgres.recovery.volumeSnapshots | object | `{}` | Recover from CSI volume snapshots instead of an object store, in the CNPG `bootstrap.recovery.volumeSnapshots` format |
-| postgres.resources | object | `{}` | Resource requests and limits for the PostgreSQL instances |
+| postgres.resources | object | `{"limits":{"memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource requests and limits of the PostgreSQL pod. The memory limit leaves room for index builds; CloudNativePG recommends equal memory requests and limits for production. Set `limits` to `null` to remove the memory limit |
 | postgres.securityContext | object | `{}` | Container-level security context for the PostgreSQL instance container. Merged with the CloudNativePG defaults |
 | postgres.sslMode | string | `""` | SSL mode of the database connection (`DB_SSL_MODE`), e.g. `require` for an external database. Empty uses the Immich default |
 | postgres.storage.size | string | `"100Gi"` | Size of the PostgreSQL PVC |
@@ -916,6 +917,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | valkey.auth.enabled | bool | `false` | Enable ACL-based authentication. Requires `aclUsers` and the password in `redis.password` |
 | valkey.enabled | bool | `true` | Deploy the bundled Valkey sub-chart (official Valkey Helm Chart) |
 | valkey.replica.enabled | bool | `false` | Deploy Valkey replicas (master-replica mode). Requires `replica.persistence.size`, and `auth.aclUsers` when authentication is enabled |
+| valkey.resources | object | `{"limits":{"memory":"512Mi"},"requests":{"cpu":"50m","memory":"64Mi"}}` | Resource requests and limits of the Valkey container. Queues grow during a large first import; raise the limit for big libraries |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

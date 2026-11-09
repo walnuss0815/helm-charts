@@ -24,7 +24,7 @@ A Helm chart for Linkwarden
 | auth | object | `{"disableRegistration":false}` | Authentication configuration |
 | auth.disableRegistration | bool | `false` | Disable new user registration |
 | database | object | `{"enabled":false,"host":"","name":"linkwarden","password":{"secretKeyRef":{"key":"","name":""},"value":""},"port":5432,"url":{"secretKeyRef":{"key":"","name":""},"value":"postgresql://$(DATABASE_USER):$(DATABASE_PASSWORD)@$(DATABASE_HOST):$(DATABASE_PORT)/$(DATABASE_NAME)"},"username":{"secretKeyRef":{"key":"","name":""},"value":""}}` | External database connection configuration. Only used if `postgres.enabled` is `false` and `database.enabled` is `true` |
-| database.enabled | bool | `false` | Enable configuring an external database connection |
+| database.enabled | bool | `false` | Enable configuring an external database connection. One of `postgres.enabled` or `database.enabled` must be `true` unless `DATABASE_URL` is set via `env` or `envFrom` |
 | database.host | string | `""` | Database hostname |
 | database.name | string | `"linkwarden"` | Database name |
 | database.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Database password configuration. Must be set via `.value` or `.secretKeyRef` - there is no default |

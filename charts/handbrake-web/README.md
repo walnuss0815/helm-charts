@@ -20,14 +20,14 @@ A Helm chart for HandBrake Web
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
-| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Expose the server component via gateway-api HTTPRoute Requires Gateway API resources and suitable controller installed within the cluster (see: https://gateway-api.sigs.k8s.io/guides/) |
+| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}` | Expose the server component via gateway-api HTTPRoute Requires Gateway API resources and suitable controller installed within the cluster (see: https://gateway-api.sigs.k8s.io/guides/) |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations |
 | httpRoute.enabled | bool | `false` | HTTPRoute enabled |
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames matching HTTP header |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Which Gateways this Route is attached to |
-| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | List of rules and filters applied |
+| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | List of rules and filters applied |
 | imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Ingress configuration for the server component |
 | ingress.annotations | object | `{}` | Ingress annotations |

@@ -568,7 +568,7 @@ SMTP or an external database with `networkPolicy.egress.extraEgress`.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with `tpl` |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 
 ### Global
 

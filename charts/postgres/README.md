@@ -16,7 +16,7 @@ A Helm chart for PostgreSQL
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod scheduling |
 | database | string | `"app"` | PostgreSQL database name |
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the full chart name |
 | image | object | `{"pullPolicy":"IfNotPresent","repository":"postgres","tag":""}` | Container image configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/containers/images/) |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |

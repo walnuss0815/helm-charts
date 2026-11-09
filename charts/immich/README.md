@@ -660,7 +660,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is rendered with the Helm template engine, so it can reference chart values such as `.Release.Namespace`. Only trusted manifests should be used here. |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 
 ### Global
 

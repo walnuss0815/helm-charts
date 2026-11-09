@@ -15,7 +15,7 @@ A Helm chart for Immich, the high performance self-hosted photo and video manage
 | Repository | Name | Version |
 |------------|------|---------|
 | https://valkey.io/valkey-helm/ | valkey | 0.12.1 |
-| https://walnuss0815.github.io/helm-charts | upload-optimizer(immich-upload-optimizer) | 0.1.1 |
+| https://walnuss0815.github.io/helm-charts | upload-optimizer(immich-upload-optimizer) | 0.1.3 |
 
 ### Required
 

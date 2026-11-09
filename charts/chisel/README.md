@@ -26,12 +26,12 @@ A Helm chart for Chisel
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
 | podAnnotations | object | `{}` | Annotations to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | podLabels | object | `{}` | Labels to add to the pod. See [docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
-| podSecurityContext | object | `{}` | Pod-level security context (e.g. fsGroup) |
+| podSecurityContext | object | `{"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod-level security context. The image runs as root; the chart runs it as UID 65532 instead. Helm merges maps: set a key to `null` to remove it, or the whole value to `null` |
 | readinessProbe | object | `{}` | Readiness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | replicaCount | int | `1` | Number of replica pods to run. See [ReplicaSet docs](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/) |
-| resources | object | `{}` | CPU/memory resource requests and limits. Leaving empty is recommended to keep charts portable across environments like Minikube |
+| resources | object | `{"limits":{"memory":"128Mi"},"requests":{"cpu":"10m","memory":"32Mi"}}` | CPU/memory resource requests and limits. Raise the limit for many concurrent tunnelled connections. Set `limits` to `null` to remove the memory limit |
 | rules | list | `[]` | Reverse port-forwarding rules, at least one required. Each maps a port on the chisel server to a host and port in the cluster, e.g. `{local: {port: 80}, remote: {host: traefik.traefik.svc, port: 80}}`. `local.interface` defaults to `0.0.0.0`, `protocol` to `tcp` |
-| securityContext | object | `{}` | Container-level security context |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65532,"runAsNonRoot":true,"runAsUser":65532}` | Container-level security context. The client only opens network connections and writes no files, so the root filesystem is read-only |
 | server | object | `{"auth":{"secretKeyRef":{"key":"","name":""},"value":""},"fingerprint":"","host":"","port":8000}` | Remote Chisel server connection configuration |
 | server.auth | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Authentication string for the Chisel remote server |
 | server.auth.secretKeyRef | object | `{"key":"","name":""}` | Reference to a Kubernetes Secret key containing the auth value |
@@ -41,9 +41,9 @@ A Helm chart for Chisel
 | server.fingerprint | string | `""` | Fingerprint of the server's public key (44 characters, ends with `=`), passed as `--fingerprint`. Strongly recommended: if empty, the client accepts any server |
 | server.host | string | `""` | IP address or domain name of a remote server running Chisel. Required |
 | server.port | int | `8000` | Port Chisel is using on the remote server |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
+| serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount the ServiceAccount API credentials into the pod |
+| serviceAccount.automount | bool | `false` | Automatically mount the ServiceAccount API credentials into the pod. The Chisel client does not need access to the Kubernetes API |
 | serviceAccount.create | bool | `true` | Whether to create a service account |
 | serviceAccount.name | string | `""` | Name of the service account to use. If empty and `create` is true, a name is generated from the fullname template |
 | tolerations | list | `[]` | Tolerations for pod scheduling |

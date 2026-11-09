@@ -49,17 +49,17 @@ A Helm chart for Kubernetes
 | persistence.data.storageClass | string | `""` | Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
 | podLabels | object | `{}` | Labels to add to the pod |
-| podSecurityContext | object | `{}` | Pod security context configuration |
+| podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | Pod security context. The image runs as root (no USER in its Dockerfile) and existing data volumes are owned by root, so the user is not changed. To run as non-root, set `runAsUser`, `runAsGroup` and `fsGroup` and make sure the data volume belongs to that user |
 | readinessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Readiness probe configuration |
 | replicaCount | int | `1` | Number of replicas for the paperless-ai deployment |
-| resources | object | `{}` | Resource limits and requests for the paperless-ai container |
-| securityContext | object | `{}` | Container security context configuration |
+| resources | object | `{"limits":{"memory":"3Gi"},"requests":{"cpu":"100m","memory":"512Mi"}}` | Resource requests and limits for the paperless-ai container. Runs Node.js and a Python RAG service with torch and sentence-transformers. Set `limits` to `null` to remove the memory limit |
+| securityContext | object | `{"allowPrivilegeEscalation":false}` | Container security context. Capabilities are kept so that root can still write to volumes owned by other users |
 | service | object | `{"port":3000,"type":"ClusterIP"}` | Service configuration |
 | service.port | int | `3000` | Service port |
 | service.type | string | `"ClusterIP"` | Service type (ClusterIP, NodePort, LoadBalancer) |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration |
+| serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account configuration |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount a ServiceAccount's API credentials |
+| serviceAccount.automount | bool | `false` | Automatically mount a ServiceAccount's API credentials. paperless-ai does not need access to the Kubernetes API |
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | The name of the service account to use (if not set and create is true, a name is generated using the fullname template) |
 | tolerations | list | `[]` | Tolerations for pod assignment |

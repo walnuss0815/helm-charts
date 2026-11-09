@@ -33,19 +33,19 @@ A Helm chart for Kubernetes
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | podAnnotations | object | `{}` | Annotations to add to the pod |
 | podLabels | object | `{}` | Labels to add to the pod |
-| podSecurityContext | object | `{}` | Pod security context configuration |
+| podSecurityContext | object | `{"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod security context. Runs as the image's non-root user `gotenberg` (`1001`). Helm merges maps: set a key to `null` to remove it, or the whole value to `null` |
 | readinessProbe | object | `{"httpGet":{"path":"/health","port":"http"}}` | Readiness probe configuration |
 | readinessProbe.httpGet | object | `{"path":"/health","port":"http"}` | HTTP GET configuration for readiness probe |
 | readinessProbe.httpGet.path | string | `"/health"` | Health check endpoint path |
 | replicaCount | int | `1` | Number of replicas for the gotenberg deployment |
-| resources | object | `{}` | Resource limits and requests for the gotenberg container |
-| securityContext | object | `{}` | Container security context configuration |
+| resources | object | `{"limits":{"memory":"2Gi"},"requests":{"cpu":"100m","memory":"512Mi"}}` | Resource requests and limits for the gotenberg container. Chromium and LibreOffice run in the container; raise the memory limit for large conversions. Set `limits` to `null` to remove the memory limit |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001}` | Container security context. The root filesystem stays writable because Chromium and LibreOffice write to the home directory and `/tmp` |
 | service | object | `{"port":3000,"type":"ClusterIP"}` | Service configuration |
-| service.port | int | `3000` | Service port |
+| service.port | int | `3000` | Service port. Traffic is forwarded to container port 3000 |
 | service.type | string | `"ClusterIP"` | Service type (ClusterIP, NodePort, LoadBalancer) |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration |
+| serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account configuration |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount a ServiceAccount's API credentials |
+| serviceAccount.automount | bool | `false` | Automatically mount a ServiceAccount's API credentials. Gotenberg does not need access to the Kubernetes API |
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | The name of the service account to use (if not set and create is true, a name is generated using the fullname template) |
 | tolerations | list | `[]` | Tolerations for pod assignment |

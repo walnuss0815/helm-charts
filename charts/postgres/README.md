@@ -36,20 +36,19 @@ A Helm chart for PostgreSQL
 | persistence.pgdata.storageClass | string | `""` | Storage class for the PostgreSQL data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | podLabels | object | `{}` | Labels to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
-| podSecurityContext | object | `{}` | Pod-level security context |
-| port | int | `5432` | Port written to the credentials Secret (`port` key and `uri`). The container and Service listen on `service.port`, so keep both in sync |
+| podSecurityContext | object | `{"fsGroup":999,"fsGroupChangePolicy":"OnRootMismatch","runAsGroup":999,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod-level security context. Runs as the image's `postgres` user (UID 999 in the Debian image, 70 in Alpine tags); `fsGroup` makes the data volume writable. On storage that ignores `fsGroup`, set this and `securityContext` to `null` to start as root and let the entrypoint switch users. `{}` keeps the defaults, and both must go because the entrypoint needs the capabilities dropped there |
 | readinessProbe | object | `{"exec":{"command":["sh","-c","psql -U $POSTGRES_USER -d $POSTGRES_DB -c \"SELECT 1\""]},"initialDelaySeconds":5,"periodSeconds":5}` | Readiness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
-| resources | object | `{}` | Resource requests and limits for the PostgreSQL container. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
+| resources | object | `{"limits":{"memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource requests and limits for the PostgreSQL container. The memory limit covers the default `shared_buffers` (128MB) plus a few connections; raise it for larger databases. See [Kubernetes docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) |
 | secret | object | `{"create":true,"name":""}` | Secret configuration for database credentials |
-| secret.create | bool | `true` | Create a secret containing database credentials and connection details |
-| secret.name | string | `""` | Name of the secret containing `username` and `password`. Auto-generated if `create` is `true` |
-| securityContext | object | `{}` | Container-level security context |
+| secret.create | bool | `true` | Create a Secret with the connection details and a random password. The password is regenerated on every render (`helm upgrade`, Argo CD sync) while PostgreSQL keeps the one from its first start, so use this for CI and one-off `helm install` only. For GitOps set `false` and provide the Secret via `name` |
+| secret.name | string | `""` | Name of the credentials Secret (supports Helm templating). Defaults to the fullname if `create` is `true`. Required if `create` is `false`; the Secret needs the keys `username` and `password`, plus `host` and `port` for odoo and `host`, `port` and `database` for linkwarden when used as their subchart |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]}}` | Container-level security context. The root filesystem stays writable because PostgreSQL writes to `/var/run/postgresql` and `/tmp` |
 | service | object | `{"port":5432,"type":"ClusterIP"}` | Kubernetes Service configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/services-networking/service/) |
-| service.port | int | `5432` | Service port |
+| service.port | int | `5432` | Service port. PostgreSQL in the container always listens on 5432. Also written to the credentials Secret (`port` key and `uri`) |
 | service.type | string | `"ClusterIP"` | Service type. See [service types](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) |
-| serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
+| serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account configuration. See [Kubernetes docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount a ServiceAccount's API credentials |
+| serviceAccount.automount | bool | `false` | Automatically mount a ServiceAccount's API credentials |
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | serviceAccount.name | string | `""` | Name of the service account to use. If not set and `create` is `true`, a name is generated using the fullname template |
 | tolerations | list | `[]` | Tolerations for pod scheduling |

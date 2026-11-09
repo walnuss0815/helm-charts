@@ -84,7 +84,7 @@ A Helm chart for Odoo
 | postgres.database | string | `"postgres"` | Name of the PostgreSQL database to create |
 | postgres.enabled | bool | `true` | Enable the PostgreSQL subchart. Set to `false` to use an external database via `database.*` |
 | postgres.secret | object | `{"create":true,"name":"{{ .Release.Name }}-db"}` | Secret configuration for database credentials |
-| postgres.secret.create | bool | `true` | Create a new secret for database credentials |
+| postgres.secret.create | bool | `true` | Create a new secret for database credentials. Its random password is regenerated on every render, so use it for CI only. For GitOps set `false` and point `name` at a Secret with the keys `host`, `port`, `username` and `password` |
 | postgres.secret.name | string | `"{{ .Release.Name }}-db"` | Name of the secret (supports Helm templating) |
 | readinessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":5}` | Readiness probe configuration |
 | replicaCount | int | `1` | Number of replicas for the Odoo deployment |

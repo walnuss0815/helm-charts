@@ -94,12 +94,12 @@ A Helm chart for Kubernetes
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
 | ocr | object | `{"languages":["eng"]}` | OCR (Optical Character Recognition) configuration |
-| ocr.languages | list | `["eng"]` | OCR languages to install (3-letter ISO 639-2 codes). See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) |
+| ocr.languages | list | `["eng"]` | OCR languages to use (`PAPERLESS_OCR_LANGUAGE`, Tesseract codes such as `deu`). The image includes `eng`, `deu`, `fra`, `ita` and `spa`; other languages need a custom image, as `PAPERLESS_OCR_LANGUAGES` cannot install them in this rootless, read-only container. See [Tesseract language data](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) |
 | parser | object | `{"datetime":["en"]}` | Document parser configuration |
 | parser.datetime | list | `["en"]` | Date/time parsing locales. See [dateparser supported locales](https://dateparser.readthedocs.io/en/latest/supported_locales.html) |
-| persistence | object | `{"consumption":{"accessModes":["ReadWriteMany"],"annotations":{},"keep":true,"size":"512Mi","storageClass":""},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"8Gi","storageClass":""}}` | Persistence configuration for paperless-ngx volumes |
-| persistence.consumption | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"keep":true,"size":"512Mi","storageClass":""}` | Consumption directory persistence configuration |
-| persistence.consumption.accessModes | list | `["ReadWriteMany"]` | Access modes for consumption PVC |
+| persistence | object | `{"consumption":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"512Mi","storageClass":""},"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""},"media":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"8Gi","storageClass":""}}` | Persistence configuration for paperless-ngx volumes |
+| persistence.consumption | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"512Mi","storageClass":""}` | Consumption directory persistence configuration |
+| persistence.consumption.accessModes | list | `["ReadWriteOnce"]` | Access modes for consumption PVC. Use `ReadWriteMany` when `webdav.enabled` and the webdav and paperless-ngx pods may run on different nodes |
 | persistence.consumption.annotations | object | `{}` | Annotations for the consumption PVC |
 | persistence.consumption.keep | bool | `true` | Keep the consumption PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the documents waiting to be consumed. Delete it manually with `kubectl delete pvc <fullname>-consumption` |
 | persistence.consumption.size | string | `"512Mi"` | Size of the consumption PVC |
@@ -126,7 +126,7 @@ A Helm chart for Kubernetes
 | readinessProbe.initialDelaySeconds | int | `30` | Initial delay before starting probes |
 | readinessProbe.timeoutSeconds | int | `5` | Timeout in seconds for the probe |
 | replicaCount | int | `1` | Number of replicas for the paperless-ngx deployment |
-| resources | object | `{}` | Resource limits and requests for the paperless-ngx container |
+| resources | object | `{"limits":{"memory":"2Gi"},"requests":{"cpu":"250m","memory":"1Gi"}}` | Resource requests and limits for the paperless-ngx container. Sized for the defaults (one web and one task worker, SQLite); raise the memory limit for many OCR threads, large scans or `ai.llm.embedding.backend: huggingface` |
 | secretKey | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Django secret key (`PAPERLESS_SECRET_KEY`) used to sign sessions and tokens. Required: set `value` or `secretKeyRef`, otherwise rendering fails. Use a long random string and keep it stable, changing it signs out all users |
 | secretKey.secretKeyRef | object | `{"key":"","name":""}` | Reference to existing secret containing the secret key |
 | secretKey.secretKeyRef.key | string | `""` | Key within the secret |
@@ -168,7 +168,7 @@ A Helm chart for Kubernetes
 | sso | object | `{"autoSignup":false,"config":{},"enabled":false}` | Single Sign-On (SSO) configuration |
 | sso.autoSignup | bool | `false` | Automatically create user accounts on first SSO login |
 | sso.config | object | `{}` | SSO provider configuration (OpenID Connect). See [django-allauth documentation](https://docs.allauth.org/en/latest/socialaccount/providers/openid_connect.html) |
-| sso.enabled | bool | `false` | Enable SSO authentication |
+| sso.enabled | bool | `false` | Enable SSO authentication. Sets `PAPERLESS_APPS` to the OpenID Connect provider app unless `PAPERLESS_APPS` is set in `env` or `envFrom` |
 | tika | object | `{"enabled":true}` | Apache Tika subchart configuration (for document parsing) |
 | tika.enabled | bool | `true` | Enable Apache Tika service |
 | tolerations | list | `[]` | Tolerations for pod assignment |
@@ -184,11 +184,9 @@ A Helm chart for Kubernetes
 | valkeyKV.url.secretKeyRef.key | string | `""` | Key within the secret |
 | valkeyKV.url.secretKeyRef.name | string | `""` | Name of the secret |
 | valkeyKV.url.value | string | `"redis://{{ .Release.Name }}-valkey:6379"` | Valkey URL value (note: paperless-ngx expects the redis:// scheme even when connecting to Valkey) |
-| webdav | object | `{"enabled":false,"persistence":{"data":{"claimName":"{{ .Release.Name }}-consumption"}}}` | WebDAV configuration for document consumption |
+| webdav | object | See the webdav.* rows | WebDAV configuration for document consumption |
 | webdav.enabled | bool | `false` | Enable WebDAV integration |
-| webdav.persistence | object | `{"data":{"claimName":"{{ .Release.Name }}-consumption"}}` | WebDAV persistence configuration |
-| webdav.persistence.data | object | `{"claimName":"{{ .Release.Name }}-consumption"}` | Data directory configuration |
-| webdav.persistence.data.claimName | string | `"{{ .Release.Name }}-consumption"` | PVC claim name for WebDAV consumption |
+| webdav.persistence.data.claimName | string | `<fullname>-consumption` | Name of the consumption PVC mounted into WebDAV. Rendered with `tpl` in the webdav subchart, so it mirrors this chart's fullname (including its 63-character truncation) from the release name. Set it to `<fullname>-consumption` when `nameOverride` or `fullnameOverride` is set |
 | workerTimeout | int | `nil` | Celery task hard time limit in seconds (`PAPERLESS_WORKER_TIMEOUT`). Paperless defaults to 1800 s. It also limits the LLM index build (`llmindex_index`); large embedding models on CPU can exceed it on the first build. Unset or `0` keeps the default |
 
 ----------------------------------------------

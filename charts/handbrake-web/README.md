@@ -36,16 +36,18 @@ A Helm chart for HandBrake Web
 | ingress.hosts | list | `[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Ingress hosts configuration |
 | ingress.tls | list | `[]` | TLS configuration |
 | nameOverride | string | `""` | Override the name of the chart |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":""},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":""}}` | Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart) |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"mountPath":"/data","size":"1Gi","storageClass":""}` | Config/data directory persistence configuration |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"mountPath":"/data","size":"1Gi","storageClass":""},"video":{"accessModes":["ReadWriteMany"],"annotations":{},"keep":true,"mountPath":"/video","size":"16Gi","storageClass":""}}` | Persistence configuration, shared between the server and worker workloads (and optionally the webdav subchart) |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"mountPath":"/data","size":"1Gi","storageClass":""}` | Config/data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
+| persistence.data.keep | bool | `true` | Keep the data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the application configuration and state. Delete it manually with `kubectl delete pvc <fullname>-data` |
 | persistence.data.mountPath | string | `"/data"` | Mount path for this volume within the server/worker containers |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `""` | Storage class for the data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
-| persistence.video | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"mountPath":"/video","size":"16Gi","storageClass":""}` | Video library persistence configuration |
+| persistence.video | object | `{"accessModes":["ReadWriteMany"],"annotations":{},"keep":true,"mountPath":"/video","size":"16Gi","storageClass":""}` | Video library persistence configuration |
 | persistence.video.accessModes | list | `["ReadWriteMany"]` | Access modes for the video PVC. Defaults to `ReadWriteMany` because the server, worker, and the optional webdav subchart all mount this PVC concurrently. Most default/local-path StorageClasses (including `kind`'s) only support `ReadWriteOnce` - make sure your StorageClass actually supports RWX before relying on this default, or override it if server/worker/webdav never run on different nodes at once. |
 | persistence.video.annotations | object | `{}` | Annotations for the video PVC |
+| persistence.video.keep | bool | `true` | Keep the video PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the video library; the optional webdav subchart mounts the same PVC. Delete it manually with `kubectl delete pvc <fullname>-video` |
 | persistence.video.mountPath | string | `"/video"` | Mount path for this volume within the server/worker containers |
 | persistence.video.size | string | `"16Gi"` | Size of the video PVC |
 | persistence.video.storageClass | string | `""` | Storage class for the video PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |

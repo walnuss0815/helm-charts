@@ -40,10 +40,11 @@ A Helm chart for Kubernetes
 | livenessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Liveness probe configuration |
 | nameOverride | string | `""` | Override the name of the chart |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}}` | Persistence configuration for paperless-ai data |
-| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Data directory persistence configuration |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}}` | Persistence configuration for paperless-ai data |
+| persistence.data | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}` | Data directory persistence configuration |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
+| persistence.data.keep | bool | `true` | Keep the data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the application data and settings. Delete it manually with `kubectl delete pvc <fullname>-data` |
 | persistence.data.size | string | `"1Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `""` | Storage class for data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |

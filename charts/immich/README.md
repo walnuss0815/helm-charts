@@ -454,13 +454,37 @@ the value is YAML-quoted on substitution. A `${TOKEN}` with no matching
 ## Persistence
 
 The media volume (`persistence.media`, mounted at `/data`) holds the original
-photos and videos. It is annotated with `helm.sh/resource-policy: keep`
-(`persistence.media.keep: true`), so Helm keeps the PVC on `helm uninstall` and
-Argo CD treats it like `Delete=false` when the Application is deleted. A
-reinstall with the same release name adopts the kept PVC again. Delete it
-manually once it is no longer needed:
+photos and videos. The media PVC and the PostgreSQL `Cluster` are both
+annotated with `helm.sh/resource-policy: keep` by default
+(`persistence.media.keep`, `postgres.keep`), so Helm skips deleting them on
+`helm uninstall` and Argo CD (>= 2.7) treats the annotation like
+`argocd.argoproj.io/sync-options: Delete=false` when the Application is
+deleted. The PVCs of the CloudNativePG cluster are owned by the `Cluster` and
+stay with it. A reinstall with the same release name and namespace adopts both
+again.
+
+The annotation does not cover Argo CD auto-prune when a resource disappears
+from the rendered manifests (e.g. `postgres.enabled: false`). To protect
+against that, add `argocd.argoproj.io/sync-options: Prune=false` through
+`persistence.media.annotations` and `postgres.annotations`.
+
+A kept `Cluster` keeps running, but the `ScheduledBackup` is deleted with the
+release, and so is the `ObjectStore` if the chart created it
+(`postgres.backup.objectStore.create`). While WAL archiving is enabled
+(`postgres.backup.enabled` with `method: plugin`, or with an object store for
+`method: volumeSnapshot`), the kept `Cluster` still archives into that deleted
+`ObjectStore`. Every attempt fails, and PostgreSQL keeps the WAL files on the
+database volume until it is full. To avoid this, set
+`postgres.backup.enabled: false` and upgrade before uninstalling, or archive
+into an `ObjectStore` managed outside the release
+(`postgres.backup.objectStore.create: false` and
+`postgres.backup.objectStore.name`). Otherwise reinstall or delete the kept
+`Cluster` promptly.
+
+Delete both manually once they are no longer needed:
 
 ```sh
+kubectl delete cluster.postgresql.cnpg.io <fullname>-postgresql   # its PVCs go with it
 kubectl delete pvc <fullname>-media
 ```
 
@@ -562,7 +586,8 @@ With `method: volumeSnapshot` the chart schedules CSI volume snapshots instead
 object store is enabled for point-in-time recovery.
 
 To restore, bootstrap a new cluster from the backup. Recovery only applies when
-the `Cluster` is created, so delete the existing `Cluster` (and its PVCs) first
+the `Cluster` is created, so delete the existing `Cluster` first (its PVCs go
+with it; `helm uninstall` alone keeps it while `postgres.keep` is `true`)
 or install a new release. Archive the new cluster's WAL to a different
 `serverName`, because CloudNativePG refuses to write into a non-empty archive:
 
@@ -797,6 +822,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | postgres.image.repository | string | `"ghcr.io/cloudnative-pg/postgresql"` | PostgreSQL image repository for the CNPG cluster instances |
 | postgres.image.tag | string | `"18.6-standard-trixie"` | PostgreSQL image tag. Must start with the PostgreSQL major version (e.g. `18.6-standard-trixie`), which selects the matching `vchord` image and paths. Changing the major version triggers a CNPG major upgrade |
 | postgres.instances | int | `1` | Number of PostgreSQL instances in the CNPG cluster |
+| postgres.keep | bool | `true` | Keep the CNPG Cluster and the database PVCs it owns when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). The cluster keeps running until it is deleted manually, see Persistence in the README |
 | postgres.monitoring.enablePodMonitor | bool | `false` | Create a Prometheus Operator `PodMonitor` named `<fullname>-postgresql-metrics` for the PostgreSQL instances. Requires the Prometheus Operator CRDs. The chart renders it itself because the CNPG `enablePodMonitor` field is deprecated |
 | postgres.nodeSelector | object | `{}` | Node selector for PostgreSQL instance scheduling. Merged into the CNPG `spec.affinity`; do not also set `affinity.nodeSelector` |
 | postgres.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | PostgreSQL password of `user`. If no source is set and `enabled` is `true`, CloudNativePG generates a random password in the `<fullname>-postgresql-app` Secret. Required when `enabled` is `false` |

@@ -37,15 +37,17 @@ A Helm chart for Kavita
 | livenessProbe | object | `{"httpGet":{"path":"/","port":"http"}}` | Liveness probe configuration. Empty disables the probe. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
-| persistence | object | `{"config":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""},"library":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}}` | Persistence configuration for the Kavita volumes. Both PVCs are always created |
-| persistence.config | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Config directory, mounted at `/kavita/config` (database, settings, covers) |
+| persistence | object | `{"config":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""},"library":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}}` | Persistence configuration for the Kavita volumes. Both PVCs are always created |
+| persistence.config | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}` | Config directory, mounted at `/kavita/config` (database, settings, covers) |
 | persistence.config.accessModes | list | `["ReadWriteOnce"]` | Access modes for the config PVC |
 | persistence.config.annotations | object | `{}` | Annotations for the config PVC |
+| persistence.config.keep | bool | `true` | Keep the config PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the database, settings and covers. Delete it manually with `kubectl delete pvc <fullname>-config` |
 | persistence.config.size | string | `"1Gi"` | Size of the config PVC |
 | persistence.config.storageClass | string | `""` | Storage class for config PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
-| persistence.library | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | Library directory, mounted at `/library` (books, comics, manga) |
+| persistence.library | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}` | Library directory, mounted at `/library` (books, comics, manga) |
 | persistence.library.accessModes | list | `["ReadWriteOnce"]` | Access modes for the library PVC |
 | persistence.library.annotations | object | `{}` | Annotations for the library PVC |
+| persistence.library.keep | bool | `true` | Keep the library PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the books, comics and manga. Delete it manually with `kubectl delete pvc <fullname>-library` |
 | persistence.library.size | string | `"1Gi"` | Size of the library PVC |
 | persistence.library.storageClass | string | `""` | Storage class for library PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |

@@ -74,9 +74,10 @@ A Helm chart for Linkwarden
 | nextauth.secret.value | string | `""` | Plain-text secret value. Ignored if `secretKeyRef.name` is set |
 | nextauth.url | string | `"http://localhost:3000/api/v1/auth"` | Public URL of the NextAuth API endpoint. Must be set to the real, externally-reachable URL in any non-local deployment - NextAuth uses this for redirect/callback validation, so a stale/incorrect value here is a functional and security concern (e.g. behind an Ingress, this must match the Ingress host, not localhost) |
 | nodeSelector | object | `{}` | Node selector for pod assignment |
-| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"2Gi","storageClass":""}}` | Persistence configuration for the linkwarden data directory |
+| persistence | object | `{"data":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"2Gi","storageClass":""}}` | Persistence configuration for the linkwarden data directory |
 | persistence.data.accessModes | list | `["ReadWriteOnce"]` | Access modes for the data PVC |
 | persistence.data.annotations | object | `{}` | Annotations for the data PVC |
+| persistence.data.keep | bool | `true` | Keep the data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the archived pages, screenshots and uploads. Delete it manually with `kubectl delete pvc <fullname>-data` |
 | persistence.data.size | string | `"2Gi"` | Size of the data PVC |
 | persistence.data.storageClass | string | `""` | Storage class for the data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the pod |

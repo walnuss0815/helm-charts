@@ -27,10 +27,11 @@ A Helm chart for PostgreSQL
 | livenessProbe | object | `{"exec":{"command":["sh","-c","pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]},"periodSeconds":5}` | Liveness probe configuration. See [Kubernetes docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | nameOverride | string | `""` | Override the chart name |
 | nodeSelector | object | `{}` | Node selector for pod scheduling |
-| persistence | object | `{"pgdata":{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}}` | Persistence configuration for PostgreSQL volumes |
-| persistence.pgdata | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"size":"1Gi","storageClass":""}` | PostgreSQL data directory persistence configuration |
+| persistence | object | `{"pgdata":{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}}` | Persistence configuration for PostgreSQL volumes |
+| persistence.pgdata | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"keep":true,"size":"1Gi","storageClass":""}` | PostgreSQL data directory persistence configuration |
 | persistence.pgdata.accessModes | list | `["ReadWriteOnce"]` | Access modes for the PostgreSQL data PVC |
 | persistence.pgdata.annotations | object | `{}` | Annotations for the PostgreSQL data PVC |
+| persistence.pgdata.keep | bool | `true` | Keep the PostgreSQL data PVC when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). It holds the database files. Delete it manually with `kubectl delete pvc <fullname>-pgdata` |
 | persistence.pgdata.size | string | `"1Gi"` | Size of the PostgreSQL data PVC |
 | persistence.pgdata.storageClass | string | `""` | Storage class for the PostgreSQL data PVC. Empty uses the cluster's default StorageClass; `-` sets `storageClassName: ""`, which disables dynamic provisioning |
 | podAnnotations | object | `{}` | Annotations to add to the Pod. See [Kubernetes docs](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |

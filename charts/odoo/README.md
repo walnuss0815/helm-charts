@@ -20,8 +20,13 @@ A Helm chart for Odoo
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| adminPassword | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Odoo master password, protects creating, backing up and deleting databases in the database manager. Required: set `value` or `secretKeyRef`, otherwise rendering fails. Used by the default `config` through `admin_passwd = $ADMIN_PASSWD`; keep that line when overriding `config` |
+| adminPassword.secretKeyRef | object | `{"key":"","name":""}` | Reference to an existing secret containing the master password |
+| adminPassword.secretKeyRef.key | string | `""` | Key within the Secret |
+| adminPassword.secretKeyRef.name | string | `""` | Name of an existing Secret |
+| adminPassword.value | string | `""` | Plain-text value. Ignored if `secretKeyRef.name` and `secretKeyRef.key` are set. Prefer `secretKeyRef` |
 | affinity | object | `{}` | Affinity rules for pod scheduling |
-| config | string | `"[options]\naddons_path = /mnt/extra-addons\ndata_dir = /var/lib/odoo\n\nhttp_interface = 0.0.0.0\n\ndb_host = $DB_HOST\ndb_port = $DB_PORT\ndb_user = $DB_USER\ndb_password = $DB_PASSWORD\n\nlog_level = $LOG_LEVEL\n\n{{ tpl .Values.extraConfig . }}"` | Odoo configuration file content (supports Helm templating) |
+| config | string | `"[options]\naddons_path = /mnt/extra-addons\ndata_dir = /var/lib/odoo\n\nhttp_interface = 0.0.0.0\n\ndb_host = $DB_HOST\ndb_port = $DB_PORT\ndb_user = $DB_USER\ndb_password = $DB_PASSWORD\n\nadmin_passwd = $ADMIN_PASSWD\n\nlog_level = $LOG_LEVEL\n\n{{ tpl .Values.extraConfig . }}"` | Odoo configuration file content (supports Helm templating) |
 | database | object | `{"host":"","password":{"secretKeyRef":{"key":"","name":""},"value":""},"port":5432,"username":{"secretKeyRef":{"key":"","name":""},"value":"odoo"}}` | External database connection config. Only used if `postgres.enabled` is `false` |
 | database.host | string | `""` | Database hostname |
 | database.password | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Database password configuration |
@@ -57,7 +62,7 @@ A Helm chart for Odoo
 | ingress.enabled | bool | `false` | Enable ingress |
 | ingress.hosts | list | `[{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Ingress hosts configuration |
 | ingress.tls | list | `[]` | TLS configuration for ingress |
-| initContainer | list | `[]` | Configuration of init containers |
+| initContainers | list | `[]` | Additional init containers, run after the init container that renders `odoo.conf`. Rendered with `tpl` |
 | livenessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":5}` | Liveness probe configuration |
 | logLevel | string | `"info"` | Odoo log level. See [documentation](https://www.odoo.com/documentation/19.0/developer/reference/cli.html#cmdoption-odoo-bin-log-level) |
 | nameOverride | string | `""` | Override the chart name |

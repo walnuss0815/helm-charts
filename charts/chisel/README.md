@@ -30,15 +30,16 @@ A Helm chart for Chisel
 | readinessProbe | object | `{}` | Readiness probe configuration. See [docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) |
 | replicaCount | int | `1` | Number of replica pods to run. See [ReplicaSet docs](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/) |
 | resources | object | `{}` | CPU/memory resource requests and limits. Leaving empty is recommended to keep charts portable across environments like Minikube |
-| rules | list | `[]` | Chisel reverse port-forwarding rules. Each rule maps a port on the remote Chisel server to a host/port inside the cluster. Example: ```yaml rules:   - local:       interface: 0.0.0.0       port: 80     remote:       host: traefik-external.traefik-external.svc.cluster.local       port: 80 ``` |
+| rules | list | `[]` | Reverse port-forwarding rules, at least one required. Each maps a port on the chisel server to a host and port in the cluster, e.g. `{local: {port: 80}, remote: {host: traefik.traefik.svc, port: 80}}`. `local.interface` defaults to `0.0.0.0`, `protocol` to `tcp` |
 | securityContext | object | `{}` | Container-level security context |
-| server | object | `{"auth":{"secretKeyRef":{"key":"","name":""},"value":""},"host":"","port":8000}` | Remote Chisel server connection configuration |
+| server | object | `{"auth":{"secretKeyRef":{"key":"","name":""},"value":""},"fingerprint":"","host":"","port":8000}` | Remote Chisel server connection configuration |
 | server.auth | object | `{"secretKeyRef":{"key":"","name":""},"value":""}` | Authentication string for the Chisel remote server |
 | server.auth.secretKeyRef | object | `{"key":"","name":""}` | Reference to a Kubernetes Secret key containing the auth value |
 | server.auth.secretKeyRef.key | string | `""` | Key within the secret |
 | server.auth.secretKeyRef.name | string | `""` | Name of the secret |
-| server.auth.value | string | `""` | Plain-text auth value (takes precedence if set) |
-| server.host | string | `""` | IP address or domain name of a remote server running Chisel |
+| server.auth.value | string | `""` | Plain-text auth value in the form `<user>:<pass>`. Ignored if `secretKeyRef.name` and `secretKeyRef.key` are set |
+| server.fingerprint | string | `""` | Fingerprint of the server's public key (44 characters, ends with `=`), passed as `--fingerprint`. Strongly recommended: if empty, the client accepts any server |
+| server.host | string | `""` | IP address or domain name of a remote server running Chisel. Required |
 | server.port | int | `8000` | Port Chisel is using on the remote server |
 | serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. See [docs](https://kubernetes.io/docs/concepts/security/service-accounts/) |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |

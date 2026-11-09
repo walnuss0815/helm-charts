@@ -65,17 +65,17 @@ A Helm chart for Kubernetes
 | embeddings.enabled | bool | `false` | Enable the Text Embeddings Inference server |
 | env | object | `{}` | Additional environment variables as a map of variable name to value. Values are rendered with `tpl` |
 | envFrom | object | `{}` | Additional environment variables as a map of variable name to a Kubernetes `valueFrom` object, e.g. `MY_VAR: {secretKeyRef: {name: my-secret, key: my-key}}` |
-| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy |
+| extraManifests | list | `[]` | Extra Kubernetes manifests to deploy alongside the chart. Each entry is a string or a map and is rendered with `tpl` |
 | fullnameOverride | string | `""` | Override the fullname of the chart |
 | gotenberg | object | `{"enabled":true}` | Gotenberg subchart configuration (for document conversion) |
 | gotenberg.enabled | bool | `true` | Enable Gotenberg service |
 | host | string | `"chart-example.local"` | Hostname for the paperless-ngx instance |
-| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]}` | Gateway API HTTPRoute configuration (requires Gateway API CRDs installed) |
+| httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":["chart-example.local"],"parentRefs":[{"name":"gateway","sectionName":"http"}],"rules":[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}` | Gateway API HTTPRoute configuration (requires Gateway API CRDs installed) |
 | httpRoute.annotations | object | `{}` | HTTPRoute annotations |
 | httpRoute.enabled | bool | `false` | Enable HTTPRoute |
 | httpRoute.hostnames | list | `["chart-example.local"]` | Hostnames for HTTP header matching |
 | httpRoute.parentRefs | list | `[{"name":"gateway","sectionName":"http"}]` | Parent gateway references to attach this route to |
-| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/headers"}}]}]` | Routing rules and filters |
+| httpRoute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | Routing rules and filters |
 | image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/paperless-ngx/paperless-ngx","tag":""}` | Container image configuration |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"ghcr.io/paperless-ngx/paperless-ngx"` | Container image repository |

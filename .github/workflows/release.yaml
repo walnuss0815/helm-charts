@@ -68,7 +68,7 @@ jobs:
 
       - name: Set up Helm
         if: ${{ steps.bump.outputs.charts != '' }}
-        uses: azure/setup-helm@v5.0.1
+        uses: azure/setup-helm@v5.1.0
 
       - name: Add Helm repositories
         if: ${{ steps.bump.outputs.charts != '' }}

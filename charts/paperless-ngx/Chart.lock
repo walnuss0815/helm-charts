@@ -13,6 +13,6 @@ dependencies:
   version: 0.1.12
 - name: text-embeddings-inference
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.1
-digest: sha256:1180566cf01eb1c34cb066ba60839e2f83083fa283a13ad5d7f5131a606bda43
-generated: "2026-11-06T12:12:39.016004331Z"
+  version: 0.1.2
+digest: sha256:8e2fa44d637b80e5e610345dd37ad88bf808fb4f5542b9674e8250ac34c3c239
+generated: "2026-11-10T03:34:19.543991817Z"

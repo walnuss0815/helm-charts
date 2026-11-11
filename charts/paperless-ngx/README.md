@@ -17,7 +17,7 @@ A Helm chart for Kubernetes
 | https://valkey.io/valkey-helm/ | valkey | 0.12.1 |
 | https://walnuss0815.github.io/helm-charts | gotenberg | 0.1.12 |
 | https://walnuss0815.github.io/helm-charts | embeddings(text-embeddings-inference) | 0.1.2 |
-| https://walnuss0815.github.io/helm-charts | tika | 0.1.5 |
+| https://walnuss0815.github.io/helm-charts | tika | 0.2.0 |
 | https://walnuss0815.github.io/helm-charts | webdav | 1.1.1 |
 
 ## Values

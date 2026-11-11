@@ -14,7 +14,7 @@ A Helm chart for HandBrake Web
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://walnuss0815.github.io/helm-charts | webdav | 0.1.16 |
+| https://walnuss0815.github.io/helm-charts | webdav | 1.1.1 |
 
 ## Values
 

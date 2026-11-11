@@ -1,6 +1,6 @@
 dependencies:
 - name: webdav
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.1.16
-digest: sha256:4e1a2241e7bb7e3eaf42a598095565a02b2b97fc98f9d520cddaa32d8125f26c
-generated: "2026-10-08T21:30:05.32774526Z"
+  version: 1.1.1
+digest: sha256:8417ebfefc65c83318f6fec2382aaeecc560731b0d525522f0fa50ca5f282315
+generated: "2026-11-11T01:52:00.060392296Z"

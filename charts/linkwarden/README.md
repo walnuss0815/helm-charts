@@ -14,7 +14,7 @@ A Helm chart for Linkwarden
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://walnuss0815.github.io/helm-charts | postgres | 1.1.0 |
+| https://walnuss0815.github.io/helm-charts | postgres | 1.1.1 |
 
 ## Values
 

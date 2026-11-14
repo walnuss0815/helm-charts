@@ -1,9 +1,9 @@
 dependencies:
 - name: valkey
   repository: https://valkey.io/valkey-helm/
-  version: 0.12.1
+  version: 1.0.0
 - name: immich-upload-optimizer
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.3
-digest: sha256:4d00a76b7d07c6bf6623dfffa05214f742087bc29c2fd6ac8316b45a6d4baec3
-generated: "2026-11-09T20:22:37.728776705Z"
+digest: sha256:e265cbfa4545f1babaebf82ae6b3a6d2f57f105415cf440d1b11b34bd986484c
+generated: "2026-11-14T02:05:44.386508115Z"

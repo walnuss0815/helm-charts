@@ -821,7 +821,7 @@ Removed or renamed values fail rendering with a hint instead of being ignored.
 | postgres.extraSharedPreloadLibraries | list | `[]` | Additional shared preload libraries. `vchord.so` is always preloaded |
 | postgres.host | string | `""` | Host of an external database. Required when `enabled` is `false` |
 | postgres.image.repository | string | `"ghcr.io/cloudnative-pg/postgresql"` | PostgreSQL image repository for the CNPG cluster instances |
-| postgres.image.tag | string | `"18.6-standard-trixie"` | PostgreSQL image tag. Must start with the PostgreSQL major version (e.g. `18.6-standard-trixie`), which selects the matching `vchord` image and paths. Changing the major version triggers a CNPG major upgrade |
+| postgres.image.tag | string | `"18.7-standard-trixie"` | PostgreSQL image tag. Must start with the PostgreSQL major version (e.g. `18.7-standard-trixie`), which selects the matching `vchord` image and paths. Changing the major version triggers a CNPG major upgrade |
 | postgres.instances | int | `1` | Number of PostgreSQL instances in the CNPG cluster |
 | postgres.keep | bool | `true` | Keep the CNPG Cluster and the database PVCs it owns when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). The cluster keeps running until it is deleted manually, see Persistence in the README |
 | postgres.monitoring.enablePodMonitor | bool | `false` | Create a Prometheus Operator `PodMonitor` named `<fullname>-postgresql-metrics` for the PostgreSQL instances. Requires the Prometheus Operator CRDs. The chart renders it itself because the CNPG `enablePodMonitor` field is deprecated |

@@ -4977,6 +4977,20 @@ entries:
     version: 0.1.0
   tika:
   - apiVersion: v2
+    appVersion: 3.3.3.1-full
+    created: "2026-11-20T14:20:35.519043883Z"
+    description: A Helm chart for Kubernetes
+    digest: 792366c0e1f45711bbd661f9ec34a7929026d7d948c3c46ac50b14e68820f769
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: tika
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/tika-0.2.1/tika-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
     appVersion: 3.3.3.0-full
     created: "2026-11-09T14:07:35.34057992Z"
     description: A Helm chart for Kubernetes
@@ -5397,4 +5411,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-20T12:51:31.234818021Z"
+generated: "2026-11-20T14:20:35.519439857Z"

@@ -37,6 +37,84 @@
         "minor"
       ],
       "automerge": false
+    },
+    {
+      "description": "Docker tags carry no prerelease flag: look up these images on GitHub releases so releases flagged as prerelease there are skipped. Wait a day so the image for the release is published before the PR opens",
+      "matchDepNames": [
+        "jpillora/chisel",
+        "clusterzx/paperless-ai",
+        "hacdias/webdav",
+        "ghcr.io/damongolding/immich-kiosk",
+        "ghcr.io/linkwarden/linkwarden",
+        "ghcr.io/thenickoftime/handbrake-web-server",
+        "ghcr.io/paperless-ngx/paperless-ngx",
+        "ghcr.io/immich-app/immich-server",
+        "ghcr.io/miguelangel-nubla/immich-upload-optimizer",
+        "quay.io/keycloak/keycloak"
+      ],
+      "overrideDatasource": "github-releases",
+      "minimumReleaseAge": "1 day"
+    },
+    {
+      "description": "These GitHub releases are tagged with a v prefix that the appVersion does not use. Each entry must also be in the GitHub releases rule above",
+      "matchDepNames": [
+        "jpillora/chisel",
+        "clusterzx/paperless-ai",
+        "ghcr.io/damongolding/immich-kiosk",
+        "ghcr.io/linkwarden/linkwarden",
+        "ghcr.io/thenickoftime/handbrake-web-server",
+        "ghcr.io/paperless-ngx/paperless-ngx"
+      ],
+      "extractVersion": "^v(?<version>.+)$"
+    },
+    {
+      "description": "GitHub repository of this image",
+      "matchDepNames": [
+        "ghcr.io/damongolding/immich-kiosk"
+      ],
+      "overridePackageName": "damongolding/immich-kiosk"
+    },
+    {
+      "description": "GitHub repository of this image",
+      "matchDepNames": [
+        "ghcr.io/linkwarden/linkwarden"
+      ],
+      "overridePackageName": "linkwarden/linkwarden"
+    },
+    {
+      "description": "GitHub repository of this image",
+      "matchDepNames": [
+        "ghcr.io/thenickoftime/handbrake-web-server"
+      ],
+      "overridePackageName": "TheNickOfTime/Handbrake-Web"
+    },
+    {
+      "description": "GitHub repository of this image",
+      "matchDepNames": [
+        "ghcr.io/paperless-ngx/paperless-ngx"
+      ],
+      "overridePackageName": "paperless-ngx/paperless-ngx"
+    },
+    {
+      "description": "GitHub repository of this image",
+      "matchDepNames": [
+        "ghcr.io/immich-app/immich-server"
+      ],
+      "overridePackageName": "immich-app/immich"
+    },
+    {
+      "description": "GitHub repository of this image",
+      "matchDepNames": [
+        "ghcr.io/miguelangel-nubla/immich-upload-optimizer"
+      ],
+      "overridePackageName": "miguelangel-nubla/immich-upload-optimizer"
+    },
+    {
+      "description": "GitHub repository of this image",
+      "matchDepNames": [
+        "quay.io/keycloak/keycloak"
+      ],
+      "overridePackageName": "keycloak/keycloak"
     }
   ]
 }

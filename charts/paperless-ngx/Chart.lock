@@ -7,12 +7,12 @@ dependencies:
   version: 1.1.1
 - name: tika
   repository: https://walnuss0815.github.io/helm-charts
-  version: 0.2.0
+  version: 0.2.1
 - name: gotenberg
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.12
 - name: text-embeddings-inference
   repository: https://walnuss0815.github.io/helm-charts
   version: 0.1.2
-digest: sha256:98ab72ed94ff3842b59614301d46151f44be2951de4eeb20e70a27dbf91dc223
-generated: "2026-11-19T09:05:15.960156776Z"
+digest: sha256:52895532668f55968709056e6d99ec8e16e37fa7e615b356159f4591c47e8bd1
+generated: "2026-11-20T22:08:36.802903357Z"

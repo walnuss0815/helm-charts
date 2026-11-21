@@ -660,7 +660,7 @@ SMTP or an external database with `networkPolicy.egress.extraEgress`.
 | postgres.enabled | bool | `true` | Deploy a CloudNativePG `Cluster`. Set to `false` to use an external database |
 | postgres.host | string | `""` | Host of an external database. Required when `enabled` is `false` |
 | postgres.image.repository | string | `"ghcr.io/cloudnative-pg/postgresql"` | PostgreSQL image repository of the CNPG cluster instances |
-| postgres.image.tag | string | `"18.6-standard-trixie"` | PostgreSQL image tag. Keycloak supports PostgreSQL 14 to 18. Changing the major version triggers a CNPG major upgrade |
+| postgres.image.tag | string | `"18.7-standard-trixie"` | PostgreSQL image tag. Keycloak supports PostgreSQL 14 to 18. Changing the major version triggers a CNPG major upgrade |
 | postgres.initdb | object | `{}` | Additional fields of the CNPG `bootstrap.initdb` section, e.g. `localeCollate`, `localeCType` or `postInitApplicationSQL`. `database`, `owner` and `secret` are set by the chart |
 | postgres.instances | int | `1` | Number of PostgreSQL instances in the CNPG cluster. Use 2+ for high availability |
 | postgres.keep | bool | `true` | Keep the CNPG Cluster and the database PVCs it owns when the release is uninstalled or the Argo CD Application is deleted (`helm.sh/resource-policy: keep`). The cluster keeps running until it is deleted manually, see Database in the README |

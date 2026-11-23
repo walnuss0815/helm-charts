@@ -4,7 +4,7 @@ description: A Helm chart for Immich Upload Optimizer, the smart upload proxy th
 type: application
 version: 0.1.3
 # renovate: image=ghcr.io/miguelangel-nubla/immich-upload-optimizer
-appVersion: "v0.5.5"
+appVersion: "v0.5.6"
 maintainers:
   - name: walnuss0815
     email: walnuss0815@gmail.com

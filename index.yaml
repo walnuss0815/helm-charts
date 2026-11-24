@@ -1500,6 +1500,22 @@ entries:
     version: 0.1.1
   immich-upload-optimizer:
   - apiVersion: v2
+    appVersion: v0.5.6
+    created: "2026-11-24T03:31:05.621660566Z"
+    description: A Helm chart for Immich Upload Optimizer, the smart upload proxy
+      that optimizes images losslessly and transcodes videos with hardware acceleration
+      before they reach Immich.
+    digest: 684af24147828b50fb632f41e8e6f89abfccf7d9b0ac9429d4552cf7e1e61c87
+    maintainers:
+    - email: walnuss0815@gmail.com
+      name: walnuss0815
+      url: https://github.com/walnuss0815
+    name: immich-upload-optimizer
+    type: application
+    urls:
+    - https://github.com/walnuss0815/helm-charts/releases/download/immich-upload-optimizer-0.1.4/immich-upload-optimizer-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
     appVersion: v0.5.5
     created: "2026-11-09T14:27:17.56382036Z"
     description: A Helm chart for Immich Upload Optimizer, the smart upload proxy
@@ -5447,4 +5463,4 @@ entries:
     urls:
     - https://github.com/walnuss0815/helm-charts/releases/download/webdav-0.1.0/webdav-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-21T04:49:49.938295508Z"
+generated: "2026-11-24T03:31:05.622101908Z"

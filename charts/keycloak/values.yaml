@@ -640,7 +640,7 @@ postgres:
     # -- PostgreSQL image tag. Keycloak supports PostgreSQL 14 to 18. Changing
     # the major version triggers a CNPG major upgrade
     # @section -- PostgreSQL
-    tag: "18.6-standard-trixie"
+    tag: "18.7-standard-trixie"
   # -- Number of PostgreSQL instances in the CNPG cluster. Use 2+ for high availability
   # @section -- PostgreSQL
   instances: 1

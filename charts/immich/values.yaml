@@ -734,10 +734,10 @@ postgres:
     repository: ghcr.io/cloudnative-pg/postgresql
     # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
     # -- PostgreSQL image tag. Must start with the PostgreSQL major version
-    # (e.g. `18.6-standard-trixie`), which selects the matching `vchord` image
+    # (e.g. `18.7-standard-trixie`), which selects the matching `vchord` image
     # and paths. Changing the major version triggers a CNPG major upgrade
     # @section -- PostgreSQL
-    tag: "18.6-standard-trixie"
+    tag: "18.7-standard-trixie"
   vchord:
     # -- Inject the `vchord` extension via an ImageVolume extension. Disable
     # only if `image` already ships `vchord`
